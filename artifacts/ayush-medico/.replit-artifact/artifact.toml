@@ -1,14 +1,14 @@
 kind = "web"
-previewPath = "/ayush-medico/"
-title = "Ayush Medico (secondary)"
-description = "Secondary imported copy of the Ayush Medico pharmacy website."
+previewPath = "/"
+title = "Ayush Medico"
+description = "A premium local pharmacy website and medicine management app with customer-facing pharmacy services, medicine discovery, delivery information, contact pathways, and an admin panel."
 version = "1.0.0"
 id = "artifacts/ayush-medico"
 router = "path"
 
 [[services]]
 name = "web"
-paths = [ "/ayush-medico/" ]
+paths = [ "/" ]
 localPort = 18169
 
 [services.development]
@@ -25,4 +25,4 @@ to = "/index.html"
 
 [services.env]
 PORT = "18169"
-BASE_PATH = "/ayush-medico/"
+BASE_PATH = "/"

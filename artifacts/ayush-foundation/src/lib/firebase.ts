@@ -1,26 +1,9 @@
-import { getApp, getApps, initializeApp, type FirebaseApp, type FirebaseOptions } from 'firebase/app';
+import { getApp, getApps, initializeApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
 
-type FirebaseServiceName = 'auth' | 'firestore' | 'storage';
-
-export type FirebaseServiceStatus = {
-  available: boolean;
-  error?: string;
-};
-
-export type FirebaseConnectionStatus = {
-  configured: boolean;
-  projectId: string | null;
-  app: FirebaseServiceStatus;
-  auth: FirebaseServiceStatus;
-  firestore: FirebaseServiceStatus;
-  storage: FirebaseServiceStatus;
-  initializationError?: string;
-};
-
-const firebaseConfig: FirebaseOptions = {
+const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
@@ -30,107 +13,48 @@ const firebaseConfig: FirebaseOptions = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-const requiredConfigKeys = [
-  'apiKey',
-  'authDomain',
-  'projectId',
-  'storageBucket',
-  'messagingSenderId',
-  'appId',
-] as const;
+const requiredConfig: Array<[string, unknown]> = [
+  ['VITE_FIREBASE_API_KEY', firebaseConfig.apiKey],
+  ['VITE_FIREBASE_AUTH_DOMAIN', firebaseConfig.authDomain],
+  ['VITE_FIREBASE_PROJECT_ID', firebaseConfig.projectId],
+  ['VITE_FIREBASE_STORAGE_BUCKET', firebaseConfig.storageBucket],
+  ['VITE_FIREBASE_MESSAGING_SENDER_ID', firebaseConfig.messagingSenderId],
+  ['VITE_FIREBASE_APP_ID', firebaseConfig.appId],
+];
 
-const missingConfigKeys = requiredConfigKeys.filter(
-  (key) => !firebaseConfig[key],
-);
+const missingConfig = requiredConfig
+  .filter(([, value]) => !value)
+  .map(([name]) => name);
 
-const serviceErrors: Partial<Record<FirebaseServiceName, string>> = {};
-let initializationError: string | undefined;
-let firebaseApp: FirebaseApp | null = null;
-let firebaseAuth: Auth | null = null;
-let firestore: Firestore | null = null;
-let firebaseStorage: FirebaseStorage | null = null;
+const hasFirebaseConfig = missingConfig.length === 0;
 
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : 'Unknown Firebase error';
+export const firebaseApp: FirebaseApp | null = hasFirebaseConfig
+  ? getApps().length
+    ? getApp()
+    : initializeApp(firebaseConfig)
+  : null;
+
+export const firebaseAuth: Auth | null = firebaseApp ? getAuth(firebaseApp) : null;
+export const firestore: Firestore | null = firebaseApp
+  ? getFirestore(firebaseApp)
+  : null;
+export const firebaseStorage: FirebaseStorage | null = firebaseApp
+  ? getStorage(firebaseApp)
+  : null;
+
+const missingConfigMessage = `Firebase is not configured. Missing: ${missingConfig.join(', ')}`;
+
+export function requireFirebaseAuth(): Auth {
+  if (!firebaseAuth) throw new Error(missingConfigMessage);
+  return firebaseAuth;
 }
 
-function initializeFirebase(): void {
-  if (missingConfigKeys.length > 0) {
-    initializationError = `Missing Firebase configuration: ${missingConfigKeys.join(', ')}`;
-    return;
-  }
-
-  try {
-    firebaseApp = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-  } catch (error) {
-    initializationError = getErrorMessage(error);
-    return;
-  }
-
-  const serviceInitializers: Array<{
-    name: FirebaseServiceName;
-    initialize: () => void;
-  }> = [
-    {
-      name: 'auth',
-      initialize: () => {
-        firebaseAuth = getAuth(firebaseApp!);
-      },
-    },
-    {
-      name: 'firestore',
-      initialize: () => {
-        firestore = getFirestore(firebaseApp!);
-      },
-    },
-    {
-      name: 'storage',
-      initialize: () => {
-        firebaseStorage = getStorage(firebaseApp!);
-      },
-    },
-  ];
-
-  for (const service of serviceInitializers) {
-    try {
-      service.initialize();
-    } catch (error) {
-      serviceErrors[service.name] = getErrorMessage(error);
-    }
-  }
+export function requireFirestore(): Firestore {
+  if (!firestore) throw new Error(missingConfigMessage);
+  return firestore;
 }
 
-initializeFirebase();
-
-export { firebaseApp, firebaseAuth, firestore, firebaseStorage };
-
-export function getFirebaseStatus(): FirebaseConnectionStatus {
-  return {
-    configured: missingConfigKeys.length === 0,
-    projectId: firebaseConfig.projectId ?? null,
-    app: {
-      available: firebaseApp !== null,
-      ...(initializationError ? { error: initializationError } : {}),
-    },
-    auth: {
-      available: firebaseAuth !== null,
-      ...(serviceErrors.auth ? { error: serviceErrors.auth } : {}),
-    },
-    firestore: {
-      available: firestore !== null,
-      ...(serviceErrors.firestore ? { error: serviceErrors.firestore } : {}),
-    },
-    storage: {
-      available: firebaseStorage !== null,
-      ...(serviceErrors.storage ? { error: serviceErrors.storage } : {}),
-    },
-    ...(initializationError ? { initializationError } : {}),
-  };
-}
-
-export function getFirebaseServiceError(
-  service: FirebaseServiceName,
-): Error | null {
-  const error = serviceErrors[service];
-  return error ? new Error(error) : null;
+export function requireFirebaseStorage(): FirebaseStorage {
+  if (!firebaseStorage) throw new Error(missingConfigMessage);
+  return firebaseStorage;
 }

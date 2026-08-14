@@ -1,0 +1,288 @@
+AYUSH MEDICO — PHASE 2 UI UPDATE
+PREMIUM MEDICINE PROMOTIONAL BANNERS
+
+I want you to MODIFY THE EXISTING WEBSITE CODE NOW.
+
+Do not just read the brief or give me a report.
+Actually make the UI changes and run the build afterward.
+
+==================================================
+1. REMOVE THE LARGE HOMEPAGE FORM
+==================================================
+
+Do NOT place a large medicine availability/request form directly on the homepage.
+
+The homepage should NOT look like a form-based website.
+
+Instead, keep the homepage clean and premium with:
+- Search
+- Promotional medicine banners
+- Services
+- Categories
+- Contact/CTA buttons
+
+The detailed medicine availability form will be implemented in a later phase.
+
+Do not remove the navigation/CTA that can eventually lead to the medicine availability feature.
+
+==================================================
+2. CREATE A PREMIUM MEDICINE ADVERTISEMENT SLIDER
+==================================================
+
+Create a large, visually impressive promotional banner/carousel on the homepage.
+
+I mean the type of rotating banners commonly seen on modern pharmacy/e-commerce websites:
+
+[ LARGE IMAGE / PRODUCT VISUAL ]
+[ HEADLINE ]
+[ SHORT DESCRIPTION ]
+[ CTA BUTTON ]
+
+Then automatically transition to the next promotional slide.
+
+The banners should feel like actual Ayush Medico promotional advertisements, NOT a basic image carousel.
+
+==================================================
+3. MEDICINE / PRODUCT PROMOTIONAL SLIDES
+==================================================
+
+The banner system must support medicine/product promotional slides.
+
+Each slide should be designed to support:
+
+- Medicine/product image
+- Medicine/product name
+- Brand/manufacturer
+- Category
+- Short description
+- Promotional heading
+- CTA
+- Optional link
+- Active/inactive state
+
+For the current Phase 2:
+
+DO NOT invent real medicines.
+DO NOT invent prices.
+DO NOT invent discounts.
+DO NOT invent stock.
+DO NOT claim a medicine is available.
+
+Use tasteful generic/static promotional content or neutral visual placeholders until the real medicine data is connected.
+
+The important part right now is the DESIGN and COMPONENT STRUCTURE.
+
+==================================================
+4. FUTURE ADMIN CONTROL
+==================================================
+
+Design the banner component so that later the Admin Panel can control it.
+
+In a future phase, Admin should be able to:
+
+- Add banner
+- Upload banner/medicine image
+- Add medicine name
+- Add brand
+- Add category
+- Add promotional text
+- Add CTA text
+- Add CTA destination
+- Change banner order
+- Enable/disable banner
+- Edit banner
+- Delete banner
+
+Do NOT build Firebase/Admin functionality now.
+
+Just make the component architecture ready for it.
+
+==================================================
+5. CAROUSEL BEHAVIOUR
+==================================================
+
+The banner should:
+
+- Automatically rotate
+- Have smooth transitions
+- Have previous/next arrows
+- Have slide indicators/dots
+- Pause appropriately when interacting
+- Support touch/swipe on mobile
+- Work with keyboard navigation
+- Have accessible labels
+- Avoid layout shifting
+
+Make the animation smooth and premium.
+
+Do not make it excessively flashy.
+
+==================================================
+6. VISUAL DESIGN
+==================================================
+
+Make the banners look PREMIUM.
+
+Use:
+
+- High-quality pharmacy/healthcare imagery
+- Clean composition
+- Strong typography
+- Professional green pharmacy branding
+- Beautiful spacing
+- Rounded corners where appropriate
+- Subtle shadows
+- Premium CTA buttons
+- Good contrast
+- Responsive image treatment
+
+The banner should immediately catch the customer's attention when the homepage loads.
+
+Do not use:
+- Low-quality images
+- Watermarked images
+- Random unrelated stock photography
+- Fake medical claims
+- Fake offers
+- Fake ratings
+- Fake discounts
+
+==================================================
+7. AYUSH MEDICO BRANDING
+==================================================
+
+Make sure the banner area clearly belongs to:
+
+AYUSH MEDICO
+KURLA WEST
+
+Keep the visual identity consistent with the rest of the website.
+
+Use the existing Ayush Medico green visual theme.
+
+==================================================
+8. HERO + CONTACT ACTIONS
+==================================================
+
+Keep the premium hero design.
+
+The hero should have:
+
+- Green pharmacy-themed visual treatment
+- Strong background/visual
+- WhatsApp Us button
+- Get Directions button
+- Call Now option
+
+WhatsApp:
+
++91 98332 73838
+
+Address:
+
+Shop No.1, Hut No.67 1/1, Ground Floor,
+Gangaram Makad Wala Chawl,
+Halav Pool, Near Rolex Hotel,
+CTS No.451, Kurla West,
+Mumbai – 400070
+
+Get Directions should open Google Maps for the Ayush Medico location.
+
+WhatsApp should open WhatsApp for:
++91 98332 73838
+
+Call should use:
++91 98332 73838
+
+==================================================
+9. FLOATING WHATSAPP BUTTON
+==================================================
+
+Keep/add a floating WhatsApp button.
+
+Requirements:
+
+- Fixed lower-right position
+- Green WhatsApp appearance
+- WhatsApp icon
+- Opens WhatsApp
+- Mobile friendly
+- Desktop friendly
+- Accessible
+- Does not cover important controls
+
+==================================================
+10. EMPTY MEDICINE SECTIONS
+==================================================
+
+IMPORTANT:
+
+"New Medicine Arrivals"
+
+must initially be EMPTY.
+
+"Special Medicines — Only Available Here"
+
+must initially be EMPTY.
+
+Do NOT put fake medicines in these sections.
+
+Do NOT put fake images, brands, prices, stock, or product information.
+
+Show a polished empty state instead.
+
+Later, the Admin Panel will populate these sections.
+
+==================================================
+11. GENERAL + VETERINARY MEDICINES
+==================================================
+
+The future medicine architecture must support:
+
+- General Medicines
+- Veterinary Medicines
+
+Do not build the database/admin functionality yet.
+
+Make the presentation architecture ready for these categories.
+
+==================================================
+12. IMPORTANT — ACTUALLY MODIFY THE CODE
+==================================================
+
+Inspect the current Phase 1/Phase 2 implementation.
+
+Then actually modify the necessary files.
+
+Do NOT simply tell me what could be changed.
+
+Do NOT respond with:
+"No code changes were made."
+
+MAKE THE CHANGES.
+
+==================================================
+13. VERIFICATION
+==================================================
+
+After making the changes:
+
+1. Run TypeScript checks.
+2. Run the production build.
+3. Fix all errors.
+4. Test the carousel.
+5. Test mobile swipe behaviour.
+6. Test previous/next controls.
+7. Test WhatsApp.
+8. Test Call.
+9. Test Get Directions.
+10. Test the floating WhatsApp button.
+11. Check mobile responsiveness.
+12. Check desktop responsiveness.
+13. Confirm New Medicine Arrivals is empty.
+14. Confirm Special Medicines is empty.
+15. Check browser console for errors.
+
+Do NOT move into Firebase/database/admin functionality.
+
+STOP after completing this UI update.

@@ -53,100 +53,77 @@ export const homeServices: Array<{
 export const medicineCategories = [
   { title: 'Prescription Medicines', note: 'For prescribed routines', icon: 'Rx' },
   { title: 'OTC Medicines', note: 'Everyday essentials', icon: 'OTC' },
-  { title: 'Baby Care', note: 'Gentle family care', icon: 'BC', imageUrl: '/images/ayush-baby-care.jpg' },
+  { title: 'Baby Care', note: 'Gentle family care', icon: 'BC' },
   { title: 'Personal Care', note: 'Daily wellbeing', icon: 'PC' },
   { title: 'Vitamins & Supplements', note: 'Nutrition support', icon: 'VS' },
   { title: 'Diabetic Care', note: 'Helpful home supplies', icon: 'DC' },
   { title: 'Healthcare Devices', note: 'Tools for home care', icon: 'HD' },
-  { title: 'Surgical Supplies', note: 'Practical care basics', icon: 'SS', imageUrl: '/images/ayush-first-aid.jpg' },
+  { title: 'Surgical Supplies', note: 'Practical care basics', icon: 'SS' },
   { title: 'Ayurvedic Products', note: 'Traditional wellness', icon: 'AP' },
 ];
 
-/**
- * Phase 2 catalog contract.
- *
- * The customer UI intentionally starts with no medicine records. These fields
- * are the shape a future admin workflow can use for create, edit, delete,
- * image upload, visibility, and homepage placement without introducing the
- * medicine database in this phase.
- */
-export type MedicineType = 'general' | 'veterinary';
-
-export type MedicineRecord = {
+export type MedicinePromoSlide = {
   id: string;
-  imageUrl: string | null;
-  name: string;
+  productName: string;
   brand: string;
-  manufacturer: string;
   category: string;
   description: string;
-  medicineType: MedicineType;
-  isNewArrival: boolean;
-  isSpecial: boolean;
-  isVisible: boolean;
-};
-
-// These arrays are intentionally empty until an approved catalog source exists.
-export const newMedicineArrivals: MedicineRecord[] = [];
-export const localSpecials: MedicineRecord[] = [];
-
-export type PromotionalBanner = {
-  id: string;
-  eyebrow: string;
-  title: string;
-  description: string;
-  icon: 'delivery' | 'availability' | 'prescription';
-  imageUrl: string;
-  primaryLabel: string;
-  primaryHref: string;
-  secondaryLabel: string;
-  secondaryHref: string;
+  headline: string;
+  ctaLabel: string;
+  ctaHref: string;
+  imageUrl?: string;
+  visual: 'wellness' | 'prescription' | 'neighbourhood';
+  active: boolean;
+  sortOrder: number;
 };
 
 /**
- * Ayush Medico-owned service promotions only.
- * This list is deliberately shaped so a future admin panel can manage it
- * without changing the slider component.
+ * Presentation-ready slide records. The optional imageUrl, href, active, and
+ * sortOrder fields intentionally mirror the future admin contract so this
+ * static Phase 2 data can be replaced without changing the carousel.
  */
-export const promotionalBanners: PromotionalBanner[] = [
+export const medicinePromoSlides: MedicinePromoSlide[] = [
   {
-    id: 'local-delivery-support',
-    eyebrow: 'AYUSH MEDICO · KURLA WEST',
-    title: 'Local care, brought closer.',
+    id: 'promo-wellness',
+    productName: 'Everyday care collection',
+    brand: 'Ayush Medico',
+    category: 'Wellness & care',
     description:
-      'Talk to our team about dependable home delivery support for your medicines and healthcare essentials.',
-    icon: 'delivery',
-    imageUrl: '/images/ayush-local-delivery.jpg',
-    primaryLabel: 'Talk about delivery',
-    primaryHref: '/contact',
-    secondaryLabel: 'Call the pharmacy',
-    secondaryHref: '/contact',
+      'A calm, considered place to ask about the healthcare essentials your routine needs.',
+    headline: 'Care for the everyday moments.',
+    ctaLabel: 'Explore our services',
+    ctaHref: '/services',
+    visual: 'wellness',
+    active: true,
+    sortOrder: 1,
   },
   {
-    id: 'medicine-availability',
-    eyebrow: 'MEDICINE AVAILABILITY',
-    title: 'Need a medicine checked?',
+    id: 'promo-prescription',
+    productName: 'Prescription care support',
+    brand: 'Ayush Medico',
+    category: 'Prescription care',
     description:
-      'Share a name, strength, or clear prescription detail and our team will guide you on the next step.',
-    icon: 'availability',
-    imageUrl: '/images/ayush-pharmacy-hero.jpg',
-    primaryLabel: 'Check availability',
-    primaryHref: '/medicines',
-    secondaryLabel: 'Ask our team',
-    secondaryHref: '/contact',
+      'Bring the details that matter and speak with a local pharmacy team who can guide the next step.',
+    headline: 'Clarity when details matter.',
+    ctaLabel: 'Talk to our team',
+    ctaHref: '/contact',
+    visual: 'prescription',
+    active: true,
+    sortOrder: 2,
   },
   {
-    id: 'prescription-support',
-    eyebrow: 'PHARMACY SUPPORT',
-    title: 'Prescription help, clearly explained.',
+    id: 'promo-neighbourhood',
+    productName: 'Pharmacy care close by',
+    brand: 'Ayush Medico · Kurla West',
+    category: 'Neighbourhood care',
     description:
-      'When a valid prescription is needed, Ayush Medico will explain what to bring before arranging anything.',
-    icon: 'prescription',
-    imageUrl: '/images/ayush-first-aid.jpg',
-    primaryLabel: 'Contact Ayush Medico',
-    primaryHref: '/contact',
-    secondaryLabel: 'Learn about services',
-    secondaryHref: '/services',
+      'A familiar local pharmacy for thoughtful questions, clear next steps, and care that feels close.',
+    headline: 'Good health, close to home.',
+    ctaLabel: 'Get directions',
+    ctaHref: 'https://www.google.com/maps/search/?api=1&query=Ayush+Medico+Kurla+West+Mumbai',
+    visual: 'neighbourhood',
+    active: true,
+    sortOrder: 3,
   },
 ];
 

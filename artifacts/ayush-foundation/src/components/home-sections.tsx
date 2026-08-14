@@ -1,52 +1,27 @@
-import { ArrowRight, BadgeCheck, HeartHandshake, MapPin, MessageCircle, PackageCheck, PackageOpen, Search, ShieldCheck, Truck, UsersRound } from 'lucide-react';
+import { ArrowRight, BadgeCheck, HeartHandshake, MapPin, MessageCircle, PackageCheck, PackageOpen, ShieldCheck, Truck, UsersRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { localSpecials } from '@/lib/home-data';
 import { contactDetails } from '@/lib/site-data';
 
 export function SpecialMedicines() {
-  const visibleSpecials = localSpecials.filter((item) => item.isVisible && item.isSpecial);
-
   return (
     <section className="site-container py-16 md:py-24" aria-labelledby="special-medicines-heading">
       <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
         <div>
           <p className="eyebrow">A local point of view</p>
           <h2 id="special-medicines-heading" className="mt-3 max-w-md font-display text-3xl leading-tight tracking-[-0.04em] sm:text-4xl">
-            Special Medicines
+            Special Medicines — Only Available Here
           </h2>
-          <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">
-            A reserved space for verified medicines that Ayush Medico chooses to highlight for the Kurla West community.
-          </p>
+          <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">This space is reserved for carefully selected local recommendations once the pharmacy team can manage the collection directly.</p>
           <Link to="/medicines" className="group mt-7 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-bold text-background transition-colors hover:bg-primary" data-testid="link-special-check-availability">
             Check Availability <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-        {visibleSpecials.length === 0 ? (
-          <div className="rounded-[1.75rem] border border-primary/15 bg-[hsl(189_35%_94%)] p-6 sm:p-8" data-testid="empty-special-medicines">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-card text-primary shadow-sm">
-              <PackageOpen size={25} strokeWidth={1.5} aria-hidden="true" />
-            </div>
-            <p className="mt-7 text-xs font-bold uppercase tracking-[0.14em] text-primary">Reserved for verified listings</p>
-            <h3 className="mt-2 max-w-md font-display text-2xl leading-tight tracking-[-0.035em] text-foreground">No special medicines are listed yet.</h3>
-            <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">
-              We will only show medicines here after the Ayush Medico team confirms the details and chooses to feature them.
-            </p>
-            <Link to="/contact" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline" data-testid="link-special-enquire">
-              Ask about a medicine <Search size={16} />
-            </Link>
-          </div>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-3">
-            {visibleSpecials.map((item, index) => (
-              <article key={item.id} className={`rounded-2xl border border-border p-5 ${index === 1 ? 'bg-[hsl(189_35%_94%)]' : 'bg-card'}`} data-testid={`card-special-${item.id}`}>
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-primary"><ShieldCheck size={19} /></div>
-                <p className="mt-7 text-xs font-bold uppercase tracking-[0.12em] text-primary">{item.category}</p>
-                <h3 className="mt-2 text-sm font-bold leading-5 text-foreground">{item.name}</h3>
-                <p className="mt-2 text-xs leading-5 text-muted-foreground">{item.description}</p>
-              </article>
-            ))}
-          </div>
-        )}
+        <div className="rounded-[1.75rem] border border-dashed border-primary/30 bg-[hsl(189_35%_94%)] p-8 sm:p-10" data-testid="empty-state-special-medicines">
+          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-card text-primary shadow-sm"><PackageOpen size={22} /></span>
+          <p className="mt-7 text-xs font-bold uppercase tracking-[0.12em] text-primary">Admin-ready collection</p>
+          <h3 className="mt-2 font-display text-2xl tracking-[-0.03em] text-foreground">Nothing featured here yet.</h3>
+          <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">Special Medicines will stay empty until real product information is added. No placeholder medicines or claims are shown in this preview.</p>
+        </div>
       </div>
     </section>
   );
@@ -62,16 +37,14 @@ export function DeliverySection() {
           <p className="mt-5 max-w-lg text-base leading-7 text-[hsl(189_35%_84%)]">
             Need to stay in? Call us and we can talk through local delivery support for your medicines and healthcare essentials.
           </p>
-           <Link to="/contact" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[hsl(20_72%_69%)] px-5 py-3.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5" data-testid="link-delivery-contact">
-             Check Delivery Availability <ArrowRight size={16} />
+          <Link to="/contact" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[hsl(20_72%_69%)] px-5 py-3.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5" data-testid="link-delivery-contact">
+            Talk about delivery <ArrowRight size={16} />
           </Link>
         </div>
         <div className="relative mx-auto w-full max-w-[390px]">
           <div className="soft-dots absolute -inset-8 rounded-[2.5rem] opacity-50" aria-hidden="true" />
-           <div className="relative overflow-hidden rounded-[2rem] border border-primary-foreground/15 bg-primary-foreground/10 p-3 backdrop-blur">
-             <img src="/images/ayush-local-delivery.jpg" alt="Care essentials packed for local delivery" className="aspect-[4/3] w-full rounded-[1.5rem] object-cover" />
-             <div className="p-3 pb-2">
-             <div className="flex items-center gap-3 border-b border-primary-foreground/15 pb-5">
+          <div className="relative rounded-[2rem] border border-primary-foreground/15 bg-primary-foreground/10 p-6 backdrop-blur">
+            <div className="flex items-center gap-3 border-b border-primary-foreground/15 pb-5">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[hsl(20_72%_69%)] text-foreground"><Truck size={21} /></span>
               <div><p className="text-sm font-bold">Local delivery support</p><p className="mt-1 text-xs text-[hsl(189_35%_78%)]">Arranged with a real pharmacy team</p></div>
             </div>
@@ -80,7 +53,6 @@ export function DeliverySection() {
               <div><PackageCheck size={18} className="text-[hsl(20_72%_69%)]" /><p className="mt-2 text-xs font-semibold">Safe packaging</p></div>
               <div><MessageCircle size={18} className="text-[hsl(20_72%_69%)]" /><p className="mt-2 text-xs font-semibold">Quick response</p></div>
             </div>
-             </div>
           </div>
         </div>
       </div>
@@ -113,8 +85,8 @@ export function WhyChooseSection() {
           ))}
         </div>
       </div>
-      <div className="mt-12 flex flex-col gap-4 rounded-2xl border border-border bg-[hsl(189_35%_94%)] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div className="flex items-center gap-3"><MapPin size={19} className="shrink-0 text-primary" /><p className="text-sm font-semibold text-foreground">{contactDetails.address}</p></div>
+       <div className="mt-12 flex flex-col gap-4 rounded-2xl border border-border bg-[hsl(189_35%_94%)] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="flex items-center gap-3"><MapPin size={19} className="shrink-0 text-primary" /><p className="text-sm font-semibold text-foreground">{contactDetails.locationLabel}</p></div>
         <Link to="/contact" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline" data-testid="link-why-contact">Meet the team <ArrowRight size={16} /></Link>
       </div>
     </section>

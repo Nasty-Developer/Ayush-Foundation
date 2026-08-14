@@ -24,16 +24,15 @@ export function CategoryPreview() {
           <Link
             key={category.title}
             to="/medicines"
-             className={`group relative flex min-h-[142px] flex-col justify-between overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-md sm:p-5 ${index === 0 ? 'bg-[hsl(189_35%_94%)]' : ''}`}
+            className={`group flex min-h-[142px] flex-col justify-between rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-md sm:p-5 ${index === 0 ? 'bg-[hsl(189_35%_94%)]' : ''}`}
             data-testid={`link-category-${index}`}
           >
-             {category.imageUrl && <img src={category.imageUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover opacity-20 transition-transform duration-500 group-hover:scale-105" />}
-             <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-xs font-bold tracking-[-0.04em] text-primary">{category.icon}</span>
-             <span className="relative">
-               <span className="block text-sm font-bold leading-5 text-foreground">{category.title}</span>
-               <span className="mt-1 block text-xs leading-5 text-muted-foreground">{category.note}</span>
-             </span>
-             <Circle size={7} fill="currentColor" className="relative mt-3 text-accent transition-transform group-hover:translate-x-1" />
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-secondary text-xs font-bold tracking-[-0.04em] text-primary">{category.icon}</span>
+            <span>
+              <span className="block text-sm font-bold leading-5 text-foreground">{category.title}</span>
+              <span className="mt-1 block text-xs leading-5 text-muted-foreground">{category.note}</span>
+            </span>
+            <Circle size={7} fill="currentColor" className="mt-3 text-accent transition-transform group-hover:translate-x-1" />
           </Link>
         ))}
       </div>
