@@ -62,55 +62,87 @@ export const medicineCategories = [
   { title: 'Ayurvedic Products', note: 'Traditional wellness', icon: 'AP' },
 ];
 
-export const newMedicineArrivals = [
-  {
-    id: 'arrival-01',
-    name: 'CalmRest Vitamin D3',
-    detail: 'Daily wellness supplement · 60 tablets',
-    tag: 'Wellness',
-    tone: 'sun',
-  },
-  {
-    id: 'arrival-02',
-    name: 'ThermoEase Digital Thermometer',
-    detail: 'Quick-read healthcare device',
-    tag: 'Home care',
-    tone: 'sky',
-  },
-  {
-    id: 'arrival-03',
-    name: 'Nourish Baby Gentle Wash',
-    detail: 'Mild everyday baby care · 200 ml',
-    tag: 'Baby care',
-    tone: 'coral',
-  },
-  {
-    id: 'arrival-04',
-    name: 'FlexiGuard Crepe Bandage',
-    detail: 'Soft support for home first aid',
-    tag: 'First aid',
-    tone: 'mint',
-  },
-];
+/**
+ * Phase 2 catalog contract.
+ *
+ * The customer UI intentionally starts with no medicine records. These fields
+ * are the shape a future admin workflow can use for create, edit, delete,
+ * image upload, visibility, and homepage placement without introducing the
+ * medicine database in this phase.
+ */
+export type MedicineType = 'general' | 'veterinary';
 
-export const localSpecials = [
+export type MedicineRecord = {
+  id: string;
+  imageUrl: string | null;
+  name: string;
+  brand: string;
+  manufacturer: string;
+  category: string;
+  description: string;
+  medicineType: MedicineType;
+  isNewArrival: boolean;
+  isSpecial: boolean;
+  isVisible: boolean;
+};
+
+// These arrays are intentionally empty until an approved catalog source exists.
+export const newMedicineArrivals: MedicineRecord[] = [];
+export const localSpecials: MedicineRecord[] = [];
+
+export type PromotionalBanner = {
+  id: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  icon: 'delivery' | 'availability' | 'prescription';
+  primaryLabel: string;
+  primaryHref: string;
+  secondaryLabel: string;
+  secondaryHref: string;
+};
+
+/**
+ * Ayush Medico-owned service promotions only.
+ * This list is deliberately shaped so a future admin panel can manage it
+ * without changing the slider component.
+ */
+export const promotionalBanners: PromotionalBanner[] = [
   {
-    id: 'special-01',
-    name: 'Neighbourhood wellness picks',
-    detail: 'A presentation-only collection of products our team can help identify or source.',
-    label: 'Local selection',
+    id: 'local-delivery-support',
+    eyebrow: 'AYUSH MEDICO · KURLA WEST',
+    title: 'Local care, brought closer.',
+    description:
+      'Talk to our team about dependable home delivery support for your medicines and healthcare essentials.',
+    icon: 'delivery',
+    primaryLabel: 'Talk about delivery',
+    primaryHref: '/contact',
+    secondaryLabel: 'Call the pharmacy',
+    secondaryHref: '/contact',
   },
   {
-    id: 'special-02',
-    name: 'Hard-to-find care essentials',
-    detail: 'Tell us what you are looking for; we will check with our pharmacy team.',
-    label: 'Ask our team',
+    id: 'medicine-availability',
+    eyebrow: 'MEDICINE AVAILABILITY',
+    title: 'Need a medicine checked?',
+    description:
+      'Share a name, strength, or clear prescription detail and our team will guide you on the next step.',
+    icon: 'availability',
+    primaryLabel: 'Check availability',
+    primaryHref: '/medicines',
+    secondaryLabel: 'Ask our team',
+    secondaryHref: '/contact',
   },
   {
-    id: 'special-03',
-    name: 'Ayurvedic everyday care',
-    detail: 'A small preview of traditional wellness products available to enquire about.',
-    label: 'Preview collection',
+    id: 'prescription-support',
+    eyebrow: 'PHARMACY SUPPORT',
+    title: 'Prescription help, clearly explained.',
+    description:
+      'When a valid prescription is needed, Ayush Medico will explain what to bring before arranging anything.',
+    icon: 'prescription',
+    primaryLabel: 'Contact Ayush Medico',
+    primaryHref: '/contact',
+    secondaryLabel: 'Learn about services',
+    secondaryHref: '/services',
   },
 ];
 

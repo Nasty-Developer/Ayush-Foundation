@@ -1,34 +1,52 @@
-import { ArrowRight, BadgeCheck, Box, HeartHandshake, MapPin, MessageCircle, PackageCheck, ShieldCheck, Truck, UsersRound } from 'lucide-react';
+import { ArrowRight, BadgeCheck, HeartHandshake, MapPin, MessageCircle, PackageCheck, PackageOpen, Search, ShieldCheck, Truck, UsersRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { localSpecials } from '@/lib/home-data';
 import { contactDetails } from '@/lib/site-data';
 
 export function SpecialMedicines() {
+  const visibleSpecials = localSpecials.filter((item) => item.isVisible && item.isSpecial);
+
   return (
     <section className="site-container py-16 md:py-24" aria-labelledby="special-medicines-heading">
       <div className="grid gap-10 lg:grid-cols-[0.78fr_1.22fr] lg:items-end">
         <div>
           <p className="eyebrow">A local point of view</p>
           <h2 id="special-medicines-heading" className="mt-3 max-w-md font-display text-3xl leading-tight tracking-[-0.04em] sm:text-4xl">
-            Special Medicines — Only Available Here
+            Special Medicines
           </h2>
           <p className="mt-4 max-w-md text-sm leading-6 text-muted-foreground sm:text-base">
-            A careful placeholder collection for products and local sourcing stories we may feature in the future. Availability is always confirmed by our team.
+            A reserved space for verified medicines that Ayush Medico chooses to highlight for the Kurla West community.
           </p>
           <Link to="/medicines" className="group mt-7 inline-flex items-center gap-2 rounded-full bg-foreground px-5 py-3 text-sm font-bold text-background transition-colors hover:bg-primary" data-testid="link-special-check-availability">
             Check Availability <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
           </Link>
         </div>
-        <div className="grid gap-3 sm:grid-cols-3">
-          {localSpecials.map((item, index) => (
-            <article key={item.id} className={`rounded-2xl border border-border p-5 ${index === 1 ? 'bg-[hsl(189_35%_94%)]' : 'bg-card'}`} data-testid={`card-special-${item.id}`}>
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-primary"><Box size={19} /></span>
-              <p className="mt-7 text-xs font-bold uppercase tracking-[0.12em] text-primary">{item.label}</p>
-              <h3 className="mt-2 text-sm font-bold leading-5 text-foreground">{item.name}</h3>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">{item.detail}</p>
-            </article>
-          ))}
-        </div>
+        {visibleSpecials.length === 0 ? (
+          <div className="rounded-[1.75rem] border border-primary/15 bg-[hsl(189_35%_94%)] p-6 sm:p-8" data-testid="empty-special-medicines">
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-card text-primary shadow-sm">
+              <PackageOpen size={25} strokeWidth={1.5} aria-hidden="true" />
+            </div>
+            <p className="mt-7 text-xs font-bold uppercase tracking-[0.14em] text-primary">Reserved for verified listings</p>
+            <h3 className="mt-2 max-w-md font-display text-2xl leading-tight tracking-[-0.035em] text-foreground">No special medicines are listed yet.</h3>
+            <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+              We will only show medicines here after the Ayush Medico team confirms the details and chooses to feature them.
+            </p>
+            <Link to="/contact" className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline" data-testid="link-special-enquire">
+              Ask about a medicine <Search size={16} />
+            </Link>
+          </div>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-3">
+            {visibleSpecials.map((item, index) => (
+              <article key={item.id} className={`rounded-2xl border border-border p-5 ${index === 1 ? 'bg-[hsl(189_35%_94%)]' : 'bg-card'}`} data-testid={`card-special-${item.id}`}>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-secondary text-primary"><ShieldCheck size={19} /></div>
+                <p className="mt-7 text-xs font-bold uppercase tracking-[0.12em] text-primary">{item.category}</p>
+                <h3 className="mt-2 text-sm font-bold leading-5 text-foreground">{item.name}</h3>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">{item.description}</p>
+              </article>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
