@@ -3,32 +3,59 @@ import {
   signInWithEmailAndPassword,
   signOut,
   type User,
+  type UserCredential,
 } from 'firebase/auth';
 
 import { firebaseAuth } from '@/lib/firebase';
-import { ADMIN_EMAIL, isAdminEmail } from './index';
+import { isAdminEmail } from './index';
 
 export function isAdminUser(user: User | null): boolean {
   return Boolean(user && isAdminEmail(user.email));
 }
 
+function getSignInError(error: unknown): Error {
+  const code = typeof error === 'object' && error !== null && 'code' in error
+    ? String((error as { code?: unknown }).code)
+    : '';
+
+  if (
+    code === 'auth/invalid-credential' ||
+    code === 'auth/invalid-email' ||
+    code === 'auth/user-disabled' ||
+    code === 'auth/user-not-found' ||
+    code === 'auth/wrong-password'
+  ) {
+    return new Error('Incorrect email or password.');
+  }
+
+  return new Error(
+    'Unable to connect to the authentication service. Please try again.',
+  );
+}
+
 export async function signInAdmin(email: string, password: string): Promise<User> {
   if (!firebaseAuth) {
-    throw new Error('Firebase Authentication is not configured yet.');
+    throw new Error(
+      'Unable to connect to the authentication service. Please try again.',
+    );
   }
 
-  if (!isAdminEmail(email)) {
-    throw new Error(`Only the ${ADMIN_EMAIL} administrator account can sign in here.`);
+  let credential: UserCredential;
+  try {
+    credential = await signInWithEmailAndPassword(
+      firebaseAuth,
+      email.trim(),
+      password,
+    );
+  } catch (error) {
+    throw getSignInError(error);
   }
 
-  const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
   if (!isAdminUser(credential.user)) {
     await signOut(firebaseAuth);
-    throw new Error('This account is not authorized for the Ayush Medico admin panel.');
-  }
-  if (!credential.user.emailVerified) {
-    await signOut(firebaseAuth);
-    throw new Error('Verify the administrator email before accessing the admin panel.');
+    throw new Error(
+      'You are not authorized to access the Ayush Medico Admin Panel.',
+    );
   }
 
   return credential.user;
@@ -45,13 +72,34 @@ export function subscribeToAdmin(
 ): () => void {
   if (!firebaseAuth) {
     onChange(null);
-    onError(new Error('Firebase Authentication is not configured yet.'));
+    onError(
+      new Error(
+        'Unable to connect to the authentication service. Please try again.',
+      ),
+    );
     return () => undefined;
   }
 
+  const auth = firebaseAuth;
+
   return onAuthStateChanged(
-    firebaseAuth,
-    (user) => onChange(isAdminUser(user) ? user : null),
+    auth,
+    (user) => {
+      if (!user) {
+        onChange(null);
+        return;
+      }
+
+      if (isAdminUser(user)) {
+        onChange(user);
+        return;
+      }
+
+      void signOut(auth).finally(() => {
+        onChange(null);
+        onError(new Error('You are not authorized to access the Ayush Medico Admin Panel.'));
+      });
+    },
     onError,
   );
 }
