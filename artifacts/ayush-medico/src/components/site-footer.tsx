@@ -1,6 +1,6 @@
-import { Clock3, Mail, MapPin, Phone } from 'lucide-react';
+import { Clock3, MapPin, MessageCircle, Navigation, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { contactDetails, navItems } from '@/lib/site-data';
+import { contactDetails, directionsUrl, navItems, whatsappUrl } from '@/lib/site-data';
 
 export function SiteFooter() {
   const legalLinks = ['Privacy Policy', 'Terms & Conditions', 'Refund & Cancellation Policy', 'Shipping & Delivery Policy', 'Prescription Policy', 'Disclaimer'];
@@ -19,9 +19,6 @@ export function SiteFooter() {
           <p className="mt-5 max-w-xs text-sm leading-6 text-muted-foreground">
             Your neighbourhood pharmacy for genuine medicines, thoughtful advice, and care that comes back to you.
           </p>
-          <a href={`mailto:${contactDetails.email}`} className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline" data-testid="link-footer-email">
-            <Mail size={15} /> {contactDetails.email}
-          </a>
         </div>
 
         <div>
@@ -50,6 +47,10 @@ export function SiteFooter() {
             <p className="flex gap-2.5"><MapPin size={17} className="mt-0.5 shrink-0 text-primary" /> {contactDetails.address}</p>
             <p className="flex gap-2.5"><Clock3 size={17} className="mt-0.5 shrink-0 text-primary" /> {contactDetails.hours}</p>
             <a href={`tel:${contactDetails.phone.replaceAll(' ', '')}`} className="flex gap-2.5 transition-colors hover:text-primary" data-testid="link-footer-phone"><Phone size={17} className="mt-0.5 shrink-0 text-primary" /> {contactDetails.phone}</a>
+            <div className="flex flex-wrap gap-3 pt-1">
+              <a href={whatsappUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-primary transition-colors hover:text-foreground" data-testid="link-footer-whatsapp"><MessageCircle size={16} /> WhatsApp Us</a>
+              <a href={directionsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm font-bold text-primary transition-colors hover:text-foreground" data-testid="link-footer-directions"><Navigation size={16} /> Directions</a>
+            </div>
           </div>
         </div>
       </div>

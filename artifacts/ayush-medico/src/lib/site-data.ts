@@ -57,8 +57,13 @@ export const availabilityItems = [
 ];
 
 export const contactDetails = {
-  phone: '+91 98765 43210',
-  email: 'hello@ayushmedico.in',
-  address: '12, Green Park Market, Bengaluru',
+  phone: '+91 98332 73838',
+  address:
+    'Shop No.1, Hut No.67 1/1, Ground Floor, Gangaram Makad Wala Chawl, Halav Pool, Near Rolex Hotel, CTS No.451, Kurla West, Mumbai – 400070',
   hours: 'Mon–Sat · 8:00 am–9:00 pm',
 };
+
+export const directionsUrl =
+  'https://www.google.com/maps/search/?api=1&query=Shop%20No.1%2C%20Hut%20No.67%201%2F1%2C%20Ground%20Floor%2C%20Gangaram%20Makad%20Wala%20Chawl%2C%20Halav%20Pool%2C%20Near%20Rolex%20Hotel%2C%20CTS%20No.451%2C%20Kurla%20West%2C%20Mumbai%20%E2%80%93%20400070';
+
+export const whatsappUrl = 'https://wa.me/919833273838';

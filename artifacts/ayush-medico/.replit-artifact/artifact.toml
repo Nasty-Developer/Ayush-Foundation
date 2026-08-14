@@ -1,7 +1,7 @@
 kind = "web"
 previewPath = "/"
 title = "Ayush Medico"
-description = "A premium, trustworthy local pharmacy website foundation with responsive navigation, pharmacy services, medicine availability messaging, home delivery information, and contact pathways."
+description = "A premium, trustworthy local pharmacy website with responsive navigation, pharmacy services, medicine availability messaging, home delivery information, and contact pathways."
 version = "1.0.0"
 id = "artifacts/ayush-medico"
 router = "path"

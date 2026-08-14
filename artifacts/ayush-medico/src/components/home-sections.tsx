@@ -1,6 +1,7 @@
 import { ArrowRight, BadgeCheck, Box, HeartHandshake, MapPin, MessageCircle, PackageCheck, ShieldCheck, Truck, UsersRound } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { localSpecials } from '@/lib/home-data';
+import { contactDetails } from '@/lib/site-data';
 
 export function SpecialMedicines() {
   return (
@@ -92,7 +93,7 @@ export function WhyChooseSection() {
         </div>
       </div>
       <div className="mt-12 flex flex-col gap-4 rounded-2xl border border-border bg-[hsl(189_35%_94%)] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-        <div className="flex items-center gap-3"><MapPin size={19} className="shrink-0 text-primary" /><p className="text-sm font-semibold text-foreground">12, Green Park Market, Bengaluru</p></div>
+        <div className="flex items-center gap-3"><MapPin size={19} className="shrink-0 text-primary" /><p className="text-sm font-semibold text-foreground">{contactDetails.address}</p></div>
         <Link to="/contact" className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:underline" data-testid="link-why-contact">Meet the team <ArrowRight size={16} /></Link>
       </div>
     </section>
