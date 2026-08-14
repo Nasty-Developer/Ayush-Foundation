@@ -210,3 +210,31 @@ a {
     width: min(100% - 4rem, 1180px);
   }
 }
+
+/* Admin cockpit — paper ledger, teal ink, quiet utility */
+.admin-shell {
+  min-height: 100dvh;
+  background:
+    linear-gradient(90deg, hsl(var(--primary) / 0.025) 1px, transparent 1px),
+    linear-gradient(hsl(var(--primary) / 0.025) 1px, transparent 1px),
+    hsl(var(--background));
+  background-size: 32px 32px;
+}
+.admin-sidebar {
+  background: hsl(184 29% 94% / 0.95);
+  border-right: 1px solid hsl(var(--border));
+}
+.admin-sidebar-scroll { scrollbar-width: thin; scrollbar-color: hsl(var(--primary) / .2) transparent; }
+.admin-main { min-width: 0; }
+.admin-topbar { backdrop-filter: blur(12px); background: hsl(var(--background) / .86); }
+.admin-panel { box-shadow: 0 10px 28px hsl(var(--foreground) / .045); }
+.admin-kicker { font-size: .68rem; letter-spacing: .17em; text-transform: uppercase; font-weight: 700; color: hsl(var(--primary)); }
+.admin-mono { font-family: var(--app-font-mono); font-variant-numeric: tabular-nums; }
+.admin-table-row { transition: background-color 160ms ease; }
+.admin-table-row:hover { background: hsl(var(--primary) / .035); }
+.admin-skeleton { animation: admin-pulse 1.35s ease-in-out infinite; background: hsl(var(--muted)); }
+.admin-login-mark { box-shadow: 12px 12px 0 hsl(var(--accent) / .42); }
+@keyframes admin-pulse { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+@media (max-width: 767px) {
+  .admin-sidebar { box-shadow: 16px 0 44px hsl(var(--foreground) / .12); }
+}

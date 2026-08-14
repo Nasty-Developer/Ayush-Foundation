@@ -9,6 +9,7 @@ import ContactPage from '@/pages/contact';
 import HomePage from '@/pages/home';
 import MedicinesPage from '@/pages/medicines';
 import ServicesPage from '@/pages/services';
+import AdminPage from '@/pages/admin';
 import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 
 const queryClient = new QueryClient();
@@ -19,6 +20,7 @@ function Router() {
     // survives a page crash.
     <RoutedErrorBoundary>
       <Routes>
+        <Route path="/admin/*" element={<AdminPage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/medicines" element={<MedicinesPage />} />
         <Route path="/services" element={<ServicesPage />} />
