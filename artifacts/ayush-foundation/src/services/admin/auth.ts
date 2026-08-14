@@ -9,29 +9,63 @@ import { firebaseAuth } from '@/lib/firebase';
 import { ADMIN_EMAIL, isAdminEmail } from './index';
 
 export function isAdminUser(user: User | null): boolean {
-  return Boolean(user && isAdminEmail(user.email));
+  return Boolean(user?.email && isAdminEmail(user.email));
 }
 
 export async function signInAdmin(email: string, password: string): Promise<User> {
   if (!firebaseAuth) {
-    throw new Error('Firebase Authentication is not configured yet.');
+    throw new Error('Unable to connect to the authentication service. Please try again.');
   }
 
-  if (!isAdminEmail(email)) {
-    throw new Error(`Only the ${ADMIN_EMAIL} administrator account can sign in here.`);
-  }
+  try {
+    const credential = await signInWithEmailAndPassword(
+      firebaseAuth,
+      email.trim().toLowerCase(),
+      password,
+    );
 
-  const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
-  if (!isAdminUser(credential.user)) {
-    await signOut(firebaseAuth);
-    throw new Error('This account is not authorized for the Ayush Medico admin panel.');
-  }
-  if (!credential.user.emailVerified) {
-    await signOut(firebaseAuth);
-    throw new Error('Verify the administrator email before accessing the admin panel.');
-  }
+    if (!isAdminUser(credential.user)) {
+      await signOut(firebaseAuth);
+      throw new Error(
+        'You are not authorized to access the Ayush Medico Admin Panel.',
+      );
+    }
 
-  return credential.user;
+    // Authorization is based on the authenticated Firebase user's email.
+    // Do not reject the authorized admin solely because emailVerified is false:
+    // that produced a misleading verification error after successful sign-in.
+    return credential.user;
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message ===
+        'You are not authorized to access the Ayush Medico Admin Panel.'
+    ) {
+      throw error;
+    }
+
+    const code =
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      typeof error.code === 'string'
+        ? error.code
+        : '';
+
+    if (
+      code === 'auth/invalid-credential' ||
+      code === 'auth/invalid-email' ||
+      code === 'auth/user-disabled' ||
+      code === 'auth/user-not-found' ||
+      code === 'auth/wrong-password'
+    ) {
+      throw new Error('Incorrect email or password.');
+    }
+
+    throw new Error(
+      'Unable to connect to the authentication service. Please try again.',
+    );
+  }
 }
 
 export async function signOutAdmin(): Promise<void> {
@@ -43,15 +77,26 @@ export function subscribeToAdmin(
   onChange: (user: User | null) => void,
   onError: (error: Error) => void,
 ): () => void {
-  if (!firebaseAuth) {
+  const auth = firebaseAuth;
+  if (!auth) {
     onChange(null);
     onError(new Error('Firebase Authentication is not configured yet.'));
     return () => undefined;
   }
 
   return onAuthStateChanged(
-    firebaseAuth,
-    (user) => onChange(isAdminUser(user) ? user : null),
+    auth,
+    (user) => {
+      if (isAdminUser(user)) {
+        onChange(user);
+        return;
+      }
+
+      onChange(null);
+      if (user) {
+        void signOut(auth).catch(onError);
+      }
+    },
     onError,
   );
 }
