@@ -1,0 +1,1 @@
+- [Artifact build environment](artifact-build-environment.md) — direct Vite production builds need the workflow's PORT and BASE_PATH values.
