@@ -1,5 +1,6 @@
 import { ArrowRight, Camera, CheckCircle2, FileText, Search } from 'lucide-react';
 import { PageFrame, SoftContactCard } from '@/components/page-frame';
+import { contactDetails, whatsappUrl } from '@/lib/site-data';
 
 export default function MedicinesPage() {
   return (
@@ -18,8 +19,8 @@ export default function MedicinesPage() {
               ))}
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <a href="tel:+919876543210" className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-0.5" data-testid="link-medicines-call">Call to check <ArrowRight size={16} /></a>
-              <a href="mailto:hello@ayushmedico.in?subject=Medicine%20availability" className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-5 py-3 text-sm font-bold text-primary transition-colors hover:bg-secondary" data-testid="link-medicines-email">Email a request <ArrowRight size={16} /></a>
+              <a href={`tel:${contactDetails.phone.replaceAll(' ', '')}`} className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-0.5" data-testid="link-medicines-call">Call to check <ArrowRight size={16} /></a>
+              <a href={whatsappUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full border border-border px-5 py-3 text-sm font-bold text-primary transition-colors hover:bg-secondary" data-testid="link-medicines-whatsapp">WhatsApp a request <ArrowRight size={16} /></a>
             </div>
           </div>
           <SoftContactCard />

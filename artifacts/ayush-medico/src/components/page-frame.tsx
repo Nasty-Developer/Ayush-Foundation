@@ -2,6 +2,7 @@ import { ArrowRight, Clock3, HeartHandshake, PhoneCall, ShieldCheck } from 'luci
 import { ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import { SiteLayout } from '@/components/site-layout';
+import { contactDetails } from '@/lib/site-data';
 
 type PageFrameProps = {
   eyebrow: string;
@@ -31,8 +32,8 @@ export function SoftContactCard() {
       <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[hsl(20_72%_69%)] text-foreground"><PhoneCall size={21} /></span>
       <h2 className="mt-7 font-display text-3xl leading-tight tracking-[-0.04em]">Prefer a real conversation?</h2>
       <p className="mt-3 text-sm leading-6 text-[hsl(189_35%_84%)]">Our team is happy to help with a medicine check or a delivery question.</p>
-      <a href="tel:+919876543210" className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary-foreground px-5 py-3 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5" data-testid="link-page-phone">
-        +91 98765 43210 <ArrowRight size={16} />
+      <a href={`tel:${contactDetails.phone.replaceAll(' ', '')}`} className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary-foreground px-5 py-3 text-sm font-bold text-primary transition-transform hover:-translate-y-0.5" data-testid="link-page-phone">
+        {contactDetails.phone} <ArrowRight size={16} />
       </a>
     </div>
   );
