@@ -1,13 +1,14 @@
-import { ArrowRight, BadgeCheck, HeartHandshake, MapPin, Phone, Search, ShieldCheck, ShoppingBag, Sparkles, Truck } from 'lucide-react';
+import { ArrowRight, BadgeCheck, HeartHandshake, MapPin, MessageCircle, Phone, Search, ShieldCheck, ShoppingBag, Sparkles, Truck } from 'lucide-react';
 import { FormEvent, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { CategoryPreview } from '@/components/category-preview';
 import { FaqAccordion } from '@/components/faq-accordion';
 import { DeliverySection, SpecialMedicines, WhyChooseSection } from '@/components/home-sections';
 import { MedicineArrivals } from '@/components/medicine-arrivals';
+import { PromotionBanner } from '@/components/promotion-banner';
 import { SectionHeading } from '@/components/section-heading';
 import { SiteLayout } from '@/components/site-layout';
-import { contactDetails, directionsUrl } from '@/lib/site-data';
+import { contactDetails, directionsUrl, whatsappUrl } from '@/lib/site-data';
 import { homeServices } from '@/lib/home-data';
 
 function HomeServiceIcon({ name }: { name: string }) {
@@ -90,6 +91,8 @@ export default function HomePage() {
       ['og:title', 'Ayush Medico | Care, close to home'],
       ['og:description', description],
       ['og:type', 'website'],
+      ['og:image', '/images/ayush-pharmacy-hero.jpg'],
+      ['og:url', window.location.origin],
     ];
     metaTags.forEach(([property, content]) => {
       let tag = document.querySelector<HTMLMetaElement>(`meta[property="${property}"]`);
@@ -107,8 +110,8 @@ export default function HomePage() {
       <section className="paper-grid overflow-hidden border-b border-border/60">
         <div className="site-container grid min-h-[650px] items-center gap-12 py-14 md:grid-cols-[1.04fr_0.96fr] md:py-20 lg:min-h-[700px] lg:py-24">
           <div className="relative z-10 max-w-2xl">
-            <div className="reveal inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3.5 py-2 text-xs font-bold text-primary shadow-sm" data-testid="status-open-now">
-              <span className="h-2 w-2 rounded-full bg-[hsl(156_46%_45%)]" /> Open today · 8:00 am – 9:00 pm
+             <div className="reveal inline-flex items-center gap-2 rounded-full border border-primary/20 bg-card px-3.5 py-2 text-xs font-bold text-primary shadow-sm" data-testid="status-pharmacy-hours">
+               <span className="h-2 w-2 rounded-full bg-[hsl(156_46%_45%)]" /> Mon–Sat · 8:00 am – 9:00 pm
             </div>
             <h1 className="reveal reveal-delay-1 mt-7 max-w-xl font-display text-[3.25rem] leading-[0.98] tracking-[-0.055em] text-foreground sm:text-6xl lg:text-[5.2rem]" data-testid="text-hero-heading">
               Good health,<br /><span className="text-primary">close to home.</span>
@@ -124,21 +127,27 @@ export default function HomePage() {
               <a href={`tel:${contactDetails.phone.replaceAll(' ', '')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-primary/25 bg-card px-6 py-3.5 text-sm font-bold text-primary transition-colors hover:bg-secondary" data-testid="link-hero-call">
                 <Phone size={16} /> Call Now
               </a>
+               <a href={whatsappUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full border border-[hsl(145_44%_32%/0.28)] bg-[hsl(145_44%_95%)] px-6 py-3.5 text-sm font-bold text-[hsl(145_44%_27%)] transition-colors hover:bg-[hsl(145_44%_89%)]" data-testid="link-hero-whatsapp">
+                 <MessageCircle size={16} /> WhatsApp Us
+               </a>
             </div>
             <a href={directionsUrl} target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-primary hover:underline" data-testid="link-hero-directions">
               <MapPin size={15} /> Get Directions
             </a>
           </div>
 
-          <div className="relative mx-auto h-[340px] w-full max-w-[510px] sm:h-[430px] md:h-[490px]" aria-label="Illustration of Ayush Medico care">
-            <div className="hero-orbit absolute left-1/2 top-1/2 h-[270px] w-[270px] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/20 bg-[hsl(189_35%_91%)] sm:h-[390px] sm:w-[390px]" />
-            <div className="absolute left-1/2 top-1/2 h-[200px] w-[200px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[hsl(176_42%_33%)] sm:h-[275px] sm:w-[275px]" />
-            <div className="absolute left-1/2 top-1/2 flex h-[150px] w-[150px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[14px] border-[hsl(189_35%_91%)] bg-card shadow-lg sm:h-[205px] sm:w-[205px]">
-              <div className="relative flex h-16 w-16 items-center justify-center rounded-[20px] bg-primary text-primary-foreground sm:h-20 sm:w-20" aria-hidden="true">
-                <span className="absolute h-10 w-3 rounded-full bg-primary-foreground sm:h-12 sm:w-3.5" />
-                <span className="absolute h-3 w-10 rounded-full bg-primary-foreground sm:w-12" />
-              </div>
-            </div>
+           <div className="relative mx-auto h-[340px] w-full max-w-[510px] sm:h-[430px] md:h-[490px]" aria-label="Inside Ayush Medico pharmacy">
+             <div className="hero-orbit absolute -inset-3 rounded-[2.5rem] border border-primary/20 bg-[hsl(189_35%_91%)] sm:-inset-5" />
+             <div className="relative h-full overflow-hidden rounded-[2rem] border-[10px] border-card bg-card shadow-lg sm:rounded-[2.5rem] sm:border-[14px]">
+               <img src="/images/ayush-pharmacy-hero.jpg" alt="Warm, well-stocked interior of Ayush Medico pharmacy" className="h-full w-full object-cover" />
+               <div className="absolute inset-0 bg-gradient-to-t from-[hsl(202_38%_16%/0.58)] via-transparent to-[hsl(123_24%_27%/0.08)]" />
+               <div className="absolute bottom-5 left-5 right-5 rounded-2xl border border-card/20 bg-foreground/75 p-4 text-primary-foreground backdrop-blur-sm sm:bottom-7 sm:left-7 sm:right-7">
+                 <div className="flex items-center gap-3">
+                   <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-accent text-foreground" aria-hidden="true"><ShieldCheck size={19} /></span>
+                   <div><p className="text-xs font-semibold text-primary-foreground/75">A familiar pharmacy in</p><p className="mt-0.5 text-sm font-bold">Kurla West, Mumbai</p></div>
+                 </div>
+               </div>
+             </div>
             <div className="hero-float absolute left-0 top-2 rounded-2xl border border-border bg-card p-4 shadow-md sm:left-5 sm:top-16" data-testid="card-hero-genuine">
               <div className="flex items-center gap-3"><span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[hsl(42_55%_88%)] text-[hsl(35_55%_38%)]"><ShieldCheck size={20} /></span><div><p className="text-xs font-bold text-muted-foreground">Every pack</p><p className="mt-0.5 text-sm font-bold text-foreground">Genuine & checked</p></div></div>
             </div>
@@ -151,6 +160,7 @@ export default function HomePage() {
       </section>
 
       <TrustStrip />
+      <PromotionBanner />
 
       <section className="site-container py-16 md:py-24" aria-labelledby="services-heading">
         <SectionHeading eyebrow="Here when it matters" title="Six simple ways we can help." description="From a medicine check to a thoughtful conversation, our services are designed around the everyday needs of a local family." linkLabel="See all services" linkHref="/services" />

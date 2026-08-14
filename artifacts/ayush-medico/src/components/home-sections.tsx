@@ -62,14 +62,16 @@ export function DeliverySection() {
           <p className="mt-5 max-w-lg text-base leading-7 text-[hsl(189_35%_84%)]">
             Need to stay in? Call us and we can talk through local delivery support for your medicines and healthcare essentials.
           </p>
-          <Link to="/contact" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[hsl(20_72%_69%)] px-5 py-3.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5" data-testid="link-delivery-contact">
-            Talk about delivery <ArrowRight size={16} />
+           <Link to="/contact" className="mt-8 inline-flex items-center gap-2 rounded-full bg-[hsl(20_72%_69%)] px-5 py-3.5 text-sm font-bold text-foreground transition-transform hover:-translate-y-0.5" data-testid="link-delivery-contact">
+             Check Delivery Availability <ArrowRight size={16} />
           </Link>
         </div>
         <div className="relative mx-auto w-full max-w-[390px]">
           <div className="soft-dots absolute -inset-8 rounded-[2.5rem] opacity-50" aria-hidden="true" />
-          <div className="relative rounded-[2rem] border border-primary-foreground/15 bg-primary-foreground/10 p-6 backdrop-blur">
-            <div className="flex items-center gap-3 border-b border-primary-foreground/15 pb-5">
+           <div className="relative overflow-hidden rounded-[2rem] border border-primary-foreground/15 bg-primary-foreground/10 p-3 backdrop-blur">
+             <img src="/images/ayush-local-delivery.jpg" alt="Care essentials packed for local delivery" className="aspect-[4/3] w-full rounded-[1.5rem] object-cover" />
+             <div className="p-3 pb-2">
+             <div className="flex items-center gap-3 border-b border-primary-foreground/15 pb-5">
               <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[hsl(20_72%_69%)] text-foreground"><Truck size={21} /></span>
               <div><p className="text-sm font-bold">Local delivery support</p><p className="mt-1 text-xs text-[hsl(189_35%_78%)]">Arranged with a real pharmacy team</p></div>
             </div>
@@ -78,6 +80,7 @@ export function DeliverySection() {
               <div><PackageCheck size={18} className="text-[hsl(20_72%_69%)]" /><p className="mt-2 text-xs font-semibold">Safe packaging</p></div>
               <div><MessageCircle size={18} className="text-[hsl(20_72%_69%)]" /><p className="mt-2 text-xs font-semibold">Quick response</p></div>
             </div>
+             </div>
           </div>
         </div>
       </div>

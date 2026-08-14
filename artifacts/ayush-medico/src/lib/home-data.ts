@@ -53,12 +53,12 @@ export const homeServices: Array<{
 export const medicineCategories = [
   { title: 'Prescription Medicines', note: 'For prescribed routines', icon: 'Rx' },
   { title: 'OTC Medicines', note: 'Everyday essentials', icon: 'OTC' },
-  { title: 'Baby Care', note: 'Gentle family care', icon: 'BC' },
+  { title: 'Baby Care', note: 'Gentle family care', icon: 'BC', imageUrl: '/images/ayush-baby-care.jpg' },
   { title: 'Personal Care', note: 'Daily wellbeing', icon: 'PC' },
   { title: 'Vitamins & Supplements', note: 'Nutrition support', icon: 'VS' },
   { title: 'Diabetic Care', note: 'Helpful home supplies', icon: 'DC' },
   { title: 'Healthcare Devices', note: 'Tools for home care', icon: 'HD' },
-  { title: 'Surgical Supplies', note: 'Practical care basics', icon: 'SS' },
+  { title: 'Surgical Supplies', note: 'Practical care basics', icon: 'SS', imageUrl: '/images/ayush-first-aid.jpg' },
   { title: 'Ayurvedic Products', note: 'Traditional wellness', icon: 'AP' },
 ];
 
@@ -96,6 +96,7 @@ export type PromotionalBanner = {
   title: string;
   description: string;
   icon: 'delivery' | 'availability' | 'prescription';
+  imageUrl: string;
   primaryLabel: string;
   primaryHref: string;
   secondaryLabel: string;
@@ -115,6 +116,7 @@ export const promotionalBanners: PromotionalBanner[] = [
     description:
       'Talk to our team about dependable home delivery support for your medicines and healthcare essentials.',
     icon: 'delivery',
+    imageUrl: '/images/ayush-local-delivery.jpg',
     primaryLabel: 'Talk about delivery',
     primaryHref: '/contact',
     secondaryLabel: 'Call the pharmacy',
@@ -127,6 +129,7 @@ export const promotionalBanners: PromotionalBanner[] = [
     description:
       'Share a name, strength, or clear prescription detail and our team will guide you on the next step.',
     icon: 'availability',
+    imageUrl: '/images/ayush-pharmacy-hero.jpg',
     primaryLabel: 'Check availability',
     primaryHref: '/medicines',
     secondaryLabel: 'Ask our team',
@@ -139,6 +142,7 @@ export const promotionalBanners: PromotionalBanner[] = [
     description:
       'When a valid prescription is needed, Ayush Medico will explain what to bring before arranging anything.',
     icon: 'prescription',
+    imageUrl: '/images/ayush-first-aid.jpg',
     primaryLabel: 'Contact Ayush Medico',
     primaryHref: '/contact',
     secondaryLabel: 'Learn about services',

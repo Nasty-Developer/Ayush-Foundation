@@ -1,5 +1,5 @@
-import { ArrowRight, ChevronLeft, ChevronRight, MapPin, Search, ShieldCheck, Truck } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowRight, ChevronLeft, ChevronRight, Search, ShieldCheck, Truck } from 'lucide-react';
+import { useEffect, useRef, useState, type KeyboardEvent, type TouchEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { promotionalBanners } from '@/lib/home-data';
 
@@ -12,6 +12,7 @@ const iconByType = {
 export function PromotionBanner() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const touchStartX = useRef<number | null>(null);
 
   useEffect(() => {
     if (isPaused || promotionalBanners.length < 2) return;
@@ -31,16 +32,50 @@ export function PromotionBanner() {
     setActiveIndex((current) => (current + 1) % promotionalBanners.length);
   }
 
+  function handleKeyDown(event: KeyboardEvent<HTMLElement>) {
+    if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      showPrevious();
+    }
+    if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      showNext();
+    }
+  }
+
+  function handleTouchStart(event: TouchEvent<HTMLElement>) {
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+    setIsPaused(true);
+  }
+
+  function handleTouchEnd(event: TouchEvent<HTMLElement>) {
+    const startX = touchStartX.current;
+    const endX = event.changedTouches[0]?.clientX;
+    touchStartX.current = null;
+    setIsPaused(false);
+    if (startX === null || endX === undefined || Math.abs(endX - startX) < 48) return;
+    if (endX < startX) showNext();
+    else showPrevious();
+  }
+
   if (promotionalBanners.length === 0) return null;
 
   return (
     <section
       className="site-container py-8 md:py-12"
+      role="region"
+      aria-roledescription="carousel"
       aria-label="Ayush Medico promotions and services"
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={() => setIsPaused(false)}
+      onKeyDown={handleKeyDown}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+      tabIndex={0}
     >
-      <div className="relative min-h-[370px] overflow-hidden rounded-[2rem] bg-primary text-primary-foreground shadow-lg sm:min-h-[320px]">
+      <div className="relative min-h-[400px] overflow-hidden rounded-[2rem] bg-primary text-primary-foreground shadow-lg sm:min-h-[360px]">
         <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full border-[22px] border-primary-foreground/10" aria-hidden="true" />
         <div className="absolute -bottom-32 left-1/3 h-72 w-72 rounded-full border-[18px] border-[hsl(20_72%_69%)]/20" aria-hidden="true" />
 
@@ -80,26 +115,20 @@ export function PromotionBanner() {
                 </div>
               </div>
 
-              <div className="relative mx-auto hidden w-full max-w-[290px] md:block" aria-hidden="true">
+              <div className="relative mx-auto hidden w-full max-w-[320px] md:block" aria-hidden="true">
                 <div className="absolute -inset-5 rounded-[2.25rem] border border-primary-foreground/10" />
-                <div className="relative rounded-[2rem] border border-primary-foreground/20 bg-primary-foreground/10 p-5 backdrop-blur">
-                  <div className="flex items-center justify-between border-b border-primary-foreground/15 pb-5">
+                <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] border border-primary-foreground/20 bg-primary-foreground/10 shadow-2xl">
+                  <img src={banner.imageUrl} alt={`${banner.title} — Ayush Medico`} loading={index === 0 ? 'eager' : 'lazy'} className="h-full w-full object-cover opacity-90" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[hsl(202_38%_16%/0.76)] via-transparent to-transparent" />
+                  <div className="absolute inset-x-5 bottom-5 flex items-end justify-between gap-3">
                     <div>
-                      <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[hsl(189_35%_78%)]">Your local pharmacy</p>
+                      <p className="text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[hsl(189_35%_86%)]">Your local pharmacy</p>
                       <p className="mt-1 font-display text-2xl">Ayush Medico</p>
                     </div>
-                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[hsl(20_72%_69%)] text-foreground">
+                    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[hsl(20_72%_69%)] text-foreground">
                       <Icon size={23} />
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 pt-5 text-sm font-semibold text-[hsl(189_35%_86%)]">
-                    <MapPin size={16} className="text-[hsl(20_72%_69%)]" />
-                    KURLA WEST · MUMBAI
-                  </div>
-                  <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-primary-foreground/15">
-                    <div className="h-full w-2/3 rounded-full bg-[hsl(20_72%_69%)]" />
-                  </div>
-                  <p className="mt-3 text-xs text-[hsl(189_35%_78%)]">Care, close to home.</p>
                 </div>
               </div>
             </article>
