@@ -4,33 +4,93 @@ export const SDF_TYPES = ["PRODUCT", "STOCK", "DRUG", "COMPANY", "CATEGORY"] as 
 export type SdfType = (typeof SDF_TYPES)[number];
 
 type ParsedRow = { recordNumber: number; values: string[]; raw: string };
-export type SdfField = { name: string; index: number; sample: string };
+export type SdfField = { name: string; index: number; sample: string; start?: number; end?: number };
+export type SdfFormat = "fixed_width" | "structured";
 export type ParsedSdf = {
   type: SdfType;
+  format: SdfFormat;
+  width: number | null;
   delimiter: string | null;
   records: ParsedRow[];
   fields: SdfField[];
   headers: string[] | null;
   mapping: Record<string, number>;
-  mappingStatus: "verified_from_header" | "review_required";
+  mappingStatus: "verified_from_header" | "verified_from_fixed_width" | "review_required";
   errors: Array<{ recordNumber: number; reason: string; excerpt: string }>;
   hash: string;
 };
 
-const aliases: Record<SdfType, Record<string, string[]>> = {
+type FixedWidthField = { name: string; start: number; end: number; mappedAs?: string };
+type FixedWidthProfile = { width: number; fields: FixedWidthField[] };
+
+const fixedWidthProfiles: Record<SdfType, FixedWidthProfile> = {
   CATEGORY: {
-    sourceId: ["id", "categoryid", "categorycode", "code", "catid"],
-    name: ["name", "category", "categoryname", "description"],
+    width: 41,
+    fields: [
+      { name: "name", start: 0, end: 35, mappedAs: "name" },
+      { name: "sourceId", start: 39, end: 41, mappedAs: "sourceId" },
+    ],
   },
   COMPANY: {
-    sourceId: ["id", "companyid", "companycode", "code", "manufacturerid"],
-    name: ["name", "company", "companyname", "manufacturer", "manufacturername"],
-    code: ["code", "companycode"],
+    width: 126,
+    fields: [
+      { name: "name", start: 0, end: 30, mappedAs: "name" },
+      { name: "code", start: 30, end: 60, mappedAs: "code" },
+      { name: "sourceId", start: 122, end: 126, mappedAs: "sourceId" },
+    ],
   },
   DRUG: {
-    sourceId: ["id", "drugid", "drugcode", "code", "genericid"],
-    name: ["name", "drug", "drugname", "generic", "genericname", "composition"],
+    width: 124,
+    fields: [
+      { name: "name", start: 0, end: 60, mappedAs: "name" },
+      { name: "flags", start: 60, end: 120 },
+      { name: "sourceId", start: 122, end: 124, mappedAs: "sourceId" },
+    ],
   },
+  PRODUCT: {
+    width: 486,
+    fields: [
+      { name: "name", start: 0, end: 74, mappedAs: "name" },
+      { name: "sourceFlag", start: 74, end: 75 },
+      { name: "companyName", start: 75, end: 105, mappedAs: "companyName" },
+      { name: "categoryName", start: 105, end: 130, mappedAs: "categoryName" },
+      { name: "drugName", start: 130, end: 190, mappedAs: "drugName" },
+      { name: "dosagePack", start: 190, end: 205, mappedAs: "dosagePack" },
+      { name: "unitCount", start: 205, end: 210 },
+      { name: "packDetail", start: 210, end: 230, mappedAs: "packDetail" },
+      { name: "legacyField230", start: 230, end: 236 },
+      { name: "legacyField236", start: 236, end: 243 },
+      { name: "legacyField243", start: 243, end: 248 },
+      { name: "legacyField248", start: 248, end: 253 },
+      { name: "legacyField253", start: 253, end: 258 },
+      { name: "legacyField258", start: 258, end: 263 },
+      { name: "legacyField263", start: 263, end: 270 },
+      { name: "flags", start: 270, end: 280 },
+      { name: "sourceId", start: 480, end: 486, mappedAs: "sourceId" },
+    ],
+  },
+  STOCK: {
+    width: 81,
+    fields: [
+      { name: "batch", start: 5, end: 20, mappedAs: "batch" },
+      { name: "quantity", start: 20, end: 25, mappedAs: "quantity" },
+      { name: "expiry", start: 25, end: 32, mappedAs: "expiry" },
+      { name: "batchQuantity", start: 32, end: 35 },
+      { name: "mrp", start: 35, end: 40, mappedAs: "mrp" },
+      { name: "cost", start: 40, end: 48, mappedAs: "cost" },
+      { name: "discount", start: 48, end: 53 },
+      { name: "priceFlag", start: 53, end: 55 },
+      { name: "salePrice", start: 55, end: 61, mappedAs: "salePrice" },
+      { name: "stockFlag", start: 61, end: 65 },
+      { name: "sourceId", start: 65, end: 75, mappedAs: "sourceId" },
+    ],
+  },
+};
+
+const aliases: Record<SdfType, Record<string, string[]>> = {
+  CATEGORY: { sourceId: ["id", "categoryid", "categorycode", "code", "catid"], name: ["name", "category", "categoryname", "description"] },
+  COMPANY: { sourceId: ["id", "companyid", "companycode", "code", "manufacturerid"], name: ["name", "company", "companyname", "manufacturer", "manufacturername"], code: ["code", "companycode"] },
+  DRUG: { sourceId: ["id", "drugid", "drugcode", "code", "genericid"], name: ["name", "drug", "drugname", "generic", "genericname", "composition"] },
   PRODUCT: {
     sourceId: ["id", "productid", "productcode", "itemid", "code", "sku"],
     name: ["name", "product", "productname", "item", "itemname", "medicine", "medicinename"],
@@ -117,20 +177,59 @@ function findMapping(type: SdfType, headers: string[] | null): Record<string, nu
   return result;
 }
 
+function fixedWidthParse(type: SdfType, lines: string[], hash: string): ParsedSdf | null {
+  const profile = fixedWidthProfiles[type];
+  const nonEmpty = lines.filter((line) => line.trim() !== "");
+  if (!nonEmpty.length || nonEmpty.some((line) => line.length !== profile.width)) return null;
+
+  const fields: SdfField[] = profile.fields.map((field, index) => ({
+    name: field.name,
+    index,
+    start: field.start,
+    end: field.end,
+    sample: nonEmpty[0].slice(field.start, field.end).trim(),
+  }));
+  const mapping: Record<string, number> = {};
+  for (const field of profile.fields) if (field.mappedAs) mapping[field.mappedAs] = field.name === "sourceId" ? fields.findIndex((item) => item.name === "sourceId") : fields.findIndex((item) => item.name === field.name);
+
+  const records = nonEmpty.map((raw, index) => ({
+    recordNumber: index + 1,
+    values: profile.fields.map((field) => raw.slice(field.start, field.end).trim()),
+    raw,
+  }));
+  return {
+    type,
+    format: "fixed_width",
+    width: profile.width,
+    delimiter: null,
+    records,
+    fields,
+    headers: null,
+    mapping,
+    mappingStatus: "verified_from_fixed_width",
+    errors: [],
+    hash,
+  };
+}
+
 export function parseSdf(fileName: string, source: Buffer | string): ParsedSdf {
   const type = detectType(fileName);
-  const text = typeof source === "string" ? source : source.toString("utf8").replace(/^\uFEFF/, "");
+  const text = typeof source === "string" ? source.replace(/^\uFEFF/, "") : source.toString("ascii").replace(/^\uFEFF/, "");
   const hash = crypto.createHash("sha256").update(text).digest("hex");
-  const lines = text.split(/\r\n|\n|\r/).filter((line) => line.trim() !== "");
-  const delimiter = detectDelimiter(lines);
-  const firstValues = delimiter ? splitStructuredRecord(lines[0], delimiter) : [lines[0].trim()];
+  const lines = text.split(/\r\n|\n|\r/);
+  const fixed = fixedWidthParse(type, lines, hash);
+  if (fixed) return fixed;
+
+  const dataLines = lines.filter((line) => line.trim() !== "");
+  const delimiter = detectDelimiter(dataLines);
+  const firstValues = delimiter ? splitStructuredRecord(dataLines[0], delimiter) : [dataLines[0]?.trim() ?? ""];
   const headers = delimiter && looksLikeHeader(firstValues) ? firstValues : null;
-  const dataLines = headers ? lines.slice(1) : lines;
+  const structuredLines = headers ? dataLines.slice(1) : dataLines;
   const records: ParsedRow[] = [];
   const errors: ParsedSdf["errors"] = [];
   let expectedWidth: number | null = headers?.length ?? null;
-  for (let index = 0; index < dataLines.length; index += 1) {
-    const raw = dataLines[index];
+  for (let index = 0; index < structuredLines.length; index += 1) {
+    const raw = structuredLines[index];
     const values = delimiter ? splitStructuredRecord(raw, delimiter) : [raw.trim()];
     expectedWidth ??= values.length;
     if (delimiter && values.length !== expectedWidth) {
@@ -147,6 +246,8 @@ export function parseSdf(fileName: string, source: Buffer | string): ParsedSdf {
   }));
   return {
     type,
+    format: "structured",
+    width: null,
     delimiter,
     records,
     fields,
@@ -168,7 +269,7 @@ export function previewOf(parsed: ParsedSdf, limit = 10) {
 }
 
 export function mappingFor(type: SdfType) {
-  return aliases[type];
+  return fixedWidthProfiles[type] ?? aliases[type];
 }
 
 export { detectType };

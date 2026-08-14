@@ -73,8 +73,14 @@ export const productsTable = pgTable("catalog_products", {
   drugId: integer("drug_id").references(() => drugsTable.id, {
     onDelete: "set null",
   }),
+  sourceCompanyName: text("source_company_name"),
+  sourceCategoryName: text("source_category_name"),
+  sourceDrugName: text("source_drug_name"),
   dosageForm: text("dosage_form"),
   packSize: text("pack_size"),
+  dosagePack: text("dosage_pack"),
+  unitCount: text("unit_count"),
+  packDetail: text("pack_detail"),
   sourceCategory: text("source_category"),
   sourceData: jsonb("source_data").$type<Record<string, unknown>>().notNull().default({}),
   sourceHash: text("source_hash"),
@@ -112,15 +118,21 @@ export const stockBatchesTable = pgTable("catalog_stock_batches", {
   batchNumber: text("batch_number"),
   expiryDate: date("expiry_date", { mode: "string" }),
   quantity: numeric("quantity"),
+  batchQuantity: numeric("batch_quantity"),
   mrp: numeric("mrp"),
   salePrice: numeric("sale_price"),
   cost: numeric("cost"),
+  discount: numeric("discount"),
+  priceFlag: text("price_flag"),
+  stockFlag: text("stock_flag"),
+  linkStatus: text("link_status").notNull().default("unlinked_no_product_reference"),
   sourceData: jsonb("source_data").$type<Record<string, unknown>>().notNull().default({}),
   lastSyncedAt: timestamp("last_synced_at", { withTimezone: true }).notNull().defaultNow(),
   ...auditColumns,
 }, (table) => [
   uniqueIndex("catalog_stock_source_id_idx").on(table.sourceStockId),
   index("catalog_stock_product_idx").on(table.productId),
+  index("catalog_stock_link_status_idx").on(table.linkStatus),
 ]);
 
 export const importJobsTable = pgTable("catalog_import_jobs", {
