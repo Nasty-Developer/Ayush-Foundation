@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: customer
+    description: Customer-facing request and inquiry operations
+  - name: admin
+    description: Protected administrator operations
 paths:
   /healthz:
     get:
@@ -24,7 +28,318 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /medicine-requests:
+    post:
+      operationId: createMedicineRequest
+      tags: [customer]
+      summary: Submit a medicine availability request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicineRequestInput"
+      responses:
+        "201":
+          description: Request received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResponse"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/medicine-requests:
+    get:
+      operationId: listAdminMedicineRequests
+      tags: [admin]
+      summary: List medicine availability requests
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Status"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Paginated medicine requests
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicineRequestListResponse"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createAdminMedicineRequest
+      tags: [admin]
+      summary: Create a medicine request from an administrator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicineRequestInput"
+      responses:
+        "201":
+          description: Request created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicineRequest"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/medicine-requests/{id}:
+    get:
+      operationId: getAdminMedicineRequest
+      tags: [admin]
+      summary: Get a medicine availability request
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: Medicine request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicineRequest"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateAdminMedicineRequest
+      tags: [admin]
+      summary: Update a medicine availability request
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MedicineRequestUpdate"
+      responses:
+        "200":
+          description: Updated medicine request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MedicineRequest"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /inquiries:
+    post:
+      operationId: createInquiry
+      tags: [customer]
+      summary: Submit a customer inquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InquiryInput"
+      responses:
+        "201":
+          description: Inquiry received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmissionResponse"
+        "400":
+          description: Invalid inquiry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/inquiries:
+    get:
+      operationId: listAdminInquiries
+      tags: [admin]
+      summary: List customer inquiries
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Status"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Paginated customer inquiries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InquiryListResponse"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createAdminInquiry
+      tags: [admin]
+      summary: Create an inquiry from an administrator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InquiryInput"
+      responses:
+        "201":
+          description: Inquiry created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inquiry"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/inquiries/{id}:
+    get:
+      operationId: getAdminInquiry
+      tags: [admin]
+      summary: Get a customer inquiry
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+      responses:
+        "200":
+          description: Customer inquiry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inquiry"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Inquiry not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateAdminInquiry
+      tags: [admin]
+      summary: Update a customer inquiry
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InquiryUpdate"
+      responses:
+        "200":
+          description: Updated customer inquiry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Inquiry"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Inquiry not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/customer-engagement:
+    get:
+      operationId: getCustomerEngagementSummary
+      tags: [admin]
+      summary: Get customer engagement counts
+      responses:
+        "200":
+          description: Customer engagement summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerEngagementSummary"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
+  parameters:
+    RequestId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: number
+        minimum: 1
+    Search:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 120
+    Status:
+      name: status
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 40
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: number
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: number
+        minimum: 1
+        maximum: 100
+        default: 25
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +348,164 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    SubmissionResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+    MedicineRequestInput:
+      type: object
+      properties:
+        customerName:
+          type: string
+          minLength: 2
+          maxLength: 120
+        phone:
+          type: string
+          minLength: 7
+          maxLength: 30
+        medicineName:
+          type: string
+          minLength: 2
+          maxLength: 160
+        quantity:
+          type: number
+          minimum: 1
+          maximum: 10000
+        message:
+          type: string
+          maxLength: 2000
+      required:
+        - customerName
+        - phone
+        - medicineName
+        - quantity
+    MedicineRequestUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [NEW, REVIEWING, AVAILABLE, PARTIALLY_AVAILABLE, UNAVAILABLE, CONTACTED, RESOLVED, CANCELLED]
+        adminNotes:
+          type: string
+          maxLength: 4000
+    MedicineRequest:
+      allOf:
+        - $ref: "#/components/schemas/MedicineRequestInput"
+        - type: object
+          properties:
+            id:
+              type: number
+            status:
+              type: string
+              enum: [NEW, REVIEWING, AVAILABLE, PARTIALLY_AVAILABLE, UNAVAILABLE, CONTACTED, RESOLVED, CANCELLED]
+            adminNotes:
+              type: ["string", "null"]
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+          required: [id, status, createdAt, updatedAt]
+    MedicineRequestListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MedicineRequest"
+        total:
+          type: number
+        page:
+          type: number
+        pageSize:
+          type: number
+      required: [items, total, page, pageSize]
+    InquiryInput:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 2
+          maxLength: 120
+        phone:
+          type: string
+          minLength: 7
+          maxLength: 30
+        email:
+          type: ["string", "null"]
+          maxLength: 254
+        subject:
+          type: string
+          minLength: 2
+          maxLength: 160
+        message:
+          type: string
+          minLength: 2
+          maxLength: 4000
+      required: [name, phone, subject, message]
+    InquiryUpdate:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [NEW, READ, REPLIED, RESOLVED, ARCHIVED]
+        adminNotes:
+          type: string
+          maxLength: 4000
+    Inquiry:
+      allOf:
+        - $ref: "#/components/schemas/InquiryInput"
+        - type: object
+          properties:
+            id:
+              type: number
+            status:
+              type: string
+              enum: [NEW, READ, REPLIED, RESOLVED, ARCHIVED]
+            adminNotes:
+              type: ["string", "null"]
+            createdAt:
+              type: string
+              format: date-time
+            updatedAt:
+              type: string
+              format: date-time
+          required: [id, status, createdAt, updatedAt]
+    InquiryListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Inquiry"
+        total:
+          type: number
+        page:
+          type: number
+        pageSize:
+          type: number
+      required: [items, total, page, pageSize]
+    CustomerEngagementSummary:
+      type: object
+      properties:
+        newMedicineRequests:
+          type: number
+        newInquiries:
+          type: number
+        totalMedicineRequests:
+          type: number
+        totalInquiries:
+          type: number
+      required: [newMedicineRequests, newInquiries, totalMedicineRequests, totalInquiries]
 
