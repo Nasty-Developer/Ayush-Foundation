@@ -64,9 +64,15 @@ export const productsTable = pgTable("catalog_products", {
   sourceProductId: text("source_product_id").notNull(),
   productName: text("product_name").notNull(),
   normalizedProductName: text("normalized_product_name").notNull(),
-  companyId: integer("company_id"),
-  categoryId: integer("category_id"),
-  drugId: integer("drug_id"),
+  companyId: integer("company_id").references(() => companiesTable.id, {
+    onDelete: "set null",
+  }),
+  categoryId: integer("category_id").references(() => categoriesTable.id, {
+    onDelete: "set null",
+  }),
+  drugId: integer("drug_id").references(() => drugsTable.id, {
+    onDelete: "set null",
+  }),
   dosageForm: text("dosage_form"),
   packSize: text("pack_size"),
   sourceCategory: text("source_category"),
@@ -100,7 +106,9 @@ export const productOverridesTable = pgTable("catalog_product_overrides", {
 export const stockBatchesTable = pgTable("catalog_stock_batches", {
   id: serial("id").primaryKey(),
   sourceStockId: text("source_stock_id").notNull(),
-  productId: integer("product_id"),
+  productId: integer("product_id").references(() => productsTable.id, {
+    onDelete: "cascade",
+  }),
   batchNumber: text("batch_number"),
   expiryDate: date("expiry_date", { mode: "string" }),
   quantity: numeric("quantity"),

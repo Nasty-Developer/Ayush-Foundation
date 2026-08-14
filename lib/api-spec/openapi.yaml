@@ -10,6 +10,10 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: catalog
+    description: Public medicine catalogue operations
+  - name: imports
+    description: Protected SDF inventory import operations
 paths:
   /healthz:
     get:
@@ -24,7 +28,226 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /catalog/categories:
+    get:
+      operationId: listCatalogCategories
+      tags: [catalog]
+      summary: List active medicine categories
+      responses:
+        "200":
+          description: Active categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CatalogCategory"
+  /catalog/products:
+    get:
+      operationId: listCatalogProducts
+      tags: [catalog]
+      summary: Search the PostgreSQL medicine catalogue
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Category"
+        - $ref: "#/components/parameters/Audience"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Paginated medicine products
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogProductsResponse"
+  /catalog/stats:
+    get:
+      operationId: getCatalogStats
+      tags: [catalog]
+      summary: Get live catalogue counts
+      responses:
+        "200":
+          description: Catalogue summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogStats"
+  /catalog/imports:
+    get:
+      operationId: listCatalogImports
+      tags: [imports]
+      summary: List recent SDF import jobs and files
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Recent import history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogImportsResponse"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /catalog/imports/{id}:
+    get:
+      operationId: getCatalogImport
+      tags: [imports]
+      summary: Get an import job with files and errors
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ImportId"
+      responses:
+        "200":
+          description: Import details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogImportDetails"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Import job not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /catalog/imports/upload:
+    post:
+      operationId: uploadCatalogImportFile
+      tags: [imports]
+      summary: Upload one SDF file for preview and validation
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: x-file-name
+          in: header
+          required: true
+          schema:
+            type: string
+        - name: x-import-job-id
+          in: header
+          required: false
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+          text/plain:
+            schema:
+              type: string
+              format: binary
+      responses:
+        "201":
+          description: File preview and validation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadCatalogImportResponse"
+        "400":
+          description: Invalid upload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /catalog/imports/{id}/sync:
+    post:
+      operationId: syncCatalogImport
+      tags: [imports]
+      summary: Validate and import all files in an import job
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ImportId"
+      responses:
+        "200":
+          description: Completed import summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncCatalogImportResponse"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "422":
+          description: Validation or import failure
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
+  parameters:
+    Search:
+      name: q
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 120
+    Category:
+      name: category
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 120
+    Audience:
+      name: audience
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [general, veterinary]
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 48
+        default: 12
+    ImportId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: FirebaseIdToken
   schemas:
     HealthStatus:
       type: object
@@ -33,4 +256,213 @@ components:
           type: string
       required:
         - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    CatalogCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        active:
+          type: boolean
+      required: [id, name, active]
+    CatalogProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+        sourceProductId:
+          type: string
+        name:
+          type: string
+        company:
+          type: ["string", "null"]
+        drug:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        categoryDisplayName:
+          type: ["string", "null"]
+        dosageForm:
+          type: ["string", "null"]
+        packSize:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        salePrice:
+          type: ["string", "null"]
+        mrp:
+          type: ["string", "null"]
+        quantity:
+          type: ["string", "null"]
+      required: [id, sourceProductId, name]
+    CatalogProductsResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogProduct"
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+        totalPages:
+          type: integer
+      required: [items, page, pageSize, total, totalPages]
+    CatalogStats:
+      type: object
+      properties:
+        products:
+          type: integer
+        categories:
+          type: integer
+        companies:
+          type: integer
+        drugs:
+          type: integer
+        stockRecords:
+          type: integer
+        veterinaryProducts:
+          type: integer
+        generalProducts:
+          type: integer
+      required: [products, categories, companies, drugs, stockRecords, veterinaryProducts, generalProducts]
+    CatalogImportJob:
+      type: object
+      properties:
+        id:
+          type: integer
+        status:
+          type: string
+        startedAt:
+          type: ["string", "null"]
+          format: date-time
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+        recordsDetected:
+          type: integer
+        recordsImported:
+          type: integer
+        recordsUpdated:
+          type: integer
+        recordsSkipped:
+          type: integer
+        errorCount:
+          type: integer
+        durationMs:
+          type: ["integer", "null"]
+        summary:
+          type: ["object", "null"]
+          additionalProperties: true
+      required: [id, status, recordsDetected, recordsImported, recordsUpdated, recordsSkipped, errorCount]
+    CatalogImportFile:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobId:
+          type: integer
+        fileType:
+          type: string
+        fileName:
+          type: string
+        fileSize:
+          type: integer
+        recordCount:
+          type: integer
+        mappingStatus:
+          type: string
+        mapping:
+          type: ["object", "null"]
+          additionalProperties: true
+        preview:
+          type: ["array", "null"]
+          items:
+            type: object
+            additionalProperties: true
+      required: [id, jobId, fileType, fileName, fileSize, recordCount, mappingStatus]
+    CatalogImportError:
+      type: object
+      properties:
+        id:
+          type: integer
+        jobId:
+          type: integer
+        recordNumber:
+          type: ["integer", "null"]
+        reason:
+          type: string
+        sourceIdentifier:
+          type: ["string", "null"]
+      required: [id, jobId, reason]
+    CatalogImportsResponse:
+      type: object
+      properties:
+        jobs:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogImportJob"
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogImportFile"
+      required: [jobs, files]
+    CatalogImportDetails:
+      type: object
+      properties:
+        job:
+          $ref: "#/components/schemas/CatalogImportJob"
+        files:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogImportFile"
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogImportError"
+      required: [job, files, errors]
+    UploadCatalogImportResponse:
+      type: object
+      properties:
+        jobId:
+          type: integer
+        fileName:
+          type: string
+        fileType:
+          type: string
+        fileSize:
+          type: integer
+        recordCount:
+          type: integer
+        mappingStatus:
+          type: string
+        delimiter:
+          type: ["string", "null"]
+      required: [jobId, fileName, fileType, fileSize, recordCount, mappingStatus]
+    SyncCatalogImportResponse:
+      type: object
+      properties:
+        jobId:
+          type: integer
+        status:
+          type: string
+        imported:
+          type: integer
+        updated:
+          type: integer
+        skipped:
+          type: integer
+      required: [jobId, status, imported, updated, skipped]
 

@@ -21,24 +21,24 @@ async function upsertMaster(parsed: ParsedSdf, jobId: number) {
   let imported = 0;
   let updated = 0;
   for (const row of parsed.records) {
-    const sourceId = value(row, parsed, "sourceId") || `${parsed.type.toLowerCase()}-${row.recordNumber}`;
+    const sourceId = value(row, parsed, "sourceId");
     const name = value(row, parsed, "name");
-    if (!name) {
-      errors.push({ recordNumber: row.recordNumber, reason: "The source record has no mapped name." });
+    if (!sourceId || !name) {
+      errors.push({ recordNumber: row.recordNumber, reason: "The source record must include a mapped source ID and name.", sourceIdentifier: sourceId || undefined });
       continue;
     }
     if (parsed.type === "CATEGORY") {
-      const existing = await db.select({ id: categoriesTable.id }).from(categoriesTable).where(eq(categoriesTable.normalizedName, normalized(name))).limit(1);
-      await db.insert(categoriesTable).values({ sourceCategoryId: sourceId, name, normalizedName: normalized(name), displayName: name }).onConflictDoUpdate({ target: categoriesTable.normalizedName, set: { sourceCategoryId: sourceId, name, updatedAt: new Date(), active: true } });
+      const existing = await db.select({ id: categoriesTable.id }).from(categoriesTable).where(eq(categoriesTable.sourceCategoryId, sourceId)).limit(1);
+      await db.insert(categoriesTable).values({ sourceCategoryId: sourceId, name, normalizedName: normalized(name), displayName: name }).onConflictDoUpdate({ target: categoriesTable.sourceCategoryId, set: { name, normalizedName: normalized(name), updatedAt: new Date(), active: true } });
       existing.length ? updated += 1 : imported += 1;
     } else if (parsed.type === "COMPANY") {
       const code = value(row, parsed, "code") || null;
-      const existing = await db.select({ id: companiesTable.id }).from(companiesTable).where(eq(companiesTable.normalizedName, normalized(name))).limit(1);
-      await db.insert(companiesTable).values({ sourceCompanyId: sourceId, name, normalizedName: normalized(name), code }).onConflictDoUpdate({ target: companiesTable.normalizedName, set: { sourceCompanyId: sourceId, name, code, updatedAt: new Date() } });
+      const existing = await db.select({ id: companiesTable.id }).from(companiesTable).where(eq(companiesTable.sourceCompanyId, sourceId)).limit(1);
+      await db.insert(companiesTable).values({ sourceCompanyId: sourceId, name, normalizedName: normalized(name), code }).onConflictDoUpdate({ target: companiesTable.sourceCompanyId, set: { name, normalizedName: normalized(name), code, updatedAt: new Date() } });
       existing.length ? updated += 1 : imported += 1;
     } else if (parsed.type === "DRUG") {
-      const existing = await db.select({ id: drugsTable.id }).from(drugsTable).where(eq(drugsTable.normalizedDrugName, normalized(name))).limit(1);
-      await db.insert(drugsTable).values({ sourceDrugId: sourceId, drugName: name, normalizedDrugName: normalized(name), sourceFlags: {} }).onConflictDoUpdate({ target: drugsTable.normalizedDrugName, set: { sourceDrugId: sourceId, drugName: name, updatedAt: new Date() } });
+      const existing = await db.select({ id: drugsTable.id }).from(drugsTable).where(eq(drugsTable.sourceDrugId, sourceId)).limit(1);
+      await db.insert(drugsTable).values({ sourceDrugId: sourceId, drugName: name, normalizedDrugName: normalized(name), sourceFlags: {} }).onConflictDoUpdate({ target: drugsTable.sourceDrugId, set: { drugName: name, normalizedDrugName: normalized(name), updatedAt: new Date() } });
       existing.length ? updated += 1 : imported += 1;
     }
   }
@@ -161,6 +161,7 @@ export async function syncImportJob(jobId: number) {
   const blocked = parsedFiles.filter(({ parsed }) => parsed.mappingStatus !== "verified_from_header");
   if (blocked.length) throw new Error(`Cannot synchronize ${blocked.map(({ file }) => file.fileName).join(", ")} until its fixed-width/structured field mapping is verified. Upload a file with its source header or provide the mapping configuration.`);
   await db.update(importJobsTable).set({ status: "importing", startedAt: new Date() }).where(eq(importJobsTable.id, jobId));
+  const startedAt = Date.now();
   const summary = { imported: 0, updated: 0, skipped: 0 };
   for (const { parsed } of parsedFiles) {
     const result = parsed.type === "PRODUCT" ? await syncProducts(parsed, jobId) : parsed.type === "STOCK" ? await syncStock(parsed, jobId) : await upsertMaster(parsed, jobId);
@@ -168,6 +169,6 @@ export async function syncImportJob(jobId: number) {
     summary.updated += result.updated;
     summary.skipped += result.skipped;
   }
-  await db.update(importJobsTable).set({ status: "completed", completedAt: new Date(), recordsImported: summary.imported, recordsUpdated: summary.updated, recordsSkipped: summary.skipped, errorCount: summary.skipped, summary }).where(eq(importJobsTable.id, jobId));
+  await db.update(importJobsTable).set({ status: "completed", completedAt: new Date(), recordsImported: summary.imported, recordsUpdated: summary.updated, recordsSkipped: summary.skipped, errorCount: summary.skipped, durationMs: Date.now() - startedAt, summary }).where(eq(importJobsTable.id, jobId));
   return summary;
 }
