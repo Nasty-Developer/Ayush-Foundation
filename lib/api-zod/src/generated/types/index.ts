@@ -6,17 +6,33 @@
  * OpenAPI spec version: 0.1.0
  */
 
+export * from './catalogueProduct';
+export * from './catalogueResponse';
+export * from './categoryParameter';
+export * from './companyIdParameter';
 export * from './customerEngagementSummary';
 export * from './errorResponse';
 export * from './healthStatus';
+export * from './importError';
+export * from './importErrorListResponse';
+export * from './importRun';
+export * from './importRunListResponse';
+export * from './importRunStatus';
 export * from './inquiry';
 export * from './inquiryInput';
 export * from './inquiryListResponse';
 export * from './inquiryStatus';
 export * from './inquiryUpdate';
 export * from './inquiryUpdateStatus';
+export * from './inventoryCategory';
+export * from './inventoryFile';
+export * from './inventoryFilesUpload';
+export * from './inventorySummary';
 export * from './listAdminInquiriesParams';
 export * from './listAdminMedicineRequestsParams';
+export * from './listInventoryImportErrorsParams';
+export * from './listInventoryImportRunsParams';
+export * from './listInventoryProductsParams';
 export * from './medicineRequest';
 export * from './medicineRequestInput';
 export * from './medicineRequestListResponse';
@@ -25,6 +41,8 @@ export * from './medicineRequestUpdate';
 export * from './medicineRequestUpdateStatus';
 export * from './pageParameter';
 export * from './pageSizeParameter';
+export * from './productOverrideInput';
+export * from './productTypeParameter';
 export * from './searchParameter';
 export * from './statusParameter';
 export * from './submissionResponse';

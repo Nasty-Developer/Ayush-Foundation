@@ -39,7 +39,7 @@ export const CreateMedicineRequestBody = zod.object({
   "customerName": zod.string().min(createMedicineRequestBodyCustomerNameMin).max(createMedicineRequestBodyCustomerNameMax),
   "phone": zod.string().min(createMedicineRequestBodyPhoneMin).max(createMedicineRequestBodyPhoneMax),
   "medicineName": zod.string().min(createMedicineRequestBodyMedicineNameMin).max(createMedicineRequestBodyMedicineNameMax),
-  "quantity": zod.int().min(1).max(createMedicineRequestBodyQuantityMax),
+  "quantity": zod.number().min(1).max(createMedicineRequestBodyQuantityMax),
   "message": zod.string().max(createMedicineRequestBodyMessageMax).optional()
 })
 
@@ -65,8 +65,8 @@ export const listAdminMedicineRequestsQueryPageSizeMax = 100;
 export const ListAdminMedicineRequestsQueryParams = zod.object({
   "search": zod.coerce.string().max(listAdminMedicineRequestsQuerySearchMax).optional(),
   "status": zod.coerce.string().max(listAdminMedicineRequestsQueryStatusMax).optional(),
-  "page": zod.coerce.number().int().min(1).default(listAdminMedicineRequestsQueryPageDefault),
-  "pageSize": zod.coerce.number().int().min(1).max(listAdminMedicineRequestsQueryPageSizeMax).default(listAdminMedicineRequestsQueryPageSizeDefault)
+  "page": zod.coerce.number().min(1).default(listAdminMedicineRequestsQueryPageDefault),
+  "pageSize": zod.coerce.number().min(1).max(listAdminMedicineRequestsQueryPageSizeMax).default(listAdminMedicineRequestsQueryPageSizeDefault)
 })
 
 export const listAdminMedicineRequestsResponseItemsItemOneCustomerNameMin = 2;
@@ -89,18 +89,18 @@ export const ListAdminMedicineRequestsResponse = zod.object({
   "customerName": zod.string().min(listAdminMedicineRequestsResponseItemsItemOneCustomerNameMin).max(listAdminMedicineRequestsResponseItemsItemOneCustomerNameMax),
   "phone": zod.string().min(listAdminMedicineRequestsResponseItemsItemOnePhoneMin).max(listAdminMedicineRequestsResponseItemsItemOnePhoneMax),
   "medicineName": zod.string().min(listAdminMedicineRequestsResponseItemsItemOneMedicineNameMin).max(listAdminMedicineRequestsResponseItemsItemOneMedicineNameMax),
-  "quantity": zod.int().min(1).max(listAdminMedicineRequestsResponseItemsItemOneQuantityMax),
+  "quantity": zod.number().min(1).max(listAdminMedicineRequestsResponseItemsItemOneQuantityMax),
   "message": zod.string().max(listAdminMedicineRequestsResponseItemsItemOneMessageMax).optional()
 }).and(zod.object({
-  "id": zod.int(),
+  "id": zod.number(),
   "status": zod.enum(['NEW', 'REVIEWING', 'AVAILABLE', 'PARTIALLY_AVAILABLE', 'UNAVAILABLE', 'CONTACTED', 'RESOLVED', 'CANCELLED']),
   "adminNotes": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }))),
-  "total": zod.int(),
-  "page": zod.int(),
-  "pageSize": zod.int()
+  "total": zod.number(),
+  "page": zod.number(),
+  "pageSize": zod.number()
 })
 
 
@@ -126,7 +126,7 @@ export const CreateAdminMedicineRequestBody = zod.object({
   "customerName": zod.string().min(createAdminMedicineRequestBodyCustomerNameMin).max(createAdminMedicineRequestBodyCustomerNameMax),
   "phone": zod.string().min(createAdminMedicineRequestBodyPhoneMin).max(createAdminMedicineRequestBodyPhoneMax),
   "medicineName": zod.string().min(createAdminMedicineRequestBodyMedicineNameMin).max(createAdminMedicineRequestBodyMedicineNameMax),
-  "quantity": zod.int().min(1).max(createAdminMedicineRequestBodyQuantityMax),
+  "quantity": zod.number().min(1).max(createAdminMedicineRequestBodyQuantityMax),
   "message": zod.string().max(createAdminMedicineRequestBodyMessageMax).optional()
 })
 
@@ -149,10 +149,10 @@ export const CreateAdminMedicineRequestResponse = zod.object({
   "customerName": zod.string().min(createAdminMedicineRequestResponseOneCustomerNameMin).max(createAdminMedicineRequestResponseOneCustomerNameMax),
   "phone": zod.string().min(createAdminMedicineRequestResponseOnePhoneMin).max(createAdminMedicineRequestResponseOnePhoneMax),
   "medicineName": zod.string().min(createAdminMedicineRequestResponseOneMedicineNameMin).max(createAdminMedicineRequestResponseOneMedicineNameMax),
-  "quantity": zod.int().min(1).max(createAdminMedicineRequestResponseOneQuantityMax),
+  "quantity": zod.number().min(1).max(createAdminMedicineRequestResponseOneQuantityMax),
   "message": zod.string().max(createAdminMedicineRequestResponseOneMessageMax).optional()
 }).and(zod.object({
-  "id": zod.int(),
+  "id": zod.number(),
   "status": zod.enum(['NEW', 'REVIEWING', 'AVAILABLE', 'PARTIALLY_AVAILABLE', 'UNAVAILABLE', 'CONTACTED', 'RESOLVED', 'CANCELLED']),
   "adminNotes": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
@@ -167,7 +167,7 @@ export const CreateAdminMedicineRequestResponse = zod.object({
 
 
 export const GetAdminMedicineRequestParams = zod.object({
-  "id": zod.coerce.number().int().min(1)
+  "id": zod.coerce.number().min(1)
 })
 
 export const getAdminMedicineRequestResponseOneCustomerNameMin = 2;
@@ -189,10 +189,10 @@ export const GetAdminMedicineRequestResponse = zod.object({
   "customerName": zod.string().min(getAdminMedicineRequestResponseOneCustomerNameMin).max(getAdminMedicineRequestResponseOneCustomerNameMax),
   "phone": zod.string().min(getAdminMedicineRequestResponseOnePhoneMin).max(getAdminMedicineRequestResponseOnePhoneMax),
   "medicineName": zod.string().min(getAdminMedicineRequestResponseOneMedicineNameMin).max(getAdminMedicineRequestResponseOneMedicineNameMax),
-  "quantity": zod.int().min(1).max(getAdminMedicineRequestResponseOneQuantityMax),
+  "quantity": zod.number().min(1).max(getAdminMedicineRequestResponseOneQuantityMax),
   "message": zod.string().max(getAdminMedicineRequestResponseOneMessageMax).optional()
 }).and(zod.object({
-  "id": zod.int(),
+  "id": zod.number(),
   "status": zod.enum(['NEW', 'REVIEWING', 'AVAILABLE', 'PARTIALLY_AVAILABLE', 'UNAVAILABLE', 'CONTACTED', 'RESOLVED', 'CANCELLED']),
   "adminNotes": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
@@ -207,7 +207,7 @@ export const GetAdminMedicineRequestResponse = zod.object({
 
 
 export const UpdateAdminMedicineRequestParams = zod.object({
-  "id": zod.coerce.number().int().min(1)
+  "id": zod.coerce.number().min(1)
 })
 
 export const updateAdminMedicineRequestBodyAdminNotesMax = 4000;
@@ -238,10 +238,10 @@ export const UpdateAdminMedicineRequestResponse = zod.object({
   "customerName": zod.string().min(updateAdminMedicineRequestResponseOneCustomerNameMin).max(updateAdminMedicineRequestResponseOneCustomerNameMax),
   "phone": zod.string().min(updateAdminMedicineRequestResponseOnePhoneMin).max(updateAdminMedicineRequestResponseOnePhoneMax),
   "medicineName": zod.string().min(updateAdminMedicineRequestResponseOneMedicineNameMin).max(updateAdminMedicineRequestResponseOneMedicineNameMax),
-  "quantity": zod.int().min(1).max(updateAdminMedicineRequestResponseOneQuantityMax),
+  "quantity": zod.number().min(1).max(updateAdminMedicineRequestResponseOneQuantityMax),
   "message": zod.string().max(updateAdminMedicineRequestResponseOneMessageMax).optional()
 }).and(zod.object({
-  "id": zod.int(),
+  "id": zod.number(),
   "status": zod.enum(['NEW', 'REVIEWING', 'AVAILABLE', 'PARTIALLY_AVAILABLE', 'UNAVAILABLE', 'CONTACTED', 'RESOLVED', 'CANCELLED']),
   "adminNotes": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
@@ -271,7 +271,7 @@ export const createInquiryBodyMessageMax = 4000;
 export const CreateInquiryBody = zod.object({
   "name": zod.string().min(createInquiryBodyNameMin).max(createInquiryBodyNameMax),
   "phone": zod.string().min(createInquiryBodyPhoneMin).max(createInquiryBodyPhoneMax),
-  "email": zod.email().max(createInquiryBodyEmailMax).nullish(),
+  "email": zod.string().max(createInquiryBodyEmailMax).nullish(),
   "subject": zod.string().min(createInquiryBodySubjectMin).max(createInquiryBodySubjectMax),
   "message": zod.string().min(createInquiryBodyMessageMin).max(createInquiryBodyMessageMax)
 })
@@ -298,8 +298,8 @@ export const listAdminInquiriesQueryPageSizeMax = 100;
 export const ListAdminInquiriesQueryParams = zod.object({
   "search": zod.coerce.string().max(listAdminInquiriesQuerySearchMax).optional(),
   "status": zod.coerce.string().max(listAdminInquiriesQueryStatusMax).optional(),
-  "page": zod.coerce.number().int().min(1).default(listAdminInquiriesQueryPageDefault),
-  "pageSize": zod.coerce.number().int().min(1).max(listAdminInquiriesQueryPageSizeMax).default(listAdminInquiriesQueryPageSizeDefault)
+  "page": zod.coerce.number().min(1).default(listAdminInquiriesQueryPageDefault),
+  "pageSize": zod.coerce.number().min(1).max(listAdminInquiriesQueryPageSizeMax).default(listAdminInquiriesQueryPageSizeDefault)
 })
 
 export const listAdminInquiriesResponseItemsItemOneNameMin = 2;
@@ -322,19 +322,19 @@ export const ListAdminInquiriesResponse = zod.object({
   "items": zod.array(zod.object({
   "name": zod.string().min(listAdminInquiriesResponseItemsItemOneNameMin).max(listAdminInquiriesResponseItemsItemOneNameMax),
   "phone": zod.string().min(listAdminInquiriesResponseItemsItemOnePhoneMin).max(listAdminInquiriesResponseItemsItemOnePhoneMax),
-  "email": zod.email().max(listAdminInquiriesResponseItemsItemOneEmailMax).nullish(),
+  "email": zod.string().max(listAdminInquiriesResponseItemsItemOneEmailMax).nullish(),
   "subject": zod.string().min(listAdminInquiriesResponseItemsItemOneSubjectMin).max(listAdminInquiriesResponseItemsItemOneSubjectMax),
   "message": zod.string().min(listAdminInquiriesResponseItemsItemOneMessageMin).max(listAdminInquiriesResponseItemsItemOneMessageMax)
 }).and(zod.object({
-  "id": zod.int(),
+  "id": zod.number(),
   "status": zod.enum(['NEW', 'READ', 'REPLIED', 'RESOLVED', 'ARCHIVED']),
   "adminNotes": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
   "updatedAt": zod.coerce.date()
 }))),
-  "total": zod.int(),
-  "page": zod.int(),
-  "pageSize": zod.int()
+  "total": zod.number(),
+  "page": zod.number(),
+  "pageSize": zod.number()
 })
 
 
@@ -360,7 +360,7 @@ export const createAdminInquiryBodyMessageMax = 4000;
 export const CreateAdminInquiryBody = zod.object({
   "name": zod.string().min(createAdminInquiryBodyNameMin).max(createAdminInquiryBodyNameMax),
   "phone": zod.string().min(createAdminInquiryBodyPhoneMin).max(createAdminInquiryBodyPhoneMax),
-  "email": zod.email().max(createAdminInquiryBodyEmailMax).nullish(),
+  "email": zod.string().max(createAdminInquiryBodyEmailMax).nullish(),
   "subject": zod.string().min(createAdminInquiryBodySubjectMin).max(createAdminInquiryBodySubjectMax),
   "message": zod.string().min(createAdminInquiryBodyMessageMin).max(createAdminInquiryBodyMessageMax)
 })
@@ -384,11 +384,11 @@ export const createAdminInquiryResponseOneMessageMax = 4000;
 export const CreateAdminInquiryResponse = zod.object({
   "name": zod.string().min(createAdminInquiryResponseOneNameMin).max(createAdminInquiryResponseOneNameMax),
   "phone": zod.string().min(createAdminInquiryResponseOnePhoneMin).max(createAdminInquiryResponseOnePhoneMax),
-  "email": zod.email().max(createAdminInquiryResponseOneEmailMax).nullish(),
+  "email": zod.string().max(createAdminInquiryResponseOneEmailMax).nullish(),
   "subject": zod.string().min(createAdminInquiryResponseOneSubjectMin).max(createAdminInquiryResponseOneSubjectMax),
   "message": zod.string().min(createAdminInquiryResponseOneMessageMin).max(createAdminInquiryResponseOneMessageMax)
 }).and(zod.object({
-  "id": zod.int(),
+  "id": zod.number(),
   "status": zod.enum(['NEW', 'READ', 'REPLIED', 'RESOLVED', 'ARCHIVED']),
   "adminNotes": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
@@ -403,7 +403,7 @@ export const CreateAdminInquiryResponse = zod.object({
 
 
 export const GetAdminInquiryParams = zod.object({
-  "id": zod.coerce.number().int().min(1)
+  "id": zod.coerce.number().min(1)
 })
 
 export const getAdminInquiryResponseOneNameMin = 2;
@@ -425,11 +425,11 @@ export const getAdminInquiryResponseOneMessageMax = 4000;
 export const GetAdminInquiryResponse = zod.object({
   "name": zod.string().min(getAdminInquiryResponseOneNameMin).max(getAdminInquiryResponseOneNameMax),
   "phone": zod.string().min(getAdminInquiryResponseOnePhoneMin).max(getAdminInquiryResponseOnePhoneMax),
-  "email": zod.email().max(getAdminInquiryResponseOneEmailMax).nullish(),
+  "email": zod.string().max(getAdminInquiryResponseOneEmailMax).nullish(),
   "subject": zod.string().min(getAdminInquiryResponseOneSubjectMin).max(getAdminInquiryResponseOneSubjectMax),
   "message": zod.string().min(getAdminInquiryResponseOneMessageMin).max(getAdminInquiryResponseOneMessageMax)
 }).and(zod.object({
-  "id": zod.int(),
+  "id": zod.number(),
   "status": zod.enum(['NEW', 'READ', 'REPLIED', 'RESOLVED', 'ARCHIVED']),
   "adminNotes": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
@@ -444,7 +444,7 @@ export const GetAdminInquiryResponse = zod.object({
 
 
 export const UpdateAdminInquiryParams = zod.object({
-  "id": zod.coerce.number().int().min(1)
+  "id": zod.coerce.number().min(1)
 })
 
 export const updateAdminInquiryBodyAdminNotesMax = 4000;
@@ -475,11 +475,11 @@ export const updateAdminInquiryResponseOneMessageMax = 4000;
 export const UpdateAdminInquiryResponse = zod.object({
   "name": zod.string().min(updateAdminInquiryResponseOneNameMin).max(updateAdminInquiryResponseOneNameMax),
   "phone": zod.string().min(updateAdminInquiryResponseOnePhoneMin).max(updateAdminInquiryResponseOnePhoneMax),
-  "email": zod.email().max(updateAdminInquiryResponseOneEmailMax).nullish(),
+  "email": zod.string().max(updateAdminInquiryResponseOneEmailMax).nullish(),
   "subject": zod.string().min(updateAdminInquiryResponseOneSubjectMin).max(updateAdminInquiryResponseOneSubjectMax),
   "message": zod.string().min(updateAdminInquiryResponseOneMessageMin).max(updateAdminInquiryResponseOneMessageMax)
 }).and(zod.object({
-  "id": zod.int(),
+  "id": zod.number(),
   "status": zod.enum(['NEW', 'READ', 'REPLIED', 'RESOLVED', 'ARCHIVED']),
   "adminNotes": zod.string().nullish(),
   "createdAt": zod.coerce.date(),
@@ -491,10 +491,305 @@ export const UpdateAdminInquiryResponse = zod.object({
  * @summary Get customer engagement counts
  */
 export const GetCustomerEngagementSummaryResponse = zod.object({
-  "newMedicineRequests": zod.int(),
-  "newInquiries": zod.int(),
-  "totalMedicineRequests": zod.int(),
-  "totalInquiries": zod.int()
+  "newMedicineRequests": zod.number(),
+  "newInquiries": zod.number(),
+  "totalMedicineRequests": zod.number(),
+  "totalInquiries": zod.number()
+})
+
+
+/**
+ * @summary Search the medicine catalogue
+ */
+export const listInventoryProductsQuerySearchMax = 120;
+
+export const listInventoryProductsQueryCategoryMax = 120;
+
+
+export const listInventoryProductsQueryPageDefault = 1;
+
+export const listInventoryProductsQueryPageSizeDefault = 25;
+export const listInventoryProductsQueryPageSizeMax = 100;
+
+
+
+export const ListInventoryProductsQueryParams = zod.object({
+  "search": zod.coerce.string().max(listInventoryProductsQuerySearchMax).optional(),
+  "category": zod.coerce.string().max(listInventoryProductsQueryCategoryMax).optional(),
+  "productType": zod.enum(['general', 'human', 'veterinary']).optional(),
+  "companyId": zod.coerce.number().min(1).optional(),
+  "page": zod.coerce.number().min(1).default(listInventoryProductsQueryPageDefault),
+  "pageSize": zod.coerce.number().min(1).max(listInventoryProductsQueryPageSizeMax).default(listInventoryProductsQueryPageSizeDefault)
+})
+
+export const ListInventoryProductsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number(),
+  "sourceId": zod.string(),
+  "sourceName": zod.string(),
+  "displayName": zod.string(),
+  "normalizedSearchName": zod.string(),
+  "companyName": zod.string().nullish(),
+  "genericName": zod.string().nullish(),
+  "categoryName": zod.string().nullish(),
+  "productType": zod.string(),
+  "packForm": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "newArrival": zod.boolean(),
+  "specialMedicine": zod.boolean(),
+  "stockQuantity": zod.number().nullish(),
+  "mrp": zod.number().nullish(),
+  "salePrice": zod.number().nullish()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "pageSize": zod.number()
+})
+
+
+/**
+ * @summary Get a medicine catalogue record
+ */
+
+
+
+export const GetInventoryProductParams = zod.object({
+  "id": zod.coerce.number().min(1)
+})
+
+export const GetInventoryProductResponse = zod.object({
+  "id": zod.number(),
+  "sourceId": zod.string(),
+  "sourceName": zod.string(),
+  "displayName": zod.string(),
+  "normalizedSearchName": zod.string(),
+  "companyName": zod.string().nullish(),
+  "genericName": zod.string().nullish(),
+  "categoryName": zod.string().nullish(),
+  "productType": zod.string(),
+  "packForm": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "newArrival": zod.boolean(),
+  "specialMedicine": zod.boolean(),
+  "stockQuantity": zod.number().nullish(),
+  "mrp": zod.number().nullish(),
+  "salePrice": zod.number().nullish()
+})
+
+
+/**
+ * @summary List imported medicine categories
+ */
+export const ListInventoryCategoriesResponseItem = zod.object({
+  "id": zod.number(),
+  "sourceId": zod.string(),
+  "sourceName": zod.string(),
+  "displayName": zod.string().nullish(),
+  "sourceType": zod.string().nullish()
+})
+export const ListInventoryCategoriesResponse = zod.array(ListInventoryCategoriesResponseItem)
+
+
+/**
+ * @summary Get catalogue summary counts
+ */
+export const GetInventorySummaryResponse = zod.object({
+  "medicines": zod.number(),
+  "categories": zod.number(),
+  "companies": zod.number(),
+  "drugGroups": zod.number(),
+  "veterinaryMedicines": zod.number(),
+  "generalMedicines": zod.number(),
+  "stockRecords": zod.number()
+})
+
+
+/**
+ * @summary List SDF file statuses
+ */
+export const ListInventoryFilesResponseItem = zod.object({
+  "id": zod.number(),
+  "fileType": zod.string(),
+  "fileName": zod.string(),
+  "sizeBytes": zod.number(),
+  "sourceHash": zod.string(),
+  "detectionStatus": zod.string(),
+  "uploadStatus": zod.string(),
+  "parsingStatus": zod.string(),
+  "recordCount": zod.number().nullish(),
+  "validCount": zod.number().nullish(),
+  "invalidCount": zod.number().nullish(),
+  "warningCount": zod.number().nullish(),
+  "lastSyncAt": zod.coerce.date().nullish(),
+  "currentSyncStatus": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const ListInventoryFilesResponse = zod.array(ListInventoryFilesResponseItem)
+
+
+/**
+ * @summary Upload SDF source files for validation
+ */
+export const UploadInventoryFilesBody = zod.object({
+  "files": zod.array(zod.instanceof(File))
+})
+
+export const UploadInventoryFilesResponseItem = zod.object({
+  "id": zod.number(),
+  "fileType": zod.string(),
+  "fileName": zod.string(),
+  "sizeBytes": zod.number(),
+  "sourceHash": zod.string(),
+  "detectionStatus": zod.string(),
+  "uploadStatus": zod.string(),
+  "parsingStatus": zod.string(),
+  "recordCount": zod.number().nullish(),
+  "validCount": zod.number().nullish(),
+  "invalidCount": zod.number().nullish(),
+  "warningCount": zod.number().nullish(),
+  "lastSyncAt": zod.coerce.date().nullish(),
+  "currentSyncStatus": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date()
+})
+export const UploadInventoryFilesResponse = zod.array(UploadInventoryFilesResponseItem)
+
+
+/**
+ * @summary Validate and incrementally sync uploaded SDF files
+ */
+export const StartInventorySyncResponse = zod.object({
+  "id": zod.number(),
+  "status": zod.enum(['uploaded', 'parsing', 'validating', 'importing', 'completed', 'failed']),
+  "startedAt": zod.coerce.date(),
+  "completedAt": zod.coerce.date().nullish(),
+  "totalRecords": zod.number(),
+  "importedRecords": zod.number(),
+  "updatedRecords": zod.number(),
+  "unchangedRecords": zod.number(),
+  "skippedRecords": zod.number(),
+  "errorCount": zod.number(),
+  "warningCount": zod.number(),
+  "errorMessage": zod.string().nullish()
+})
+
+
+/**
+ * @summary List inventory import history
+ */
+export const listInventoryImportRunsQueryPageDefault = 1;
+
+export const listInventoryImportRunsQueryPageSizeDefault = 25;
+export const listInventoryImportRunsQueryPageSizeMax = 100;
+
+
+
+export const ListInventoryImportRunsQueryParams = zod.object({
+  "page": zod.coerce.number().min(1).default(listInventoryImportRunsQueryPageDefault),
+  "pageSize": zod.coerce.number().min(1).max(listInventoryImportRunsQueryPageSizeMax).default(listInventoryImportRunsQueryPageSizeDefault)
+})
+
+export const ListInventoryImportRunsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number(),
+  "status": zod.enum(['uploaded', 'parsing', 'validating', 'importing', 'completed', 'failed']),
+  "startedAt": zod.coerce.date(),
+  "completedAt": zod.coerce.date().nullish(),
+  "totalRecords": zod.number(),
+  "importedRecords": zod.number(),
+  "updatedRecords": zod.number(),
+  "unchangedRecords": zod.number(),
+  "skippedRecords": zod.number(),
+  "errorCount": zod.number(),
+  "warningCount": zod.number(),
+  "errorMessage": zod.string().nullish()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "pageSize": zod.number()
+})
+
+
+/**
+ * @summary List validation and import errors
+ */
+
+
+
+export const ListInventoryImportErrorsParams = zod.object({
+  "id": zod.coerce.number().min(1)
+})
+
+export const listInventoryImportErrorsQueryPageDefault = 1;
+
+export const listInventoryImportErrorsQueryPageSizeDefault = 25;
+export const listInventoryImportErrorsQueryPageSizeMax = 100;
+
+
+
+export const ListInventoryImportErrorsQueryParams = zod.object({
+  "page": zod.coerce.number().min(1).default(listInventoryImportErrorsQueryPageDefault),
+  "pageSize": zod.coerce.number().min(1).max(listInventoryImportErrorsQueryPageSizeMax).default(listInventoryImportErrorsQueryPageSizeDefault)
+})
+
+export const ListInventoryImportErrorsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number(),
+  "runId": zod.number(),
+  "fileId": zod.number().nullish(),
+  "lineNumber": zod.number().nullish(),
+  "sourceId": zod.string().nullish(),
+  "reason": zod.string(),
+  "rawRecord": zod.string().nullish()
+})),
+  "total": zod.number(),
+  "page": zod.number(),
+  "pageSize": zod.number()
+})
+
+
+/**
+ * @summary Update local catalogue presentation fields
+ */
+
+
+
+export const UpdateInventoryProductParams = zod.object({
+  "id": zod.coerce.number().min(1)
+})
+
+export const UpdateInventoryProductBody = zod.object({
+  "localDisplayName": zod.string().nullish(),
+  "localCategoryOverride": zod.string().nullish(),
+  "localBrandDisplayName": zod.string().nullish(),
+  "isActive": zod.boolean().optional(),
+  "newArrival": zod.boolean().optional(),
+  "specialMedicine": zod.boolean().optional(),
+  "imageUrl": zod.string().nullish(),
+  "cloudinaryPublicId": zod.string().nullish()
+})
+
+export const UpdateInventoryProductResponse = zod.object({
+  "id": zod.number(),
+  "sourceId": zod.string(),
+  "sourceName": zod.string(),
+  "displayName": zod.string(),
+  "normalizedSearchName": zod.string(),
+  "companyName": zod.string().nullish(),
+  "genericName": zod.string().nullish(),
+  "categoryName": zod.string().nullish(),
+  "productType": zod.string(),
+  "packForm": zod.string().nullish(),
+  "imageUrl": zod.string().nullish(),
+  "isActive": zod.boolean(),
+  "newArrival": zod.boolean(),
+  "specialMedicine": zod.boolean(),
+  "stockQuantity": zod.number().nullish(),
+  "mrp": zod.number().nullish(),
+  "salePrice": zod.number().nullish()
 })
 
 

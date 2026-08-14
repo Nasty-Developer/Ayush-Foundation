@@ -171,6 +171,162 @@ export interface CustomerEngagementSummary {
   totalInquiries: number;
 }
 
+export interface InventoryCategory {
+  id: number;
+  sourceId: string;
+  sourceName: string;
+  /** @nullable */
+  displayName?: string | null;
+  /** @nullable */
+  sourceType?: string | null;
+}
+
+export interface CatalogueProduct {
+  id: number;
+  sourceId: string;
+  sourceName: string;
+  displayName: string;
+  normalizedSearchName: string;
+  /** @nullable */
+  companyName?: string | null;
+  /** @nullable */
+  genericName?: string | null;
+  /** @nullable */
+  categoryName?: string | null;
+  productType: string;
+  /** @nullable */
+  packForm?: string | null;
+  /** @nullable */
+  imageUrl?: string | null;
+  isActive: boolean;
+  newArrival: boolean;
+  specialMedicine: boolean;
+  /** @nullable */
+  stockQuantity?: number | null;
+  /** @nullable */
+  mrp?: number | null;
+  /** @nullable */
+  salePrice?: number | null;
+}
+
+export interface CatalogueResponse {
+  items: CatalogueProduct[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface InventorySummary {
+  medicines: number;
+  categories: number;
+  companies: number;
+  drugGroups: number;
+  veterinaryMedicines: number;
+  generalMedicines: number;
+  stockRecords: number;
+}
+
+export interface InventoryFile {
+  id: number;
+  fileType: string;
+  fileName: string;
+  sizeBytes: number;
+  sourceHash: string;
+  detectionStatus: string;
+  uploadStatus: string;
+  parsingStatus: string;
+  /** @nullable */
+  recordCount?: number | null;
+  /** @nullable */
+  validCount?: number | null;
+  /** @nullable */
+  invalidCount?: number | null;
+  /** @nullable */
+  warningCount?: number | null;
+  /** @nullable */
+  lastSyncAt?: string | null;
+  currentSyncStatus: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface InventoryFilesUpload {
+  files: Blob[];
+}
+
+export type ImportRunStatus = typeof ImportRunStatus[keyof typeof ImportRunStatus];
+
+
+export const ImportRunStatus = {
+  uploaded: 'uploaded',
+  parsing: 'parsing',
+  validating: 'validating',
+  importing: 'importing',
+  completed: 'completed',
+  failed: 'failed',
+} as const;
+
+export interface ImportRun {
+  id: number;
+  status: ImportRunStatus;
+  startedAt: string;
+  /** @nullable */
+  completedAt?: string | null;
+  totalRecords: number;
+  importedRecords: number;
+  updatedRecords: number;
+  unchangedRecords: number;
+  skippedRecords: number;
+  errorCount: number;
+  warningCount: number;
+  /** @nullable */
+  errorMessage?: string | null;
+}
+
+export interface ImportRunListResponse {
+  items: ImportRun[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface ImportError {
+  id: number;
+  runId: number;
+  /** @nullable */
+  fileId?: number | null;
+  /** @nullable */
+  lineNumber?: number | null;
+  /** @nullable */
+  sourceId?: string | null;
+  reason: string;
+  /** @nullable */
+  rawRecord?: string | null;
+}
+
+export interface ImportErrorListResponse {
+  items: ImportError[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface ProductOverrideInput {
+  /** @nullable */
+  localDisplayName?: string | null;
+  /** @nullable */
+  localCategoryOverride?: string | null;
+  /** @nullable */
+  localBrandDisplayName?: string | null;
+  isActive?: boolean;
+  newArrival?: boolean;
+  specialMedicine?: boolean;
+  /** @nullable */
+  imageUrl?: string | null;
+  /** @nullable */
+  cloudinaryPublicId?: string | null;
+}
+
 export type SearchParameter = string;
 
 export type StatusParameter = string;
@@ -178,6 +334,19 @@ export type StatusParameter = string;
 export type PageParameter = number;
 
 export type PageSizeParameter = number;
+
+export type CategoryParameter = string;
+
+export type ProductTypeParameter = typeof ProductTypeParameter[keyof typeof ProductTypeParameter];
+
+
+export const ProductTypeParameter = {
+  general: 'general',
+  human: 'human',
+  veterinary: 'veterinary',
+} as const;
+
+export type CompanyIdParameter = number;
 
 export type ListAdminMedicineRequestsParams = {
 /**
@@ -208,6 +377,55 @@ search?: SearchParameter;
  * @maxLength 40
  */
 status?: StatusParameter;
+/**
+ * @minimum 1
+ */
+page?: PageParameter;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+pageSize?: PageSizeParameter;
+};
+
+export type ListInventoryProductsParams = {
+/**
+ * @maxLength 120
+ */
+search?: SearchParameter;
+/**
+ * @maxLength 120
+ */
+category?: CategoryParameter;
+productType?: ProductTypeParameter;
+/**
+ * @minimum 1
+ */
+companyId?: CompanyIdParameter;
+/**
+ * @minimum 1
+ */
+page?: PageParameter;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+pageSize?: PageSizeParameter;
+};
+
+export type ListInventoryImportRunsParams = {
+/**
+ * @minimum 1
+ */
+page?: PageParameter;
+/**
+ * @minimum 1
+ * @maximum 100
+ */
+pageSize?: PageSizeParameter;
+};
+
+export type ListInventoryImportErrorsParams = {
 /**
  * @minimum 1
  */

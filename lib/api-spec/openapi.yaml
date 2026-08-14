@@ -300,6 +300,233 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /inventory/products:
+    get:
+      operationId: listInventoryProducts
+      tags: [customer]
+      summary: Search the medicine catalogue
+      parameters:
+        - $ref: "#/components/parameters/Search"
+        - $ref: "#/components/parameters/Category"
+        - $ref: "#/components/parameters/ProductType"
+        - $ref: "#/components/parameters/CompanyId"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Paginated medicine catalogue
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogueResponse"
+  /inventory/products/{id}:
+    get:
+      operationId: getInventoryProduct
+      tags: [customer]
+      summary: Get a medicine catalogue record
+      parameters:
+        - $ref: "#/components/parameters/InventoryProductId"
+      responses:
+        "200":
+          description: Medicine catalogue record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogueProduct"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /inventory/categories:
+    get:
+      operationId: listInventoryCategories
+      tags: [customer]
+      summary: List imported medicine categories
+      responses:
+        "200":
+          description: Imported categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryCategory"
+  /inventory/summary:
+    get:
+      operationId: getInventorySummary
+      tags: [customer]
+      summary: Get catalogue summary counts
+      responses:
+        "200":
+          description: Catalogue counts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InventorySummary"
+  /admin/inventory/files:
+    get:
+      operationId: listInventoryFiles
+      tags: [admin]
+      summary: List SDF file statuses
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: SDF file statuses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryFile"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: uploadInventoryFiles
+      tags: [admin]
+      summary: Upload SDF source files for validation
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/InventoryFilesUpload"
+      responses:
+        "201":
+          description: Uploaded file statuses
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InventoryFile"
+        "400":
+          description: Invalid upload
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/inventory/sync:
+    post:
+      operationId: startInventorySync
+      tags: [admin]
+      summary: Validate and incrementally sync uploaded SDF files
+      security:
+        - bearerAuth: []
+      responses:
+        "202":
+          description: Sync started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportRun"
+        "400":
+          description: Missing dependency or invalid source set
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/inventory/import-runs:
+    get:
+      operationId: listInventoryImportRuns
+      tags: [admin]
+      summary: List inventory import history
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Import history
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportRunListResponse"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/inventory/import-runs/{id}/errors:
+    get:
+      operationId: listInventoryImportErrors
+      tags: [admin]
+      summary: List validation and import errors
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/ImportRunId"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/PageSize"
+      responses:
+        "200":
+          description: Import errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportErrorListResponse"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /admin/inventory/products/{id}:
+    patch:
+      operationId: updateInventoryProduct
+      tags: [admin]
+      summary: Update local catalogue presentation fields
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/InventoryProductId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProductOverrideInput"
+      responses:
+        "200":
+          description: Updated catalogue record
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogueProduct"
+        "401":
+          description: Administrator authentication required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   parameters:
     RequestId:
@@ -340,6 +567,46 @@ components:
         minimum: 1
         maximum: 100
         default: 25
+    Category:
+      name: category
+      in: query
+      required: false
+      schema:
+        type: string
+        maxLength: 120
+    ProductType:
+      name: productType
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [general, human, veterinary]
+    CompanyId:
+      name: companyId
+      in: query
+      required: false
+      schema:
+        type: number
+        minimum: 1
+    InventoryProductId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: number
+        minimum: 1
+    ImportRunId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: number
+        minimum: 1
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: FirebaseIdToken
   schemas:
     HealthStatus:
       type: object
@@ -508,4 +775,232 @@ components:
         totalInquiries:
           type: number
       required: [newMedicineRequests, newInquiries, totalMedicineRequests, totalInquiries]
+    InventoryCategory:
+      type: object
+      properties:
+        id:
+          type: number
+        sourceId:
+          type: string
+        sourceName:
+          type: string
+        displayName:
+          type: ["string", "null"]
+        sourceType:
+          type: ["string", "null"]
+      required: [id, sourceId, sourceName]
+    CatalogueProduct:
+      type: object
+      properties:
+        id:
+          type: number
+        sourceId:
+          type: string
+        sourceName:
+          type: string
+        displayName:
+          type: string
+        normalizedSearchName:
+          type: string
+        companyName:
+          type: ["string", "null"]
+        genericName:
+          type: ["string", "null"]
+        categoryName:
+          type: ["string", "null"]
+        productType:
+          type: string
+        packForm:
+          type: ["string", "null"]
+        imageUrl:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        newArrival:
+          type: boolean
+        specialMedicine:
+          type: boolean
+        stockQuantity:
+          type: ["number", "null"]
+        mrp:
+          type: ["number", "null"]
+        salePrice:
+          type: ["number", "null"]
+      required: [id, sourceId, sourceName, displayName, normalizedSearchName, productType, isActive, newArrival, specialMedicine]
+    CatalogueResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/CatalogueProduct"
+        total:
+          type: number
+        page:
+          type: number
+        pageSize:
+          type: number
+      required: [items, total, page, pageSize]
+    InventorySummary:
+      type: object
+      properties:
+        medicines:
+          type: number
+        categories:
+          type: number
+        companies:
+          type: number
+        drugGroups:
+          type: number
+        veterinaryMedicines:
+          type: number
+        generalMedicines:
+          type: number
+        stockRecords:
+          type: number
+      required: [medicines, categories, companies, drugGroups, veterinaryMedicines, generalMedicines, stockRecords]
+    InventoryFile:
+      type: object
+      properties:
+        id:
+          type: number
+        fileType:
+          type: string
+        fileName:
+          type: string
+        sizeBytes:
+          type: number
+        sourceHash:
+          type: string
+        detectionStatus:
+          type: string
+        uploadStatus:
+          type: string
+        parsingStatus:
+          type: string
+        recordCount:
+          type: ["number", "null"]
+        validCount:
+          type: ["number", "null"]
+        invalidCount:
+          type: ["number", "null"]
+        warningCount:
+          type: ["number", "null"]
+        lastSyncAt:
+          type: ["string", "null"]
+          format: date-time
+        currentSyncStatus:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, fileType, fileName, sizeBytes, sourceHash, detectionStatus, uploadStatus, parsingStatus, currentSyncStatus, createdAt, updatedAt]
+    InventoryFilesUpload:
+      type: object
+      properties:
+        files:
+          type: array
+          items:
+            type: string
+            format: binary
+      required: [files]
+    ImportRun:
+      type: object
+      properties:
+        id:
+          type: number
+        status:
+          type: string
+          enum: [uploaded, parsing, validating, importing, completed, failed]
+        startedAt:
+          type: string
+          format: date-time
+        completedAt:
+          type: ["string", "null"]
+          format: date-time
+        totalRecords:
+          type: number
+        importedRecords:
+          type: number
+        updatedRecords:
+          type: number
+        unchangedRecords:
+          type: number
+        skippedRecords:
+          type: number
+        errorCount:
+          type: number
+        warningCount:
+          type: number
+        errorMessage:
+          type: ["string", "null"]
+      required: [id, status, startedAt, totalRecords, importedRecords, updatedRecords, unchangedRecords, skippedRecords, errorCount, warningCount]
+    ImportRunListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportRun"
+        total:
+          type: number
+        page:
+          type: number
+        pageSize:
+          type: number
+      required: [items, total, page, pageSize]
+    ImportError:
+      type: object
+      properties:
+        id:
+          type: number
+        runId:
+          type: number
+        fileId:
+          type: ["number", "null"]
+        lineNumber:
+          type: ["number", "null"]
+        sourceId:
+          type: ["string", "null"]
+        reason:
+          type: string
+        rawRecord:
+          type: ["string", "null"]
+      required: [id, runId, reason]
+    ImportErrorListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportError"
+        total:
+          type: number
+        page:
+          type: number
+        pageSize:
+          type: number
+      required: [items, total, page, pageSize]
+    ProductOverrideInput:
+      type: object
+      properties:
+        localDisplayName:
+          type: ["string", "null"]
+        localCategoryOverride:
+          type: ["string", "null"]
+        localBrandDisplayName:
+          type: ["string", "null"]
+        isActive:
+          type: boolean
+        newArrival:
+          type: boolean
+        specialMedicine:
+          type: boolean
+        imageUrl:
+          type: ["string", "null"]
+        cloudinaryPublicId:
+          type: ["string", "null"]
 
