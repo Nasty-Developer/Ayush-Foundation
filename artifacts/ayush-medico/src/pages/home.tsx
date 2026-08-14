@@ -7,7 +7,7 @@ import { DeliverySection, SpecialMedicines, WhyChooseSection } from '@/component
 import { MedicineArrivals } from '@/components/medicine-arrivals';
 import { SectionHeading } from '@/components/section-heading';
 import { SiteLayout } from '@/components/site-layout';
-import { contactDetails } from '@/lib/site-data';
+import { contactDetails, directionsUrl } from '@/lib/site-data';
 import { homeServices } from '@/lib/home-data';
 
 function HomeServiceIcon({ name }: { name: string }) {
@@ -78,7 +78,7 @@ export default function HomePage() {
   useEffect(() => {
     document.documentElement.lang = 'en';
     document.title = 'Ayush Medico | Care, close to home';
-    const description = 'Ayush Medico is a trusted neighbourhood pharmacy for genuine medicines, local delivery support, and thoughtful everyday healthcare help in Bengaluru.';
+    const description = 'Ayush Medico is a trusted local pharmacy in Kurla West, Mumbai, offering genuine medicines, local delivery support, and thoughtful everyday healthcare help.';
     let descriptionTag = document.querySelector<HTMLMetaElement>('meta[name="description"]');
     if (!descriptionTag) {
       descriptionTag = document.createElement('meta');
@@ -125,7 +125,7 @@ export default function HomePage() {
                 <Phone size={16} /> Call Now
               </a>
             </div>
-            <a href="https://www.google.com/maps/search/?api=1&query=Ayush+Medico+12+Green+Park+Market+Bengaluru" target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-primary hover:underline" data-testid="link-hero-directions">
+            <a href={directionsUrl} target="_blank" rel="noreferrer" className="mt-5 inline-flex items-center gap-2 text-sm font-bold text-muted-foreground hover:text-primary hover:underline" data-testid="link-hero-directions">
               <MapPin size={15} /> Get Directions
             </a>
           </div>
@@ -188,11 +188,11 @@ export default function HomePage() {
           <div className="relative text-center">
             <p className="text-xs font-bold uppercase tracking-[0.18em] text-[hsl(20_62%_31%)]">A familiar pharmacy, close by</p>
             <h2 className="mx-auto mt-4 max-w-2xl font-display text-4xl leading-tight tracking-[-0.045em] text-foreground sm:text-5xl">Need a Medicine?</h2>
-            <p className="mx-auto mt-4 max-w-lg text-base leading-7 text-[hsl(20_42%_33%)]">Check availability, call the pharmacy, or find your way to Ayush Medico in Green Park Market.</p>
+            <p className="mx-auto mt-4 max-w-lg text-base leading-7 text-[hsl(20_42%_33%)]">Check availability, call the pharmacy, or find your way to Ayush Medico in Kurla West, Mumbai.</p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link to="/medicines" className="inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-6 py-3.5 text-sm font-bold text-background transition-transform hover:-translate-y-0.5" data-testid="link-final-availability">Check Medicine Availability <ArrowRight size={17} /></Link>
               <a href={`tel:${contactDetails.phone.replaceAll(' ', '')}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground/20 bg-card/60 px-6 py-3.5 text-sm font-bold text-foreground transition-colors hover:bg-card" data-testid="link-final-call"><Phone size={16} /> Call Now</a>
-              <a href="https://www.google.com/maps/search/?api=1&query=Ayush+Medico+12+Green+Park+Market+Bengaluru" target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground/20 bg-transparent px-6 py-3.5 text-sm font-bold text-foreground transition-colors hover:bg-card/40" data-testid="link-final-directions"><MapPin size={16} /> Get Directions</a>
+              <a href={directionsUrl} target="_blank" rel="noreferrer" className="inline-flex items-center justify-center gap-2 rounded-full border border-foreground/20 bg-transparent px-6 py-3.5 text-sm font-bold text-foreground transition-colors hover:bg-card/40" data-testid="link-final-directions"><MapPin size={16} /> Get Directions</a>
             </div>
           </div>
         </div>
