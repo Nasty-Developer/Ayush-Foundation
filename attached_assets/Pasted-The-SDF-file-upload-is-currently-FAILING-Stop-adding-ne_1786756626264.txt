@@ -1,0 +1,72 @@
+The SDF file upload is currently FAILING.
+
+Stop adding new features temporarily and FIX THE INVENTORY SYNC UPLOAD FIRST.
+
+I need the Admin Panel to actually accept my real SDF files.
+
+Please investigate the COMPLETE upload flow:
+
+Admin Panel
+→ Inventory Sync
+→ Select SDF file
+→ Upload
+→ Server/API handling
+→ File parsing
+→ Validation
+→ PostgreSQL import
+
+IMPORTANT:
+
+1. Check the browser console for the exact upload error.
+2. Check the Network request and response for the failed upload.
+3. Check the server/API logs.
+4. Check file-size limits.
+5. Check multipart/form-data handling.
+6. Check whether the frontend is sending the file correctly.
+7. Check whether the backend/API route actually receives the file.
+8. Check whether the SDF parser is receiving the uploaded file correctly.
+9. Check permissions/authentication for the upload endpoint.
+10. Check whether Vercel deployment architecture is causing the upload failure.
+
+IMPORTANT VERCEL RULE:
+
+The deployed application is:
+
+artifacts/ayush-medico
+
+Do NOT move the Vercel Root Directory.
+
+Do NOT break the existing Vercel SPA routing fix.
+
+Also remember that Vercel serverless functions have request/runtime/file limitations. If the current architecture is trying to send large SDF files through an unsuitable frontend/serverless route, redesign the upload flow appropriately rather than simply increasing a frontend limit.
+
+The original SDF files must remain untouched.
+
+Do NOT create fake/sample medicines to bypass the upload problem.
+
+Do NOT make the upload button appear successful unless the file was actually received and processed.
+
+After fixing it, test with the REAL SDF file I uploaded.
+
+The successful flow must be:
+
+REAL SDF FILE
+→ Admin uploads
+→ Upload succeeds
+→ File received
+→ Fixed-width parser reads it
+→ Records validated
+→ PostgreSQL sync runs
+→ New/Updated/Unchanged/Errors reported
+→ Medicines appear in Admin → Catalog → Medicines
+→ Medicines appear on the customer /medicines page.
+
+If the upload is failing because a required environment variable, API configuration, database connection, Cloudinary configuration, or deployment limitation is missing, identify the EXACT cause and tell me exactly what I need to provide.
+
+Do not guess.
+
+Do not stop at explaining the error.
+
+FIX THE UPLOAD.
+
+After fixing it, run TypeScript and the production build and verify the complete upload-to-catalogue flow.
