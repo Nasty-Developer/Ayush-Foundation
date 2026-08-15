@@ -103,7 +103,7 @@ router.post("/catalog/imports/upload", async (req, res): Promise<void> => {
   if (!Buffer.isBuffer(body) || body.length === 0 || body.length > MAX_UPLOAD_BYTES) { res.status(400).json({ error: "Upload an SDF file up to 60 MB." }); return; }
   let fileType: ReturnType<typeof detectType>;
   try { fileType = detectType(fileName); } catch (error) { res.status(400).json({ error: error instanceof Error ? error.message : "Unsupported SDF filename." }); return; }
-  const parsed = previewImportFile(fileName, body.toString("utf8"));
+  const parsed = await previewImportFile(fileName, body.toString("utf8"));
   const [job] = await db.insert(importJobsTable).values({ status: "uploaded", recordsDetected: parsed.records.length, errorCount: parsed.errors.length }).returning();
   await db.insert(importFilesTable).values({ jobId: job.id, fileType, fileName, fileSize: body.length, contentHash: parsed.hash, sourceText: body.toString("utf8"), detectedDelimiter: parsed.delimiter, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, mapping: parsed.mapping, preview: parsed.fields.length ? parsed.records.slice(0, 10).map((row) => Object.fromEntries(parsed.fields.map((field) => [field.name, row.values[field.index] ?? ""]))) : [] });
   if (parsed.errors.length) await db.insert(importErrorsTable).values(parsed.errors.map((item) => ({ jobId: job.id, fileId: null, recordNumber: item.recordNumber, reason: item.reason, sourceIdentifier: null, sourceExcerpt: item.excerpt })));

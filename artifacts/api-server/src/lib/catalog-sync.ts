@@ -1,6 +1,5 @@
-import { and, eq } from "drizzle-orm";
 import crypto from "node:crypto";
-import { db, categoriesTable, companiesTable, drugsTable, importErrorsTable, importFilesTable, importJobsTable, productsTable, stockBatchesTable } from "@workspace/db";
+import { and, eq, db, categoriesTable, companiesTable, drugsTable, importErrorsTable, importFilesTable, importJobsTable, productsTable, stockBatchesTable } from "@workspace/db";
 import { getMapped, parseSdf, type ParsedSdf, type SdfType } from "./sdf";
 
 type ParsedFile = { file: typeof importFilesTable.$inferSelect; parsed: ParsedSdf };
