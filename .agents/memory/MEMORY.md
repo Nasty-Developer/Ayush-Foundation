@@ -1,1 +1,2 @@
+- [Artifact preview routing](artifact-preview-routing.md) — package name, port, and a single artifact-owned workflow must agree.
 - [Artifact build environment](artifact-build-environment.md) — direct Vite production builds need the workflow's PORT and BASE_PATH values.
