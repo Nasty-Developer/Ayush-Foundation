@@ -1,0 +1,385 @@
+CONTINUE AYUSH MEDICO IMPLEMENTATION — DO NOT STOP
+
+You stopped in the middle of the implementation.
+
+The master requirements have already been read and accepted.
+
+DO NOT restart the project.
+DO NOT repeat the audit.
+DO NOT create another plan.
+DO NOT spend time rewriting the requirements.
+
+START CODING AND FINISH THE WORK.
+
+Because Agent credits are limited, work efficiently and reuse everything that is already implemented.
+
+==================================================
+PRIORITY 1 — FINISH INVENTORY SYNC
+==================================================
+
+Complete the REAL SDF pipeline first:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+↓
+
+Fixed-width parser
+↓
+
+Validation
+↓
+
+Master-data relationships
+↓
+
+PostgreSQL
+↓
+
+Safe upsert/incremental sync
+↓
+
+Admin Inventory Sync
+
+The real SDF files are already attached.
+
+Use the actual files.
+
+Do NOT create fake medicine data.
+
+Do NOT guess fields.
+
+Do NOT wipe existing PostgreSQL data.
+
+Do NOT create duplicate medicines.
+
+The Admin Panel must allow me to upload the SDF files myself in the future.
+
+==================================================
+PRIORITY 2 — COMPLETE MEDICINE CATALOGUE
+==================================================
+
+Make ALL valid imported medicines available through the catalogue.
+
+Include:
+
+- Medicine name
+- Brand/company
+- Generic/drug
+- Category
+- Stock
+- Price where actually available
+- Batch/expiry where actually available
+- General Medicines
+- Veterinary Medicines
+
+Use PostgreSQL.
+
+Use server-side search and pagination.
+
+Do NOT load the entire catalogue into the browser.
+
+==================================================
+PRIORITY 3 — CATEGORY VISUAL SYSTEM
+==================================================
+
+Make the catalogue look like a REAL pharmacy website.
+
+We do NOT need a unique photo for every medicine.
+
+Use CATEGORY-LEVEL VISUALS.
+
+Examples:
+
+Baby Care
+→ Baby Care visual
+
+Tablets
+→ Tablets/medicine visual
+
+First Aid
+→ Bandage/first-aid visual
+
+Diapers
+→ Diaper/baby-care visual
+
+Protein/Nutrition
+→ Nutrition visual
+
+Personal Care
+→ Personal-care visual
+
+Healthcare Devices
+→ Healthcare-device visual
+
+Veterinary
+→ Veterinary-care visual
+
+A medicine without its own product image should automatically use its category image.
+
+Do NOT attach random or misleading medicine photos.
+
+Admin must be able to manage category images through Cloudinary.
+
+==================================================
+PRIORITY 4 — CUSTOMER SHOPPING FLOW
+==================================================
+
+Complete:
+
+Customer signs in
+↓
+Browse/search medicines
+↓
+Medicine details
+↓
+Add to cart
+↓
+Cart
+↓
+Checkout
+↓
+Address
+↓
+Prescription when required
+↓
+Online payment
+↓
+Order
+↓
+Admin verification
+
+Guests can browse and search.
+
+Guests MUST NOT be able to complete an order.
+
+==================================================
+PRIORITY 5 — PRESCRIPTION + ADMIN VERIFICATION
+==================================================
+
+For prescription-required medicines:
+
+Customer uploads prescription.
+
+Admin Panel must show:
+
+- Customer
+- Order
+- Medicine
+- Quantity
+- Prescription
+- Address
+- Payment status
+- Stock
+
+Admin can:
+
+- Verify prescription
+- Reject prescription
+- Accept order
+- Reject order
+- Update order status
+
+Prescription files must NOT be publicly accessible.
+
+==================================================
+PRIORITY 6 — ONLINE PAYMENT
+==================================================
+
+Implement the real payment architecture.
+
+Do NOT fake payment success.
+
+Payment must be server-verified.
+
+If payment credentials are missing:
+
+finish everything else and clearly tell me exactly what credentials/configuration are still required.
+
+Do not stop the entire implementation because credentials are missing.
+
+==================================================
+PRIORITY 7 — ADMIN PANEL
+==================================================
+
+Complete the existing Admin Panel.
+
+Keep the current UI.
+
+Complete:
+
+Dashboard
+Catalog
+- Medicines
+- Vet Medicines
+- General Products
+- Categories
+- Brands
+
+Homepage
+- New Arrivals
+- Special Medicines
+- Promotional Banners
+
+Customer
+- Orders
+- Medicine Requests
+- Inquiries
+
+Inventory
+- Inventory Sync
+
+Settings
+
+Use REAL data.
+
+Do not hardcode dashboard numbers.
+
+==================================================
+PRIORITY 8 — NEW ARRIVALS / SPECIAL MEDICINES
+==================================================
+
+IMPORTANT:
+
+New Medicine Arrivals = EMPTY by default.
+
+Special Medicines = EMPTY by default.
+
+SDF sync must NOT automatically populate these.
+
+Admin controls which products appear there.
+
+==================================================
+PRIORITY 9 — CLOUDINARY
+==================================================
+
+Use Cloudinary for:
+
+- Category images
+- Promotional banners
+- Optional individual medicine images
+
+Environment variables:
+
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+
+Never expose the API secret in frontend code.
+
+If Cloudinary credentials are not available yet:
+
+build the integration correctly and continue the rest of the implementation.
+
+Do NOT stop the entire project.
+
+==================================================
+PRIORITY 10 — DO NOT BREAK EXISTING WORK
+==================================================
+
+KEEP:
+
+artifacts/ayush-medico
+
+as the Vercel Root Directory.
+
+KEEP:
+
+artifacts/ayush-medico/vercel.json
+
+The existing Vercel SPA routing fix is working.
+
+Do NOT remove it.
+
+Do NOT move the project.
+
+Do NOT recreate Firebase.
+
+Do NOT break:
+
+/admin
+/admin/login
+/admin/dashboard
+/medicines
+
+Do not redesign working parts unnecessarily.
+
+==================================================
+EFFICIENCY RULE
+==================================================
+
+Credits are limited.
+
+Therefore:
+
+- Reuse existing code.
+- Do not rebuild working components.
+- Do not repeatedly audit the same files.
+- Do not generate unnecessary explanations.
+- Do not spend Agent time on cosmetic changes before the core functionality works.
+- Fix errors as you encounter them.
+- Implement related features together.
+- Run verification after the implementation rather than repeatedly stopping for confirmation.
+
+If a requirement cannot be completed because a credential is genuinely missing, continue implementing everything that does NOT require that credential and report the missing value at the end.
+
+==================================================
+FINAL VERIFICATION
+==================================================
+
+Before stopping, run:
+
+- TypeScript
+- Production build
+- SDF parser/import test
+- PostgreSQL verification
+- Admin Inventory Sync
+- Medicine search
+- Category filtering
+- General/Veterinary filtering
+- Cart
+- Authentication
+- Checkout
+- Prescription workflow
+- Admin order workflow
+
+Verify:
+
+/admin
+/admin/dashboard
+/admin/inventory-sync
+/medicines
+
+Do NOT claim completion if something is only mocked.
+
+==================================================
+FINAL REPORT
+==================================================
+
+When finished, report ONLY:
+
+1. What was actually implemented
+2. SDF import result
+3. PostgreSQL result
+4. Medicine catalogue result
+5. Category/image result
+6. Cart/checkout result
+7. Prescription result
+8. Payment result
+9. Admin result
+10. TypeScript result
+11. Production build result
+12. Anything I still need to provide
+
+IMPORTANT:
+
+START IMPLEMENTING NOW.
+
+Do not reply with another plan.
+
+Do not say "I will implement this."
+
+Actually modify the project and complete as much as possible within the available Agent credits.
