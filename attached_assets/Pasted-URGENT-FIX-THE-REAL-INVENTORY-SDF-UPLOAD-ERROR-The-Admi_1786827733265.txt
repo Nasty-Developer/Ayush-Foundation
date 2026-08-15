@@ -1,0 +1,193 @@
+URGENT: FIX THE REAL INVENTORY SDF UPLOAD ERROR
+
+The Admin Panel Inventory Sync upload is failing with:
+
+"Unexpected token '<', '<!DOCTYPE '... is not valid JSON"
+
+This is happening when I upload the real SDF files.
+
+DO NOT change the SDF parser again unless the investigation proves the parser is the problem.
+
+The error strongly indicates that the frontend expects JSON but the upload endpoint is returning an HTML document instead of a JSON API response.
+
+Please debug the COMPLETE request flow:
+
+Admin Inventory Sync
+→ Upload and Inspect
+→ frontend request
+→ API/upload endpoint
+→ authentication
+→ file receiving
+→ SDF inspection/parser
+
+STEP 1 — INSPECT THE ACTUAL NETWORK REQUEST
+
+Check the browser Network tab for the failed upload request and determine:
+
+- Exact request URL
+- HTTP method
+- HTTP status
+- Content-Type of response
+- Response body
+- Whether the response starts with <!DOCTYPE html>
+- Whether the request is hitting the intended API endpoint
+
+Do not guess the cause.
+
+STEP 2 — FIX API ROUTING
+
+Find the exact endpoint currently used by the Inventory Sync frontend.
+
+Make sure the endpoint actually exists in the deployed architecture.
+
+The frontend must NOT accidentally request:
+
+/admin/...
+/some SPA route
+or another page route
+
+when it intends to call an API.
+
+If the endpoint is missing or incorrectly routed, fix the API architecture.
+
+IMPORTANT:
+
+The application deployed to Vercel is:
+
+artifacts/ayush-medico
+
+Do NOT change the Vercel Root Directory.
+
+Do NOT break the existing SPA routing fix.
+
+Do NOT make `/admin` routing worse.
+
+If this application is currently frontend-only on Vercel and the upload endpoint requires a backend that is NOT deployed, identify that architecture problem clearly and implement the safest compatible solution.
+
+STEP 3 — JSON ERROR HANDLING
+
+The frontend must NOT blindly call:
+
+response.json()
+
+when the response may be HTML.
+
+Implement proper response handling:
+
+- Check response.ok
+- Check Content-Type
+- Safely read the response
+- Show the actual server error
+- Never display "Unexpected token <" as the user-facing error
+
+If the server returns HTML unexpectedly, report the endpoint/status/content-type clearly in developer diagnostics.
+
+STEP 4 — FILE UPLOAD
+
+Once the endpoint is fixed, verify that it receives the actual file bytes.
+
+Support:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+Filename validation must remain:
+
+- case-insensitive
+- exact approved filenames
+- .SDF extension
+
+Maximum:
+
+60 MB per file
+
+Do not rely on browser MIME type.
+
+The existing raw-byte upload handling must remain.
+
+STEP 5 — REAL TEST
+
+Do NOT use a fake file.
+
+Use the actual SDF files attached to this project.
+
+Test at least:
+
+PRODUCT.SDF
+
+Then test the remaining files.
+
+The successful flow must be:
+
+REAL SDF
+→ upload request
+→ correct API endpoint
+→ file received
+→ parser/inspection
+→ JSON response
+→ frontend displays result
+
+STEP 6 — DO NOT STOP AT UPLOAD UI
+
+After fixing the endpoint, make sure the response actually contains useful inspection information such as:
+
+- filename
+- file size
+- detected format
+- record count
+- validation status
+- errors/warnings if any
+
+Then make the Sync PostgreSQL catalogue action work with the same correct backend architecture.
+
+IMPORTANT:
+
+Do NOT create fake medicine data.
+
+Do NOT claim success merely because the upload button works.
+
+The real file must actually reach the backend/parser.
+
+STEP 7 — VERCEL COMPATIBILITY
+
+Check whether this upload endpoint is available in the actual production deployment.
+
+The system currently works differently in Replit and Vercel.
+
+Do not create something that only works in Replit Preview.
+
+If a backend/API cannot be hosted from the current Vercel deployment architecture, explain the exact limitation and implement the correct deployment-compatible architecture rather than hiding the problem.
+
+STEP 8 — VERIFICATION
+
+After fixing:
+
+- Test real SDF upload
+- Test API response
+- Test inspection
+- Test PostgreSQL sync if available
+- Run TypeScript
+- Run production build
+- Check browser console
+- Check Network response
+
+FINAL REPORT:
+
+Tell me:
+
+1. Why the <!DOCTYPE html> error happened
+2. Which endpoint was wrong/missing
+3. What you changed
+4. Whether real PRODUCT.SDF uploaded successfully
+5. Whether all five SDF files can upload
+6. Whether PostgreSQL sync works
+7. TypeScript result
+8. Production build result
+9. Anything still required from me
+
+DO NOT just say "fixed".
+
+Actually test the real upload.
