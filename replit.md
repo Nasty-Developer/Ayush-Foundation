@@ -1,6 +1,6 @@
-# [Project name]
+# Ayush Medico
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Ayush Medico is a responsive Phase 1 foundation for a modern, trustworthy local pharmacy website.
 
 ## Run & Operate
 
@@ -14,31 +14,37 @@ _Replace the heading above with the project's name, and this line with one sente
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Frontend: React, Vite, TypeScript, Tailwind CSS
+- Routing: React Router
+- Icons: Lucide React
+- Shared API and database packages remain scaffolded for future phases
+- Build: Vite
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/ayush-medico/src/components/` — reusable header, footer, page framing, and section components
+- `artifacts/ayush-medico/src/pages/` — Home, Medicines, Services, About, Contact, and not-found pages
+- `artifacts/ayush-medico/src/lib/site-data.ts` — navigation, contact placeholders, service, trust, and availability content
+- `artifacts/ayush-medico/src/index.css` — Ayush Medico color tokens, typography, responsive utilities, and motion
+- `artifacts/ayush-medico/src/App.tsx` — React Router route map and shared providers
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Phase 1 is intentionally frontend-only; no Firebase, authentication, medicine database, cart, checkout, orders, or admin workflows are included.
+- Content that is likely to change is kept in `src/lib/site-data.ts` instead of being repeated across components.
+- The app uses React Router with a base-path-aware `BrowserRouter` so routes work in the artifact preview and future deployment.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+The foundation introduces Ayush Medico as a premium neighborhood pharmacy: visitors can learn about its care promise, browse service and availability previews, and reach the pharmacy through responsive navigation and contact CTAs. The Medicines, Services, About, and Contact routes are ready for Phase 2 expansion.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- Keep Phase 1 focused on the polished pharmacy foundation; do not add Phase 2 commerce or administration features without an explicit request.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The Vite config requires `PORT` and `BASE_PATH` when running a production build directly; the managed workflow supplies them during preview.
 
 ## Pointers
 
