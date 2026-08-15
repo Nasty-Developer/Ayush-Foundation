@@ -101,6 +101,14 @@ type ResourceConfig = {
 };
 
 const iconProps = { size: 16, strokeWidth: 1.8 };
+const MAX_SDF_FILE_BYTES = 60 * 1024 * 1024;
+const ALLOWED_SDF_FILE_NAMES = new Set([
+  'PRODUCT.SDF',
+  'STOCK.SDF',
+  'DRUG.SDF',
+  'COMPANY.SDF',
+  'CATEGORY.SDF',
+]);
 
 const resourceConfigs: Record<string, ResourceConfig> = {
   medicines: {
@@ -860,8 +868,46 @@ export function InventoryPage() {
   const [message, setMessage] = useState('');
   const [summary, setSummary] = useState<Record<string, unknown> | null>(null);
 
+  function validateFiles(candidateFiles: File[]) {
+    const seen = new Set<string>();
+    for (const file of candidateFiles) {
+      const normalizedName = file.name.trim().toUpperCase();
+      if (!normalizedName.endsWith('.SDF') || !ALLOWED_SDF_FILE_NAMES.has(normalizedName)) {
+        return `${file.name} is not an approved SDF source file. Select PRODUCT.SDF, STOCK.SDF, DRUG.SDF, COMPANY.SDF, or CATEGORY.SDF.`;
+      }
+      if (seen.has(normalizedName)) {
+        return `${file.name} is selected more than once.`;
+      }
+      if (file.size > MAX_SDF_FILE_BYTES) {
+        return `${file.name} is larger than the 60 MB per-file limit.`;
+      }
+      seen.add(normalizedName);
+    }
+    return null;
+  }
+
+  function handleFileSelection(event: ChangeEvent<HTMLInputElement>) {
+    const selectedFiles = Array.from(event.target.files ?? []);
+    const validationError = validateFiles(selectedFiles);
+    if (validationError) {
+      setFiles([]);
+      setMessage(validationError);
+      toast({ title: 'Invalid SDF selection', description: validationError, variant: 'destructive' });
+      event.target.value = '';
+      return;
+    }
+    setFiles(selectedFiles);
+    setMessage('');
+  }
+
   async function uploadFiles() {
     if (!user || !files.length) return;
+    const validationError = validateFiles(files);
+    if (validationError) {
+      setMessage(validationError);
+      toast({ title: 'Upload failed', description: validationError, variant: 'destructive' });
+      return;
+    }
     setBusy(true);
     setMessage('');
     try {
@@ -904,5 +950,5 @@ export function InventoryPage() {
     }
   }
 
-  return <div className="space-y-7"><AdminPageHeading eyebrow="Inventory" title="Inventory sync" description="Upload the approved fixed-width SDF exports and synchronize them into PostgreSQL without deleting existing catalogue data." /><section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-sm sm:p-7"><div className="flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary text-primary"><Upload size={22} /></span><div><h2 className="font-display text-2xl tracking-[-0.04em]">Upload source files</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">PRODUCT, STOCK, DRUG, COMPANY and CATEGORY files are parsed as fixed-width ASCII. Existing rows are upserted by source identifier; malformed rows remain visible in import history.</p></div></div><input type="file" multiple accept=".sdf,.SDF,text/plain" onChange={(event: ChangeEvent<HTMLInputElement>) => setFiles(Array.from(event.target.files ?? []))} className="mt-6 block w-full rounded-xl border border-dashed border-primary/30 bg-muted/40 p-4 text-sm" data-testid="input-sdf-files" /><div className="mt-4 flex flex-wrap gap-2">{files.map((file) => <span key={file.name} className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold">{file.name}</span>)}</div><div className="mt-6 flex flex-wrap gap-3"><button type="button" disabled={busy || !files.length} onClick={() => void uploadFiles()} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:opacity-50">{busy ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}Upload and inspect</button><button type="button" disabled={busy || !jobId} onClick={() => void syncFiles()} className="inline-flex items-center gap-2 rounded-xl border border-primary px-4 py-3 text-sm font-bold text-primary disabled:opacity-50">{busy ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}Sync PostgreSQL catalogue</button></div>{message && <p className="mt-4 text-sm text-muted-foreground">{message}</p>}{summary && <div className="mt-6 grid gap-3 sm:grid-cols-4">{[['New', summary.imported], ['Updated', summary.updated], ['Unchanged', summary.unchanged], ['Errors', summary.skipped]].map(([label, value]) => <div key={String(label)} className="rounded-xl bg-muted/60 p-4"><p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">{String(label)}</p><p className="mt-1 text-2xl font-bold">{String(value ?? 0)}</p></div>)}</div>}</section><p className="text-xs leading-5 text-muted-foreground">New Medicine Arrivals and Special Medicines remain empty until an administrator explicitly marks products in the existing admin catalogue. Product images use the existing Cloudinary signature endpoints when server credentials are configured.</p></div>;
+  return <div className="space-y-7"><AdminPageHeading eyebrow="Inventory" title="Inventory sync" description="Upload the approved fixed-width SDF exports and synchronize them into PostgreSQL without deleting existing catalogue data." /><section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-sm sm:p-7"><div className="flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary text-primary"><Upload size={22} /></span><div><h2 className="font-display text-2xl tracking-[-0.04em]">Upload source files</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">PRODUCT, STOCK, DRUG, COMPANY and CATEGORY files are parsed as fixed-width ASCII. Existing rows are upserted by source identifier; malformed rows remain visible in import history.</p></div></div><input type="file" multiple accept=".sdf,.SDF" onChange={handleFileSelection} className="mt-6 block w-full rounded-xl border border-dashed border-primary/30 bg-muted/40 p-4 text-sm" data-testid="input-sdf-files" /><div className="mt-4 flex flex-wrap gap-2">{files.map((file) => <span key={file.name} className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold">{file.name}</span>)}</div><div className="mt-6 flex flex-wrap gap-3"><button type="button" disabled={busy || !files.length} onClick={() => void uploadFiles()} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:opacity-50">{busy ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}Upload and inspect</button><button type="button" disabled={busy || !jobId} onClick={() => void syncFiles()} className="inline-flex items-center gap-2 rounded-xl border border-primary px-4 py-3 text-sm font-bold text-primary disabled:opacity-50">{busy ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}Sync PostgreSQL catalogue</button></div>{message && <p className="mt-4 text-sm text-muted-foreground">{message}</p>}{summary && <div className="mt-6 grid gap-3 sm:grid-cols-4">{[['New', summary.imported], ['Updated', summary.updated], ['Unchanged', summary.unchanged], ['Errors', summary.skipped]].map(([label, value]) => <div key={String(label)} className="rounded-xl bg-muted/60 p-4"><p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">{String(label)}</p><p className="mt-1 text-2xl font-bold">{String(value ?? 0)}</p></div>)}</div>}</section><p className="text-xs leading-5 text-muted-foreground">New Medicine Arrivals and Special Medicines remain empty until an administrator explicitly marks products in the existing admin catalogue. Product images use the existing Cloudinary signature endpoints when server credentials are configured.</p></div>;
 }

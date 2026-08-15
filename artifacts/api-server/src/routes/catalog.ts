@@ -3,7 +3,7 @@ import { raw, Router, type IRouter, type Request, type Response } from "express"
 import { and, asc, count, desc, eq, ilike, or, sql, db, categoriesTable, companiesTable, drugsTable, importErrorsTable, importFilesTable, importJobsTable, productOverridesTable, productsTable, stockBatchesTable } from "@workspace/db";
 import { requireAdminRequest } from "../lib/firebase-admin";
 import { previewImportFile, syncImportJob } from "../lib/catalog-sync";
-import { detectType, mappingFor } from "../lib/sdf";
+import { detectUploadType, mappingFor } from "../lib/sdf";
 
 const router: IRouter = Router();
 const MAX_UPLOAD_BYTES = 60 * 1024 * 1024;
@@ -96,13 +96,13 @@ router.get("/catalog/imports/:id", async (req, res): Promise<void> => {
   res.json({ job, files, errors });
 });
 
-router.post("/catalog/imports/upload", raw({ type: ["application/octet-stream", "text/plain"], limit: MAX_UPLOAD_BYTES }), async (req, res): Promise<void> => {
+router.post("/catalog/imports/upload", raw({ type: () => true, limit: MAX_UPLOAD_BYTES }), async (req, res): Promise<void> => {
   if (!await adminGuard(req, res)) return;
   const body = req.body as Buffer;
   const fileName = getQueryString(req.header("x-file-name"));
   if (!Buffer.isBuffer(body) || body.length === 0 || body.length > MAX_UPLOAD_BYTES) { res.status(400).json({ error: "Upload an SDF file up to 60 MB." }); return; }
-  let fileType: ReturnType<typeof detectType>;
-  try { fileType = detectType(fileName); } catch (error) { res.status(400).json({ error: error instanceof Error ? error.message : "Unsupported SDF filename." }); return; }
+  let fileType: ReturnType<typeof detectUploadType>;
+  try { fileType = detectUploadType(fileName); } catch (error) { res.status(400).json({ error: error instanceof Error ? error.message : "Unsupported SDF filename." }); return; }
   const parsed = await previewImportFile(fileName, body.toString("utf8"));
   const requestedJobId = Number.parseInt(getQueryString(req.header("x-import-job-id")), 10);
   let jobId = Number.isFinite(requestedJobId) && requestedJobId > 0 ? requestedJobId : undefined;

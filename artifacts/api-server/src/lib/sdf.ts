@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 
 export const SDF_TYPES = ["PRODUCT", "STOCK", "DRUG", "COMPANY", "CATEGORY"] as const;
 export type SdfType = (typeof SDF_TYPES)[number];
+export const ALLOWED_SDF_UPLOAD_NAMES = new Set(SDF_TYPES.map((type) => `${type}.SDF`));
 
 type ParsedRow = { recordNumber: number; values: string[]; raw: string };
 export type SdfField = { name: string; index: number; sample: string; start?: number; end?: number };
@@ -122,6 +123,14 @@ function detectType(fileName: string): SdfType {
   const match = SDF_TYPES.find((type) => base.includes(type));
   if (!match) throw new Error("Filename must identify PRODUCT, STOCK, DRUG, COMPANY, or CATEGORY.");
   return match;
+}
+
+export function detectUploadType(fileName: string): SdfType {
+  const normalizedName = fileName.trim().toUpperCase();
+  if (!normalizedName.endsWith(".SDF") || !ALLOWED_SDF_UPLOAD_NAMES.has(normalizedName)) {
+    throw new Error("Filename must be exactly PRODUCT.SDF, STOCK.SDF, DRUG.SDF, COMPANY.SDF, or CATEGORY.SDF.");
+  }
+  return normalizedName.slice(0, -4) as SdfType;
 }
 
 function splitStructuredRecord(line: string, delimiter: string): string[] {
