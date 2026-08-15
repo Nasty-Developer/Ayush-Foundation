@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { eq } from "drizzle-orm";
-import { db, importFilesTable, importJobsTable, pool } from "@workspace/db";
+import { db, importErrorsTable, importFilesTable, importJobsTable, pool } from "@workspace/db";
 import { previewImportFile, syncImportJob } from "./lib/catalog-sync";
 
 const files = [
@@ -21,7 +21,7 @@ async function main() {
     const parsed = await previewImportFile(fileName, body);
     recordsDetected += parsed.records.length;
     report.push({ fileName, type: parsed.type, bytes: body.length, records: parsed.records.length, format: parsed.format, errors: parsed.errors.length });
-    await db.insert(importFilesTable).values({
+    const [file] = await db.insert(importFilesTable).values({
       jobId: job.id,
       fileType: parsed.type,
       fileName,
@@ -33,7 +33,17 @@ async function main() {
       mappingStatus: parsed.mappingStatus,
       mapping: parsed.mapping,
       preview: parsed.records.slice(0, 10).map((row) => Object.fromEntries(parsed.fields.map((field) => [field.name, row.values[field.index] ?? ""]))),
-    });
+    }).returning({ id: importFilesTable.id });
+    if (parsed.errors.length) {
+      await db.insert(importErrorsTable).values(parsed.errors.map((error) => ({
+        jobId: job.id,
+        fileId: file.id,
+        recordNumber: error.recordNumber,
+        reason: error.reason,
+        sourceIdentifier: null,
+        sourceExcerpt: error.excerpt,
+      })));
+    }
   }
   await db.update(importJobsTable).set({ recordsDetected }).where(eq(importJobsTable.id, job.id));
   const summary = await syncImportJob(job.id);

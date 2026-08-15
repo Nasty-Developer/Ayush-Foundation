@@ -60,27 +60,28 @@ async function upsertMaster(parsed: ParsedSdf, jobId: number): Promise<SyncSumma
       continue;
     }
     if (parsed.type === "CATEGORY") {
-      const [existing] = await db.select({ id: categoriesTable.id }).from(categoriesTable).where(eq(categoriesTable.sourceCategoryId, sourceId)).limit(1);
+      const [existing] = await db.select({ id: categoriesTable.id, name: categoriesTable.name }).from(categoriesTable).where(eq(categoriesTable.sourceCategoryId, sourceId)).limit(1);
       await db.insert(categoriesTable).values({ sourceCategoryId: sourceId, name, normalizedName: normalized(name), displayName: name }).onConflictDoUpdate({
         target: categoriesTable.sourceCategoryId,
         set: { name, normalizedName: normalized(name), updatedAt: new Date(), active: true },
       });
-      bump(summary, existing ? "updated" : "imported");
+      bump(summary, !existing ? "imported" : existing.name === name ? "unchanged" : "updated");
     } else if (parsed.type === "COMPANY") {
       const code = value(row, parsed, "code") || null;
-      const [existing] = await db.select({ id: companiesTable.id }).from(companiesTable).where(eq(companiesTable.sourceCompanyId, sourceId)).limit(1);
+      const [existing] = await db.select({ id: companiesTable.id, name: companiesTable.name, code: companiesTable.code }).from(companiesTable).where(eq(companiesTable.sourceCompanyId, sourceId)).limit(1);
       await db.insert(companiesTable).values({ sourceCompanyId: sourceId, name, normalizedName: normalized(name), code }).onConflictDoUpdate({
         target: companiesTable.sourceCompanyId,
         set: { name, normalizedName: normalized(name), code, updatedAt: new Date() },
       });
-      bump(summary, existing ? "updated" : "imported");
+      bump(summary, !existing ? "imported" : existing.name === name && existing.code === code ? "unchanged" : "updated");
     } else if (parsed.type === "DRUG") {
-      const [existing] = await db.select({ id: drugsTable.id }).from(drugsTable).where(eq(drugsTable.sourceDrugId, sourceId)).limit(1);
-      await db.insert(drugsTable).values({ sourceDrugId: sourceId, drugName: name, normalizedDrugName: normalized(name), sourceFlags: { flags: value(row, parsed, "flags") } }).onConflictDoUpdate({
+      const flags = value(row, parsed, "flags");
+      const [existing] = await db.select({ id: drugsTable.id, drugName: drugsTable.drugName, sourceFlags: drugsTable.sourceFlags }).from(drugsTable).where(eq(drugsTable.sourceDrugId, sourceId)).limit(1);
+      await db.insert(drugsTable).values({ sourceDrugId: sourceId, drugName: name, normalizedDrugName: normalized(name), sourceFlags: { flags } }).onConflictDoUpdate({
         target: drugsTable.sourceDrugId,
-        set: { drugName: name, normalizedDrugName: normalized(name), sourceFlags: { flags: value(row, parsed, "flags") }, updatedAt: new Date() },
+        set: { drugName: name, normalizedDrugName: normalized(name), sourceFlags: { flags }, updatedAt: new Date() },
       });
-      bump(summary, existing ? "updated" : "imported");
+      bump(summary, !existing ? "imported" : existing.drugName === name && JSON.stringify(existing.sourceFlags) === JSON.stringify({ flags }) ? "unchanged" : "updated");
     }
   }
   summary.skipped = errors.length;
@@ -276,6 +277,7 @@ export async function syncImportJob(jobId: number) {
   await db.update(importJobsTable).set({ status: "importing", startedAt: new Date() }).where(eq(importJobsTable.id, jobId));
   const startedAt = Date.now();
   const summary: SyncSummary = { imported: 0, updated: 0, unchanged: 0, skipped: 0 };
+  summary.skipped = parsedFiles.reduce((total, { parsed }) => total + parsed.errors.length, 0);
   for (const { parsed } of parsedFiles) {
     const result = parsed.type === "PRODUCT"
       ? await syncProducts(parsed, jobId)

@@ -180,23 +180,29 @@ function findMapping(type: SdfType, headers: string[] | null): Record<string, nu
 function fixedWidthParse(type: SdfType, lines: string[], hash: string): ParsedSdf | null {
   const profile = fixedWidthProfiles[type];
   const nonEmpty = lines.filter((line) => line.trim() !== "");
-  if (!nonEmpty.length || nonEmpty.some((line) => line.length !== profile.width)) return null;
+  const validLines = nonEmpty.filter((line) => line.length === profile.width);
+  if (!validLines.length || validLines.length / nonEmpty.length < 0.95) return null;
 
   const fields: SdfField[] = profile.fields.map((field, index) => ({
     name: field.name,
     index,
     start: field.start,
     end: field.end,
-    sample: nonEmpty[0].slice(field.start, field.end).trim(),
+    sample: validLines[0].slice(field.start, field.end).trim(),
   }));
   const mapping: Record<string, number> = {};
   for (const field of profile.fields) if (field.mappedAs) mapping[field.mappedAs] = field.name === "sourceId" ? fields.findIndex((item) => item.name === "sourceId") : fields.findIndex((item) => item.name === field.name);
 
-  const records = nonEmpty.map((raw, index) => ({
+  const errors = nonEmpty.flatMap((raw, index) => raw.length === profile.width ? [] : [{
+    recordNumber: index + 1,
+    reason: `Expected fixed-width record length ${profile.width}, found ${raw.length}.`,
+    excerpt: raw.slice(0, 240),
+  }]);
+  const records = nonEmpty.flatMap((raw, index) => raw.length === profile.width ? [{
     recordNumber: index + 1,
     values: profile.fields.map((field) => raw.slice(field.start, field.end).trim()),
     raw,
-  }));
+  }] : []);
   return {
     type,
     format: "fixed_width",
@@ -207,7 +213,7 @@ function fixedWidthParse(type: SdfType, lines: string[], hash: string): ParsedSd
     headers: null,
     mapping,
     mappingStatus: "verified_from_fixed_width",
-    errors: [],
+    errors,
     hash,
   };
 }
