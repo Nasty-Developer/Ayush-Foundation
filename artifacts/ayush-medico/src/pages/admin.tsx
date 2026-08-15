@@ -467,6 +467,59 @@ function humanizeError(error: unknown) {
   return 'Something went wrong. Please try again.';
 }
 
+type ApiResponse = Record<string, unknown>;
+
+async function readApiResponse<T extends ApiResponse>(
+  response: Response,
+  endpoint: string,
+): Promise<T> {
+  const contentType = response.headers.get('content-type') ?? '';
+  const responseText = await response.text();
+  const isJson = contentType.toLowerCase().includes('application/json');
+
+  if (!isJson) {
+    console.error('[Inventory Sync] API returned a non-JSON response', {
+      endpoint,
+      status: response.status,
+      contentType: contentType || '(missing)',
+      responseBody: responseText.slice(0, 500),
+    });
+    throw new Error(
+      `Inventory API returned ${response.status} ${response.statusText} as ${contentType || 'an unknown content type'}. Check that ${endpoint} is deployed as an API route.`,
+    );
+  }
+
+  let payload: ApiResponse = {};
+  if (responseText.trim()) {
+    try {
+      const parsed: unknown = JSON.parse(responseText);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('The API returned a non-object JSON response.');
+      }
+      payload = parsed as ApiResponse;
+    } catch (error) {
+      console.error('[Inventory Sync] API returned invalid JSON', {
+        endpoint,
+        status: response.status,
+        contentType,
+        responseBody: responseText.slice(0, 500),
+        error,
+      });
+      throw new Error(`Inventory API returned invalid JSON (${response.status}).`);
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      typeof payload.error === 'string'
+        ? payload.error
+        : `Inventory API request failed with ${response.status} ${response.statusText}.`,
+    );
+  }
+
+  return payload as T;
+}
+
 function LoadingPanel({ label = 'Loading' }: { label?: string }) {
   return (
     <div className="flex min-h-[260px] items-center justify-center rounded-[1.5rem] border border-border bg-card">
@@ -914,13 +967,17 @@ export function InventoryPage() {
       const token = await user.getIdToken();
       let currentJobId = jobId;
       for (const file of files) {
-        const response = await fetch('/api/catalog/imports/upload', {
+        const endpoint = '/api/catalog/imports/upload';
+        const response = await fetch(endpoint, {
           method: 'POST',
           headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/octet-stream', 'X-File-Name': file.name, ...(currentJobId ? { 'X-Import-Job-Id': String(currentJobId) } : {}) },
           body: file,
         });
-        const payload = await response.json();
-        if (!response.ok) throw new Error(payload.error || `Could not upload ${file.name}`);
+        const payload = await readApiResponse<{
+          jobId: number;
+          recordCount: number;
+          errors?: unknown[];
+        }>(response, endpoint);
         currentJobId = payload.jobId;
         setJobId(currentJobId);
         setMessage(`${file.name}: ${payload.recordCount} fixed-width records detected${payload.errors?.length ? `, ${payload.errors.length} validation errors retained` : ''}.`);
@@ -938,9 +995,14 @@ export function InventoryPage() {
     setBusy(true);
     try {
       const token = await user.getIdToken();
-      const response = await fetch(`/api/catalog/imports/${jobId}/sync`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-      const payload = await response.json();
-      if (!response.ok) throw new Error(payload.error || 'Sync failed');
+      const endpoint = `/api/catalog/imports/${jobId}/sync`;
+      const response = await fetch(endpoint, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      const payload = await readApiResponse<{
+        imported?: number;
+        updated?: number;
+        unchanged?: number;
+        skipped?: number;
+      }>(response, endpoint);
       setSummary(payload);
       toast({ title: 'Catalogue sync completed', description: `${payload.imported ?? 0} new, ${payload.updated ?? 0} updated, ${payload.unchanged ?? 0} unchanged.` });
     } catch (error) {
