@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.token.email == 'adminayushmedical@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+
+    match /{collection}/{document} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{collection}/{document}/{nested=**} {
+      allow read, write: if isAdmin();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

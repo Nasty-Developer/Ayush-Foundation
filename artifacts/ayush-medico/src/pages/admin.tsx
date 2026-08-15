@@ -852,5 +852,57 @@ export function AdminSettingsPage() {
 }
 
 export function InventoryPage() {
-  return <div className="space-y-7"><AdminPageHeading eyebrow="Inventory" title="Inventory sync" description="A prepared place for a future inventory connection, without connecting an external medicine database or importing random data." /><div className="flex min-h-[360px] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-primary/25 bg-card p-8 text-center"><span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-primary"><RefreshCw size={24} /></span><h2 className="mt-5 font-display text-2xl tracking-[-0.04em]">Sync is not configured</h2><p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">When Ayush Medico is ready to connect an approved inventory source, this workspace can hold the setup and sync status.</p></div></div>;
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [files, setFiles] = useState<File[]>([]);
+  const [jobId, setJobId] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [summary, setSummary] = useState<Record<string, unknown> | null>(null);
+
+  async function uploadFiles() {
+    if (!user || !files.length) return;
+    setBusy(true);
+    setMessage('');
+    try {
+      const token = await user.getIdToken();
+      let currentJobId = jobId;
+      for (const file of files) {
+        const response = await fetch('/api/catalog/imports/upload', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/octet-stream', 'X-File-Name': file.name, ...(currentJobId ? { 'X-Import-Job-Id': String(currentJobId) } : {}) },
+          body: file,
+        });
+        const payload = await response.json();
+        if (!response.ok) throw new Error(payload.error || `Could not upload ${file.name}`);
+        currentJobId = payload.jobId;
+        setJobId(currentJobId);
+        setMessage(`${file.name}: ${payload.recordCount} fixed-width records detected${payload.errors?.length ? `, ${payload.errors.length} validation errors retained` : ''}.`);
+      }
+      toast({ title: 'SDF files uploaded', description: 'Review the detected records, then run the safe PostgreSQL sync.' });
+    } catch (error) {
+      toast({ title: 'Upload failed', description: humanizeError(error), variant: 'destructive' });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function syncFiles() {
+    if (!user || !jobId) return;
+    setBusy(true);
+    try {
+      const token = await user.getIdToken();
+      const response = await fetch(`/api/catalog/imports/${jobId}/sync`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+      const payload = await response.json();
+      if (!response.ok) throw new Error(payload.error || 'Sync failed');
+      setSummary(payload);
+      toast({ title: 'Catalogue sync completed', description: `${payload.imported ?? 0} new, ${payload.updated ?? 0} updated, ${payload.unchanged ?? 0} unchanged.` });
+    } catch (error) {
+      toast({ title: 'Sync failed', description: humanizeError(error), variant: 'destructive' });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return <div className="space-y-7"><AdminPageHeading eyebrow="Inventory" title="Inventory sync" description="Upload the approved fixed-width SDF exports and synchronize them into PostgreSQL without deleting existing catalogue data." /><section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-sm sm:p-7"><div className="flex items-start gap-4"><span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary text-primary"><Upload size={22} /></span><div><h2 className="font-display text-2xl tracking-[-0.04em]">Upload source files</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">PRODUCT, STOCK, DRUG, COMPANY and CATEGORY files are parsed as fixed-width ASCII. Existing rows are upserted by source identifier; malformed rows remain visible in import history.</p></div></div><input type="file" multiple accept=".sdf,.SDF,text/plain" onChange={(event: ChangeEvent<HTMLInputElement>) => setFiles(Array.from(event.target.files ?? []))} className="mt-6 block w-full rounded-xl border border-dashed border-primary/30 bg-muted/40 p-4 text-sm" data-testid="input-sdf-files" /><div className="mt-4 flex flex-wrap gap-2">{files.map((file) => <span key={file.name} className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold">{file.name}</span>)}</div><div className="mt-6 flex flex-wrap gap-3"><button type="button" disabled={busy || !files.length} onClick={() => void uploadFiles()} className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:opacity-50">{busy ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />}Upload and inspect</button><button type="button" disabled={busy || !jobId} onClick={() => void syncFiles()} className="inline-flex items-center gap-2 rounded-xl border border-primary px-4 py-3 text-sm font-bold text-primary disabled:opacity-50">{busy ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}Sync PostgreSQL catalogue</button></div>{message && <p className="mt-4 text-sm text-muted-foreground">{message}</p>}{summary && <div className="mt-6 grid gap-3 sm:grid-cols-4">{[['New', summary.imported], ['Updated', summary.updated], ['Unchanged', summary.unchanged], ['Errors', summary.skipped]].map(([label, value]) => <div key={String(label)} className="rounded-xl bg-muted/60 p-4"><p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">{String(label)}</p><p className="mt-1 text-2xl font-bold">{String(value ?? 0)}</p></div>)}</div>}</section><p className="text-xs leading-5 text-muted-foreground">New Medicine Arrivals and Special Medicines remain empty until an administrator explicitly marks products in the existing admin catalogue. Product images use the existing Cloudinary signature endpoints when server credentials are configured.</p></div>;
 }

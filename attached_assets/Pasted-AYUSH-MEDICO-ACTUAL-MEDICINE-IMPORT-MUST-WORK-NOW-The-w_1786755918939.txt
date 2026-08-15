@@ -1,0 +1,419 @@
+AYUSH MEDICO — ACTUAL MEDICINE IMPORT MUST WORK NOW
+
+The website currently has NO medicines visible.
+
+I need the actual SDF medicine data to become the website's real medicine catalogue.
+
+Do NOT just create the UI for Inventory Sync.
+
+IMPLEMENT THE COMPLETE WORKING FLOW:
+
+ADMIN PANEL
+→ Inventory Sync
+→ Upload SDF Files
+→ Parse REAL SDF files
+→ Validate
+→ Import ALL valid records
+→ PostgreSQL
+→ Medicines / Categories / Brands / Stock
+→ Customer Website
+
+==================================================
+1. ADMIN INVENTORY SYNC
+==================================================
+
+In:
+
+Admin Panel → Inventory → Inventory Sync
+
+create a proper upload interface.
+
+I should be able to upload the real:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+files myself.
+
+The upload screen must show:
+
+- Selected file
+- File size
+- Validation status
+- Record count
+- Import progress
+- New records
+- Updated records
+- Unchanged records
+- Errors
+- Final sync status
+
+Do NOT make me manually enter medicine records one by one.
+
+==================================================
+2. ACTUAL SDF IMPORT
+==================================================
+
+Use the REAL SDF files already attached to the project.
+
+They are fixed-width files.
+
+Use the exact field positions discovered during the audit.
+
+Do NOT guess fields.
+
+Do NOT create fake medicine records.
+
+Import ALL valid records.
+
+Keep the original SDF files read-only and untouched.
+
+==================================================
+3. POSTGRESQL
+==================================================
+
+The imported data must actually be stored in PostgreSQL.
+
+Create/use the appropriate tables for:
+
+- Medicines
+- Categories
+- Companies/Brands
+- Drugs/Generics
+- Stock
+- Import history
+
+Maintain the relationships discovered from the real SDF files.
+
+Use stable source IDs.
+
+If the same SDF is uploaded again:
+
+DO NOT create duplicates.
+
+Instead show:
+
+New
+Updated
+Unchanged
+Errors
+
+==================================================
+4. WEBSITE MUST USE THE DATABASE
+==================================================
+
+This is extremely important.
+
+The customer website must NOT use fake/static medicine data.
+
+The `/medicines` page must query the PostgreSQL-backed catalogue.
+
+After I upload the SDF files from Admin Panel, the medicines must actually appear on the website.
+
+Customer should be able to:
+
+- Search medicines
+- Browse categories
+- Filter by category
+- Filter General Medicines
+- Filter Veterinary Medicines
+- Search brand/company
+- Search generic/drug
+- View stock/availability where appropriate
+- View price where available
+- Open medicine details
+- Add medicine to cart
+
+Use server-side search and pagination.
+
+Do NOT send the entire medicine database to the browser.
+
+==================================================
+5. CATEGORY SYSTEM
+==================================================
+
+All valid categories from the SDF data must appear in the database and website.
+
+Do NOT hardcode fake categories.
+
+Each category should have:
+
+- Name
+- Product count
+- Category image
+- Active/inactive
+- Display order
+
+==================================================
+6. CATEGORY IMAGE STRATEGY
+==================================================
+
+I do NOT want to upload an individual photo for every medicine.
+
+Instead:
+
+Each CATEGORY gets one beautiful visual image.
+
+For example:
+
+Baby Care
+→ Baby Care image
+
+Tablets
+→ Tablets/medicine image
+
+First Aid
+→ First Aid/bandage image
+
+Diapers
+→ Diaper/baby-care image
+
+Protein/Nutrition
+→ Protein/nutrition image
+
+Personal Care
+→ Personal-care image
+
+Healthcare Devices
+→ Healthcare-device image
+
+Veterinary
+→ Veterinary-care image
+
+If an individual medicine does not have its own image:
+
+USE ITS CATEGORY IMAGE AS THE PRODUCT CARD FALLBACK.
+
+This is very important.
+
+The website should NOT show ugly empty image boxes for thousands of medicines.
+
+==================================================
+7. CATEGORY IMAGE MANAGEMENT
+==================================================
+
+Admin Panel:
+
+Catalog → Categories
+
+must allow me to:
+
+- Upload category image
+- Replace category image
+- Remove category image
+- Preview category image
+- Change category display name
+- Change display order
+- Enable/disable category
+
+Use Cloudinary for these images.
+
+Store only the Cloudinary URL/public ID in PostgreSQL.
+
+Do NOT use Firebase Storage for the large catalogue images.
+
+==================================================
+8. MEDICINE CARD
+==================================================
+
+Every imported medicine should have a beautiful customer-facing card.
+
+Show:
+
+- Category image or real product image
+- Medicine name
+- Brand/company
+- Generic/drug where available
+- Category
+- Price where actually available
+- Stock/availability where appropriate
+- Add to Cart
+
+Do NOT invent missing information.
+
+If product image is missing:
+
+medicine image
+↓
+category image
+↓
+clean generic pharmacy placeholder
+
+==================================================
+9. ADMIN MEDICINE CATALOGUE
+==================================================
+
+Admin Panel:
+
+Catalog → Medicines
+
+must show the REAL imported medicines.
+
+Include:
+
+- Search
+- Pagination
+- Category filter
+- Brand filter
+- General/Veterinary filter
+- Stock
+- Price
+- Image
+- Active/inactive
+- New Arrival
+- Special Medicine
+
+Admin should be able to manage presentation-level fields without destroying source SDF data.
+
+==================================================
+10. NEW ARRIVALS
+==================================================
+
+Keep New Medicine Arrivals EMPTY initially.
+
+SDF import must NOT automatically put every medicine into New Arrivals.
+
+Admin chooses which medicines appear there.
+
+==================================================
+11. SPECIAL MEDICINES
+==================================================
+
+Keep Special Medicines EMPTY initially.
+
+SDF import must NOT automatically put every medicine there.
+
+Admin chooses which medicines appear there.
+
+==================================================
+12. GENERAL + VETERINARY
+==================================================
+
+Correctly classify the products using the actual source data.
+
+Create separate customer filters/sections:
+
+General Medicines
+
+Veterinary Medicines
+
+Do NOT randomly classify products.
+
+==================================================
+13. PERFORMANCE
+==================================================
+
+There may be a very large number of medicine records.
+
+Therefore:
+
+- PostgreSQL indexes
+- Server-side search
+- Pagination
+- Debounced search
+- Lazy-loaded images
+- Cloudinary image optimization
+
+Do NOT load all medicines at once.
+
+Do NOT load all category/product images at once.
+
+==================================================
+14. IMPORTANT — ACTUAL TEST
+==================================================
+
+After implementation:
+
+UPLOAD THE REAL SDF FILES.
+
+Actually run the import.
+
+Then verify in PostgreSQL that records were created.
+
+Then open the website and verify that the imported medicines are actually visible.
+
+Test:
+
+Admin → Inventory Sync
+Admin → Catalog → Medicines
+Customer → /medicines
+
+Search for several REAL medicines from the imported dataset.
+
+Verify:
+
+SDF
+→ PostgreSQL
+→ Admin Catalogue
+→ Customer Website
+
+is actually working end-to-end.
+
+Do NOT tell me "complete" if only the upload UI exists.
+
+Do NOT tell me "complete" if only sample data appears.
+
+Do NOT create fake data just to make the page look populated.
+
+==================================================
+15. CLOUDINARY
+==================================================
+
+If Cloudinary credentials are already configured, complete the image system.
+
+If they are NOT configured yet:
+
+do NOT stop the medicine import.
+
+Finish:
+
+SDF → PostgreSQL → Catalogue → Website
+
+and report the exact Cloudinary environment variables still required.
+
+==================================================
+16. DO NOT BREAK EXISTING PROJECT
+==================================================
+
+Keep:
+
+artifacts/ayush-medico
+
+as the Vercel Root Directory.
+
+Keep the existing Vercel SPA routing fix.
+
+Do not recreate Firebase.
+
+Do not wipe PostgreSQL.
+
+Do not remove working Admin Panel functionality.
+
+==================================================
+FINAL REQUIREMENT
+==================================================
+
+I want to be able to do this:
+
+1. Open Admin Panel.
+2. Open Inventory Sync.
+3. Upload my SDF files.
+4. Click Sync/Import.
+5. Wait for the import to finish.
+6. Open Catalog → Medicines.
+7. See the real imported medicines.
+8. Open the customer website.
+9. Search those medicines.
+10. See them with appropriate category visuals.
+11. Add them to cart.
+
+BUILD THIS ACTUAL WORKING FLOW NOW.
+
+Do not stop at the parser.
+Do not stop at the UI.
+Do not create mock data.
+
+Make the REAL medicine catalogue appear on the REAL website.

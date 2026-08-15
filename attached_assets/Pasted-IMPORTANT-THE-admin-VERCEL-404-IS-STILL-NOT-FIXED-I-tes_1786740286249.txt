@@ -1,0 +1,249 @@
+IMPORTANT — THE /admin VERCEL 404 IS STILL NOT FIXED.
+
+I tested the deployed Vercel website again:
+
+https://ayush-medico.vercel.app/admin
+
+It STILL returns:
+
+404: NOT_FOUND
+
+Your previous work only verified/fixed the pnpm lockfile and production build.
+
+That is NOT the issue I am reporting now.
+
+The production build succeeds, but Vercel cannot serve the client-side React route /admin directly.
+
+The application uses react-router-dom.
+
+==================================================
+ACTUAL TASK
+==================================================
+
+FIX THE VERCEL SPA ROUTING FOR THE AYUSH MEDICO APP.
+
+The Vercel Root Directory MUST remain:
+
+artifacts/ayush-medico
+
+Do NOT change the root directory.
+
+Do NOT change the monorepo structure.
+
+Do NOT change the Firebase project.
+
+Do NOT redesign the Admin Panel.
+
+Do NOT change authentication.
+
+Do NOT tell me the build is successful and stop.
+
+The actual problem is:
+
+Homepage works:
+https://ayush-medico.vercel.app/
+
+But direct navigation to:
+
+https://ayush-medico.vercel.app/admin
+
+returns Vercel 404.
+
+==================================================
+1. INSPECT THE ROUTER
+==================================================
+
+Inspect the actual routing implementation inside:
+
+artifacts/ayush-medico
+
+Confirm how react-router-dom is configured.
+
+Find the route responsible for:
+
+/admin
+
+and confirm that the Admin route exists in the production build.
+
+Do not assume it exists — verify the actual source.
+
+==================================================
+2. FIX VERCEL SPA FALLBACK
+==================================================
+
+Because this is a React/Vite SPA using client-side routing, configure Vercel so direct requests to application routes are served by the frontend entry point instead of Vercel looking for a physical /admin file/directory.
+
+Check whether a vercel.json already exists.
+
+If appropriate, create/update the Vercel configuration INSIDE THE APPLICATION ROOT:
+
+artifacts/ayush-medico/vercel.json
+
+Use the correct SPA rewrite/fallback configuration for this Vite React application.
+
+The configuration must allow routes such as:
+
+/admin
+/admin/login
+/admin/dashboard
+/admin/medicines
+/admin/vet-medicines
+/admin/general-products
+/admin/categories
+/admin/brands
+/admin/homepage
+/admin/new-arrivals
+/admin/special-medicines
+/admin/orders
+/admin/medicine-requests
+/admin/inquiries
+/admin/legal
+/admin/announcements
+/admin/faq
+/admin/testimonials
+/admin/settings
+/admin/inventory
+
+to be handled by the React application.
+
+IMPORTANT:
+
+Do NOT rewrite API routes or static assets incorrectly.
+
+Do NOT break:
+- JS
+- CSS
+- images
+- favicon
+- static assets
+
+==================================================
+3. CHECK VERCEL ROOT DIRECTORY
+==================================================
+
+The Vercel project is configured with:
+
+artifacts/ayush-medico
+
+as the Root Directory.
+
+Keep it exactly that way.
+
+The Vercel configuration must therefore work from this application root.
+
+Do NOT put the routing configuration somewhere Vercel will not read because of the monorepo structure.
+
+==================================================
+4. TEST THE ACTUAL PRODUCTION BUILD
+==================================================
+
+Build the application using the production configuration.
+
+Then test the production output as closely as possible to the Vercel deployment.
+
+Verify:
+
+/
+/admin
+/admin/login
+/admin/dashboard
+
+Do not only test the homepage.
+
+==================================================
+5. IMPORTANT — TEST DIRECT NAVIGATION
+
+The fix is NOT complete if this only works after clicking a link from the homepage.
+
+Test exactly:
+
+Open:
+https://ayush-medico.vercel.app/admin
+
+directly in the browser.
+
+Then refresh.
+
+Then open:
+
+https://ayush-medico.vercel.app/admin/login
+
+directly.
+
+Then refresh.
+
+Then open:
+
+https://ayush-medico.vercel.app/admin/dashboard
+
+directly.
+
+Then refresh.
+
+These routes must NOT produce:
+
+404: NOT_FOUND
+
+==================================================
+6. FIREBASE IS NOT THE CURRENT PROBLEM
+
+Do NOT spend this task fixing Firebase Authentication.
+
+Firebase login comes AFTER the route loads.
+
+Current flow should be:
+
+Vercel
+↓
+/admin route loads
+↓
+React Router
+↓
+Admin authentication guard
+↓
+/admin/login if not authenticated
+↓
+Firebase Authentication
+↓
+Admin Dashboard
+
+Right now we are stuck at the FIRST step.
+
+==================================================
+7. DO NOT CLAIM SUCCESS WITHOUT VERIFYING
+
+Your previous response said the repository was ready for Vercel, but the deployed /admin URL still returns 404.
+
+So this time:
+
+DO NOT report success merely because:
+- pnpm install succeeds
+- TypeScript succeeds
+- production build succeeds
+
+Those are necessary but NOT sufficient.
+
+The actual acceptance test is:
+
+https://ayush-medico.vercel.app/admin
+
+must load the application instead of Vercel 404.
+
+==================================================
+8. FINAL REPORT
+
+After making the routing fix, report:
+
+- Exact routing/config file changed
+- What rewrite/fallback was added
+- Whether react-router-dom /admin route exists
+- Production build result
+- Whether direct /admin navigation works
+- Whether refreshing /admin works
+- Whether /admin/login works directly
+
+Actually make the changes now.
+
+DO NOT STOP AT ANALYSIS.
+DO NOT ONLY GIVE ME INSTRUCTIONS.
+FIX THE CODE/VERCEL CONFIGURATION.

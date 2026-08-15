@@ -1,0 +1,935 @@
+AYUSH MEDICO — CONTINUE AND COMPLETE INVENTORY SYNC
+
+IMPORTANT:
+The Vercel SPA routing issue is FIXED.
+
+The file:
+
+artifacts/ayush-medico/vercel.json
+
+is now correctly handling the React SPA routes.
+
+DO NOT TOUCH OR REMOVE THIS FIX.
+
+Now CONTINUE the previously requested Inventory Sync implementation and COMPLETE it properly.
+
+We are NOT starting the Inventory Sync work from scratch.
+
+Inspect the work already implemented in the project and continue from the current state.
+
+==================================================
+PRIMARY GOAL
+==================================================
+
+Complete the real:
+
+SDF FILE
+↓
+SDF PARSER
+↓
+VALIDATION
+↓
+IMPORT / SYNC
+↓
+DATABASE
+↓
+MEDICINE CATALOGUE
+↓
+ADMIN PANEL
+↓
+CUSTOMER WEBSITE
+
+pipeline.
+
+The system must allow me to upload my real SDF medicine files and get the medicine catalogue into the website properly.
+
+The real files are:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+Do NOT create fake medicine data.
+
+Do NOT create demo medicines.
+
+Do NOT hardcode example products.
+
+==================================================
+IMPORTANT ARCHITECTURE
+==================================================
+
+Vercel Root Directory:
+
+artifacts/ayush-medico
+
+KEEP THIS EXACTLY THE SAME.
+
+Do not create a separate undeployed API project.
+
+Do not move the application.
+
+Do not break the current Vercel deployment.
+
+The existing Firebase project remains:
+
+ayush-medico-6cf77
+
+Firebase should NOT be used as the large medicine catalogue database.
+
+Medicine catalogue data should use PostgreSQL.
+
+Medicine/product images should use Cloudinary.
+
+Firebase remains for authentication/lightweight Firebase functionality.
+
+==================================================
+SDF FILES
+==================================================
+
+Use the real SDF files and the parser architecture already being developed.
+
+Files:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+Known approximate sizes:
+
+PRODUCT.SDF ≈ 25 MB
+STOCK.SDF ≈ 891 KB
+DRUG.SDF ≈ 638 KB
+COMPANY.SDF ≈ 297 KB
+
+These are SDF files.
+
+DO NOT treat them as ordinary CSV files.
+
+Inspect the existing parser/mapping implementation.
+
+Do not throw away existing correct work.
+
+==================================================
+1. INVENTORY SYNC ADMIN PAGE
+==================================================
+
+Complete:
+
+Admin Panel
+→ Inventory
+→ Inventory Sync
+
+It must be a REAL working system.
+
+The page should allow uploading:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+For each file show:
+
+- File name
+- File type
+- File size
+- Detection status
+- Upload status
+- Parsing status
+- Record count
+- Validation status
+- Last sync
+- Current sync status
+
+==================================================
+2. FILE VALIDATION
+==================================================
+
+Before importing:
+
+Validate:
+
+- Extension
+- File type
+- File structure
+- Record format
+- Required fields
+- Duplicate source identifiers
+- Relationship integrity
+
+Show a clear preview.
+
+Example:
+
+PRODUCT.SDF
+25 MB
+
+Records detected:
+XXXXX
+
+Valid:
+XXXXX
+
+Invalid:
+XX
+
+Warnings:
+XX
+
+Do not start a production import blindly.
+
+==================================================
+3. PARSING
+==================================================
+
+Continue the actual SDF parser.
+
+The parser must correctly handle:
+
+- Fixed-width fields
+- Padding
+- Blank fields
+- Legacy formatting
+- Record lengths
+- Malformed records
+
+Do not simply:
+
+split(",")
+
+unless the actual source format proves that commas are the correct structure.
+
+Do not silently corrupt data.
+
+If a field mapping is uncertain:
+
+preserve the raw/source value and flag it for review.
+
+==================================================
+4. IMPORT ORDER
+==================================================
+
+Use the correct dependency order:
+
+1. CATEGORY.SDF
+2. COMPANY.SDF
+3. DRUG.SDF
+4. PRODUCT.SDF
+5. STOCK.SDF
+
+This is important because product and stock records depend on master data.
+
+If individual files are uploaded separately, the system should understand missing dependencies and clearly tell the admin what is still required.
+
+==================================================
+5. POSTGRESQL
+==================================================
+
+Complete the PostgreSQL database layer.
+
+Use proper relational tables such as:
+
+categories
+companies
+drugs
+products
+stock_batches
+
+Use foreign keys/relationships where appropriate.
+
+Do NOT dump everything into one giant unstructured table.
+
+Preserve source-specific fields safely.
+
+==================================================
+6. PRODUCT DATA
+==================================================
+
+Products should support:
+
+- Product name
+- Normalized search name
+- Company/manufacturer
+- Category
+- Drug/generic
+- Pack/form information where available
+- Source product ID
+- Active status
+- Image URL
+- Cloudinary public ID
+- Created timestamp
+- Updated timestamp
+
+Do not invent fields that the source does not provide.
+
+==================================================
+7. COMPANY / BRAND
+==================================================
+
+Import company/manufacturer records from:
+
+COMPANY.SDF
+
+Prevent duplicate companies.
+
+Admin should later be able to use these companies/brands in catalogue management.
+
+==================================================
+8. CATEGORY
+==================================================
+
+Import categories from:
+
+CATEGORY.SDF
+
+The customer website must be able to display categories dynamically.
+
+Support source categories including relevant types such as:
+
+- Allopathic
+- Ayurvedic
+- General
+- Surgical
+- Veterinary
+- Generics
+- Homeopathic
+- etc.
+
+Do not hardcode only a small list.
+
+Preserve source terminology internally.
+
+Customer-facing labels can be professionally displayed where appropriate.
+
+==================================================
+9. GENERAL + VETERINARY MEDICINES
+==================================================
+
+The catalogue must support:
+
+GENERAL MEDICINES
+
+and
+
+VETERINARY MEDICINES
+
+as separate customer-facing filtering/categories where supported by the source data.
+
+Do not mix veterinary products incorrectly with normal human medicines.
+
+==================================================
+10. DRUG / GENERIC DATA
+==================================================
+
+Import DRUG.SDF.
+
+Connect products to their drug/generic information where the source identifiers allow it.
+
+Customer medicine details should eventually be able to show:
+
+Medicine
+Brand/Company
+Generic/Drug
+Category
+
+Only show information that actually exists.
+
+==================================================
+11. STOCK + PRICE
+==================================================
+
+Import STOCK.SDF.
+
+Correctly map:
+
+- Product relation
+- Batch information
+- Expiry
+- Quantity
+- Price/MRP/sale price where available
+- Other stock fields
+
+IMPORTANT:
+
+Do NOT guess which numeric field represents price.
+
+Inspect the actual source mapping.
+
+If the mapping is uncertain, preserve the source field and document it.
+
+Do not invent prices.
+
+==================================================
+12. DUPLICATE PREVENTION
+==================================================
+
+If I upload the same SDF files twice:
+
+DO NOT create duplicate medicines.
+
+The system should report something like:
+
+New:
+0
+
+Updated:
+0
+
+Unchanged:
+XXXXX
+
+If records changed:
+
+New:
+XX
+
+Updated:
+XX
+
+Unchanged:
+XXXXX
+
+==================================================
+13. INCREMENTAL SYNC
+==================================================
+
+Do NOT wipe the entire medicine database every time.
+
+Use source identifiers to perform safe upserts.
+
+Handle:
+
+- New records
+- Updated records
+- Unchanged records
+
+If a product disappears from a later source file:
+
+DO NOT immediately hard-delete it.
+
+Use a safe inactive/removed-from-source strategy.
+
+==================================================
+14. IMPORT PROGRESS
+==================================================
+
+The UI must remain responsive.
+
+For large PRODUCT.SDF files:
+
+Do NOT freeze the browser.
+
+Use efficient:
+
+- streaming/chunked processing
+- batch inserts/upserts
+- background/server-side processing where appropriate
+
+Show progress:
+
+Parsing:
+42,000 / 100,000
+
+Importing:
+31,000 / 100,000
+
+Do not fake the progress percentage.
+
+==================================================
+15. IMPORT HISTORY
+==================================================
+
+Complete the Import History functionality.
+
+Show:
+
+- File
+- Type
+- Size
+- Records
+- Imported
+- Updated
+- Skipped
+- Errors
+- Start time
+- Completion time
+- Duration
+- Status
+
+Statuses:
+
+Uploaded
+Parsing
+Validating
+Importing
+Completed
+Failed
+
+==================================================
+16. ERROR REPORTING
+==================================================
+
+Do not silently skip bad records.
+
+Show:
+
+- File
+- Record/line
+- Source ID
+- Error reason
+
+Allow the admin to understand why a record failed.
+
+Do not expose database errors or credentials to customers.
+
+==================================================
+17. MEDICINE CATALOGUE ADMIN
+==================================================
+
+Complete the Admin:
+
+Catalog
+→ Medicines
+
+The admin should be able to:
+
+- Search medicines
+- Filter medicines
+- Filter category
+- Filter company
+- Filter General/Veterinary
+- View product
+- Edit safe local fields
+- Activate/deactivate
+- Manage image
+- Set New Arrival
+- Set Special Medicine
+
+Use server-side pagination.
+
+Do NOT load the entire medicine database into the browser.
+
+==================================================
+18. SOURCE DATA VS LOCAL OVERRIDES
+==================================================
+
+IMPORTANT:
+
+Do not allow future SDF syncs to destroy admin-managed presentation fields.
+
+Separate source data from local overrides.
+
+For example:
+
+sourceProductName
+localDisplayName
+
+sourceCategory
+localCategoryOverride
+
+sourceCompany
+localBrandDisplayName
+
+source data = SDF truth
+
+local override = Admin presentation control
+
+==================================================
+19. CLOUDINARY
+==================================================
+
+Medicine images MUST use Cloudinary.
+
+Do NOT use Firebase Storage for the medicine catalogue images.
+
+Environment variables:
+
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+
+I will provide the values through Replit/Vercel environment variables.
+
+DO NOT hardcode them.
+
+DO NOT commit them.
+
+DO NOT expose API_SECRET to frontend code.
+
+==================================================
+20. MEDICINE IMAGE MANAGEMENT
+==================================================
+
+Admin:
+
+Catalog
+→ Medicines
+→ Edit
+
+should allow:
+
+- Upload image
+- Replace image
+- Remove image
+- Preview image
+
+Store in PostgreSQL:
+
+imageUrl
+cloudinaryPublicId
+
+Do NOT store image binaries in PostgreSQL.
+
+Do NOT store them in Firebase.
+
+If a product has no image:
+
+show a clean pharmacy placeholder on the customer website.
+
+Do not invent product photos.
+
+==================================================
+21. FAST CUSTOMER SEARCH
+==================================================
+
+Complete the customer medicine search architecture.
+
+Search:
+
+- Medicine name
+- Brand/company
+- Generic/drug
+- Category
+
+Use PostgreSQL server-side search.
+
+Do NOT download the entire catalogue.
+
+Use:
+
+- indexes
+- pagination
+- debounced autocomplete
+- limited result sets
+
+Search should remain fast even with a large catalogue.
+
+==================================================
+22. CUSTOMER MEDICINE PAGE
+==================================================
+
+Complete:
+
+/medicines
+
+Customer should be able to:
+
+- Search
+- Filter
+- Browse categories
+- Filter General Medicines
+- Filter Veterinary Medicines
+- View medicine
+- See brand/company
+- See generic/drug
+- See price where correctly available
+- See stock/availability where appropriate
+- See image if available
+
+Do not show fake data.
+
+==================================================
+23. NEW ARRIVALS
+==================================================
+
+Keep:
+
+New Medicine Arrivals
+
+EMPTY by default.
+
+Do NOT automatically put every imported medicine into New Arrivals.
+
+Admin controls this.
+
+==================================================
+24. SPECIAL MEDICINES
+==================================================
+
+Keep:
+
+Special Medicines
+
+EMPTY by default.
+
+Admin controls this.
+
+Do not automatically populate it with imported records.
+
+==================================================
+25. INVENTORY DASHBOARD COUNTS
+==================================================
+
+Update Admin Dashboard with REAL database counts:
+
+Medicines
+Categories
+Companies
+Drug Groups
+Veterinary Medicines
+General Medicines
+Stock Records
+
+No fake numbers.
+
+==================================================
+26. DATABASE SECURITY
+==================================================
+
+Database credentials must remain server-side.
+
+Do NOT expose:
+
+DATABASE_URL
+database password
+Cloudinary API secret
+
+to frontend JavaScript.
+
+Admin-only sync endpoints must require proper admin authorization.
+
+Customers must never be able to trigger an import.
+
+==================================================
+27. VERCEL COMPATIBILITY
+==================================================
+
+CRITICAL:
+
+Vercel Root Directory remains:
+
+artifacts/ayush-medico
+
+Do NOT change this.
+
+The existing:
+
+artifacts/ayush-medico/vercel.json
+
+SPA routing fix MUST remain.
+
+Do not remove it.
+
+Do not break:
+
+/
+/admin
+/admin/login
+/medicines
+
+==================================================
+28. PERFORMANCE
+==================================================
+
+The website must remain FAST.
+
+Do NOT:
+
+- load all medicines on homepage
+- load all images at startup
+- load entire stock database
+- load entire catalogue into one admin table
+
+Use:
+
+- pagination
+- indexes
+- lazy loading
+- Cloudinary optimized images
+- efficient API queries
+- appropriate caching
+
+Homepage must remain lightweight.
+
+==================================================
+29. SECURITY + PRIVACY
+==================================================
+
+Admin-only:
+
+- SDF uploads
+- Inventory Sync
+- Import History
+- Catalogue management
+- Image management
+
+Customer:
+
+- Search
+- Browse
+- View medicines
+
+Do not expose internal database information.
+
+==================================================
+30. DO NOT BREAK EXISTING WORK
+==================================================
+
+Do NOT break:
+
+- Vercel routing fix
+- Homepage
+- WhatsApp
+- Call Now
+- Get Directions
+- Firebase authentication
+- Admin login
+- Admin Panel
+- Existing catalogue UI
+- Existing SDF work
+
+Inspect existing code before changing it.
+
+Reuse what is already implemented.
+
+Do not rebuild existing features unnecessarily.
+
+==================================================
+31. REAL IMPORT TEST
+==================================================
+
+Use the actual SDF files available to the project.
+
+Perform a controlled test import.
+
+Verify:
+
+PRODUCT.SDF parses correctly.
+STOCK.SDF parses correctly.
+DRUG.SDF parses correctly.
+COMPANY.SDF parses correctly.
+CATEGORY.SDF parses correctly.
+
+Verify relationships.
+
+Verify no duplicate records.
+
+Verify actual product records appear in Admin Catalogue.
+
+Verify category filtering.
+
+Verify General/Veterinary filtering.
+
+Verify stock/price mapping.
+
+==================================================
+32. DO NOT FAKE SUCCESS
+==================================================
+
+Do NOT report:
+
+"Inventory Sync completed"
+
+unless the actual pipeline has been tested.
+
+Do NOT use mock records just to make the dashboard show numbers.
+
+Do NOT hardcode counts.
+
+Do NOT make fake progress bars.
+
+==================================================
+33. FINAL VERIFICATION
+
+Run:
+
+- TypeScript
+- Production build
+- Database migration/validation
+- SDF parser validation
+- Import test
+- Admin catalogue test
+- Customer medicine search test
+- Category filter test
+- General/Veterinary filter test
+- Cloudinary image test if credentials are available
+
+Also verify:
+
+/admin still loads directly on Vercel.
+
+==================================================
+34. FINAL REPORT
+
+When finished, report:
+
+### SDF
+- Parser status
+- Field mappings
+- Files successfully parsed
+
+### PostgreSQL
+- Tables
+- Relationships
+- Indexes
+- Migration status
+
+### Inventory Sync
+- Upload
+- Validation
+- Preview
+- Import
+- Incremental sync
+- Duplicate handling
+- Import history
+
+### Admin
+- Catalogue
+- Categories
+- Companies
+- Stock
+- Image management
+
+### Customer
+- Medicine search
+- Categories
+- General medicines
+- Veterinary medicines
+- Price
+- Stock
+- Images
+
+### Cloudinary
+- Configuration status
+- Upload status
+
+### Deployment
+- Vercel build
+- TypeScript
+- /admin routing
+- /medicines route
+
+### Remaining requirements
+Clearly tell me ONLY what values/configuration I still need to provide.
+
+IMPORTANT:
+
+CONTINUE THE EXISTING INVENTORY SYNC WORK.
+
+DO NOT START OVER.
+
+DO NOT STOP AT UI.
+
+ACTUALLY COMPLETE THE:
+
+SDF → PARSER → POSTGRESQL → SYNC → ADMIN → CUSTOMER SEARCH
+
+PIPELINE.
+
+STOP ONLY AFTER VALIDATION.

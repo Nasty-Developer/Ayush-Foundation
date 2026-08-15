@@ -1,0 +1,963 @@
+AYUSH MEDICO — INVENTORY SYNC
+FULL PROJECT AUDIT → SDF FILE INSPECTION → PROPER IMPLEMENTATION
+
+IMPORTANT:
+
+STOP AND INSPECT THE ENTIRE CURRENT PROJECT BEFORE WRITING NEW CODE.
+
+Do NOT assume the previous Inventory Sync implementation is correct.
+
+Do NOT assume it needs to be rebuilt from scratch.
+
+Do NOT assume it was successfully removed.
+
+Do NOT assume Firestore is the medicine database.
+
+Do NOT assume PostgreSQL is already fully working.
+
+FIRST determine the CURRENT REAL STATE of the project.
+
+We have had multiple previous Inventory Sync implementations and Vercel deployment problems.
+
+I want you to carefully inspect the project and then build/repair the Inventory Sync based on what ACTUALLY exists now.
+
+==================================================
+PART 1 — FULL PROJECT AUDIT FIRST
+==================================================
+
+Before making ANY code changes:
+
+Inspect:
+
+- complete repository structure
+- artifacts/ayush-medico
+- src
+- api/server folders if present
+- database code
+- PostgreSQL configuration
+- Firebase configuration
+- Firestore rules
+- Admin Panel
+- Inventory Sync code
+- medicine catalogue code
+- medicine API
+- category API
+- company/brand API
+- stock API
+- SDF parser files
+- SDF mapping files
+- import/sync services
+- migrations
+- schema files
+- package.json files
+- environment variables
+- Vercel configuration
+- existing vercel.json
+
+Search the COMPLETE repository for:
+
+SDF
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+inventory-sync
+Inventory Sync
+upload session
+create upload session
+sync
+import
+parser
+mapping
+staging
+medicines
+categories
+companies
+brands
+drug_groups
+stock
+PostgreSQL
+Firestore
+Cloudinary
+
+DO NOT CHANGE ANYTHING DURING THIS FIRST AUDIT.
+
+==================================================
+PART 2 — CHECK THE ACTUAL SDF FILES
+==================================================
+
+Find whether the actual SDF source files are available in the project or attached project assets.
+
+Expected files may include:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+If the actual files exist:
+
+INSPECT THEM DIRECTLY.
+
+Do NOT guess their format.
+
+Do NOT assume they are CSV.
+
+Do NOT assume comma-separated data.
+
+Determine:
+
+- encoding
+- record structure
+- field structure
+- fixed-width vs delimited
+- record terminators
+- field lengths
+- identifiers
+- relationships
+- blank values
+- duplicate identifiers
+- price fields
+- stock fields
+- category fields
+- company fields
+- drug/generic fields
+- product fields
+
+Inspect representative records from EACH file.
+
+Do NOT modify the original SDF files.
+
+Do NOT convert them destructively.
+
+==================================================
+PART 3 — IF SDF FILES ARE NOT CURRENTLY AVAILABLE
+==================================================
+
+If the actual SDF files are NOT present in the project:
+
+DO NOT create fake SDF data.
+
+DO NOT create fake medicine records.
+
+DO NOT claim the parser is fully tested.
+
+Instead:
+
+1. Complete the parser architecture using the known source structure already present in the repository, if available.
+2. Make the upload/import system ready for the real SDF files.
+3. Clearly report that the actual source files still need to be supplied for final validation.
+
+Do not pretend an import was successful without real files.
+
+==================================================
+PART 4 — INSPECT PREVIOUS INVENTORY SYNC CODE
+==================================================
+
+There may be remnants of an older Inventory Sync system.
+
+Inspect:
+
+- old upload-session code
+- old API routes
+- old SDF importer
+- Firestore sync code
+- PostgreSQL sync code
+- mappingEngine
+- stagingEngine
+- firestoreSync
+- sync routes
+- frontend Inventory Sync page
+
+Determine:
+
+A. What is obsolete?
+
+B. What is still useful?
+
+C. What has already been migrated to SQL?
+
+D. What has already been deleted?
+
+E. What is currently broken?
+
+F. What should be reused?
+
+DO NOT blindly restore the old 405/505 upload-session system.
+
+DO NOT blindly delete current working code.
+
+Make the decision based on the current repository.
+
+==================================================
+PART 5 — DATABASE SOURCE OF TRUTH
+==================================================
+
+Determine the current intended source of truth for medicine catalogue data.
+
+The target architecture should be:
+
+SDF
+↓
+Parser
+↓
+Validation
+↓
+PostgreSQL
+↓
+Medicine Catalogue API
+↓
+Admin Panel + Customer Website
+
+Do NOT use Firestore as the large medicine catalogue database.
+
+Firebase should remain primarily for authentication and other lightweight Firebase functionality where already required.
+
+Do NOT move thousands of medicine records into Firestore simply because it is easier.
+
+==================================================
+PART 6 — POSTGRESQL AUDIT
+==================================================
+
+Inspect the current PostgreSQL database/schema/migrations.
+
+Check whether these tables already exist:
+
+medicines
+categories
+companies
+drug_groups
+stock
+
+Also inspect:
+
+- primary keys
+- foreign keys
+- indexes
+- unique constraints
+- source identifiers
+- timestamps
+- image fields
+- active/inactive fields
+
+If these tables already exist and are working:
+
+DO NOT recreate them.
+
+If they are incomplete:
+
+make the minimum safe migration required.
+
+Do NOT wipe existing data.
+
+Do NOT reset the database.
+
+==================================================
+PART 7 — MEDICINE DATA MODEL
+==================================================
+
+Ensure the medicine catalogue can represent:
+
+Medicine/Product
+Brand/Company
+Category
+Generic/Drug
+Stock
+Price
+MRP where available
+Batch information where available
+Expiry where available
+Product source ID
+Image URL
+Cloudinary public ID
+Active/inactive status
+Created/updated timestamps
+
+Do NOT invent source values.
+
+If a source field does not exist:
+
+leave it null/optional.
+
+==================================================
+PART 8 — SOURCE DATA VS ADMIN DATA
+==================================================
+
+This is VERY IMPORTANT.
+
+Separate:
+
+SOURCE DATA
+
+from:
+
+LOCAL ADMIN OVERRIDES.
+
+For example:
+
+sourceProductName
+localDisplayName
+
+sourceCompanyId
+localBrandOverride
+
+sourceCategoryId
+localCategoryOverride
+
+sourcePrice
+localPriceOverride
+
+source image
+admin image
+
+The next SDF sync must NOT destroy information manually managed by the pharmacist/admin.
+
+==================================================
+PART 9 — SDF RELATIONSHIP MAPPING
+==================================================
+
+Determine the actual relationships from the SDF files.
+
+Likely conceptual flow:
+
+CATEGORY
+↓
+COMPANY
+↓
+DRUG
+↓
+PRODUCT
+↓
+STOCK
+
+BUT:
+
+Do NOT assume the identifiers.
+
+Inspect the actual files and determine the real relationships.
+
+Document:
+
+CATEGORY.SDF → category identifier
+COMPANY.SDF → company identifier
+DRUG.SDF → drug identifier
+PRODUCT.SDF → product identifier + related identifiers
+STOCK.SDF → product/stock identifier
+
+Only implement mappings supported by the real files.
+
+==================================================
+PART 10 — SAFE IMPORT ORDER
+==================================================
+
+Where relationships require it, use:
+
+1. CATEGORY.SDF
+2. COMPANY.SDF
+3. DRUG.SDF
+4. PRODUCT.SDF
+5. STOCK.SDF
+
+However, if the actual source structure proves a different dependency order is required:
+
+follow the actual dependency structure.
+
+Do not force an incorrect order.
+
+==================================================
+PART 11 — INVENTORY SYNC ADMIN PAGE
+==================================================
+
+Create/repair:
+
+Admin Panel
+→ Inventory
+→ Inventory Sync
+
+It should be a REAL working admin tool.
+
+It should show:
+
+Upload SDF Files
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+For each:
+
+- file name
+- size
+- detected format
+- validation
+- record count
+- parsing status
+- import status
+- errors
+- last sync
+
+==================================================
+PART 12 — NO VERCEL RUNTIME SDF PROCESSING
+==================================================
+
+IMPORTANT:
+
+Do NOT make the normal customer-facing Vercel frontend parse huge SDF files in the browser.
+
+Do NOT make Vercel runtime process large SDF files during normal page usage.
+
+The import process must be handled safely outside the normal frontend rendering path.
+
+Use the project's existing backend/import architecture if it is actually deployable.
+
+If the current Vercel architecture cannot support long-running imports:
+
+design the importer as a separate controlled/admin-side process while keeping the customer website fast.
+
+Do NOT reintroduce the old broken upload-session API merely to make the feature appear complete.
+
+==================================================
+PART 13 — LARGE FILE HANDLING
+==================================================
+
+PRODUCT.SDF may be large.
+
+The importer must NOT load the entire file into browser memory.
+
+Use:
+
+- streaming
+- chunked processing
+- batch parsing
+- batch database inserts/upserts
+
+where appropriate.
+
+The browser must remain responsive.
+
+==================================================
+PART 14 — VALIDATION BEFORE IMPORT
+==================================================
+
+Before importing:
+
+show:
+
+File
+Records detected
+Valid records
+Invalid records
+Warnings
+Duplicates
+Missing references
+
+Example:
+
+PRODUCT.SDF
+Records: XXXXX
+Valid: XXXXX
+Invalid: XX
+Warnings: XX
+
+Do NOT silently discard invalid records.
+
+==================================================
+PART 15 — UPSERT / DUPLICATE HANDLING
+==================================================
+
+If the same SDF is uploaded twice:
+
+DO NOT duplicate medicines.
+
+Use stable source identifiers.
+
+Show:
+
+New
+Updated
+Unchanged
+Skipped
+Errors
+
+Example:
+
+New: 120
+Updated: 450
+Unchanged: 32,000
+Errors: 5
+
+Do not fake these numbers.
+
+==================================================
+PART 16 — DO NOT DELETE PRODUCTS AUTOMATICALLY
+==================================================
+
+If a medicine disappears from a later SDF:
+
+DO NOT hard-delete it automatically.
+
+Use an inactive/source-missing strategy.
+
+This protects the pharmacy catalogue.
+
+==================================================
+PART 17 — PRICE + STOCK
+==================================================
+
+Inspect the ACTUAL STOCK.SDF fields.
+
+Do not guess.
+
+Determine:
+
+- quantity
+- MRP
+- sale price
+- batch
+- expiry
+- product relation
+
+If the source contains multiple price fields:
+
+document what each one means before mapping it.
+
+Do not randomly choose a numeric field as price.
+
+==================================================
+PART 18 — ADMIN MEDICINE CATALOGUE
+==================================================
+
+Admin:
+
+Catalog
+→ Medicines
+
+must use the real PostgreSQL catalogue.
+
+Support:
+
+- search
+- pagination
+- category filter
+- company/brand filter
+- General Medicine filter
+- Veterinary Medicine filter
+- active/inactive
+- image management
+- New Arrival
+- Special Medicine
+
+Do NOT load the entire medicine catalogue into the browser.
+
+==================================================
+PART 19 — GENERAL + VETERINARY
+==================================================
+
+Support:
+
+GENERAL MEDICINES
+
+and
+
+VETERINARY MEDICINES
+
+properly.
+
+Determine the actual source/category/type information.
+
+Do not incorrectly classify veterinary medicines as human medicines.
+
+==================================================
+PART 20 — CLOUDINARY IMAGES
+==================================================
+
+Medicine/product images should use Cloudinary.
+
+NOT Firebase Storage for the large medicine catalogue.
+
+Use environment variables:
+
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+
+Never hardcode them.
+
+Never expose CLOUDINARY_API_SECRET to frontend code.
+
+Database should store:
+
+imageUrl
+cloudinaryPublicId
+
+not image binaries.
+
+If no image exists:
+
+use a clean placeholder.
+
+Do not invent medicine images.
+
+==================================================
+PART 21 — CUSTOMER WEBSITE
+==================================================
+
+The customer website should query the PostgreSQL-backed medicine API.
+
+Customer should be able to:
+
+- search medicine
+- search brand
+- search generic
+- browse category
+- filter General Medicines
+- filter Veterinary Medicines
+- view medicine
+- view brand/company
+- view generic
+- view price where available
+- view availability/stock where appropriate
+- view image where available
+
+Use:
+
+- server-side search
+- pagination
+- debounced search
+- indexes
+
+Do NOT send the entire catalogue to the browser.
+
+==================================================
+PART 22 — NEW ARRIVALS
+==================================================
+
+New Medicine Arrivals must remain EMPTY by default.
+
+SDF import must NOT automatically mark every medicine as New Arrival.
+
+Admin controls this.
+
+==================================================
+PART 23 — SPECIAL MEDICINES
+==================================================
+
+Special Medicines must remain EMPTY by default.
+
+SDF import must NOT automatically populate this.
+
+Admin controls this.
+
+==================================================
+PART 24 — INVENTORY DASHBOARD
+==================================================
+
+Dashboard must display REAL numbers.
+
+Examples:
+
+Medicines
+Categories
+Companies
+Drug Groups
+Stock Records
+General Medicines
+Veterinary Medicines
+
+No fake counts.
+
+==================================================
+PART 25 — INVENTORY SYNC HISTORY
+==================================================
+
+Create/repair import history.
+
+Show:
+
+- File
+- Size
+- Records
+- New
+- Updated
+- Unchanged
+- Errors
+- Started
+- Completed
+- Duration
+- Status
+
+Statuses:
+
+Uploaded
+Parsing
+Validating
+Importing
+Completed
+Failed
+
+==================================================
+PART 26 — ERROR LOG
+==================================================
+
+Show import errors clearly:
+
+- file
+- record
+- source ID
+- reason
+
+Do not expose database credentials.
+
+==================================================
+PART 27 — SECURITY
+==================================================
+
+Only authorized administrators can:
+
+- upload SDF
+- start import
+- view import history
+- modify catalogue
+- upload medicine images
+
+Customers must never be able to start imports.
+
+Do not make APIs publicly writable.
+
+==================================================
+PART 28 — VERCEL
+==================================================
+
+KEEP:
+
+artifacts/ayush-medico
+
+as the Vercel Root Directory.
+
+KEEP the existing:
+
+artifacts/ayush-medico/vercel.json
+
+SPA routing fix.
+
+Do NOT remove it.
+
+Do NOT move the application.
+
+Do NOT create another Vercel project.
+
+Do NOT break:
+
+/
+/admin
+/admin/login
+/admin/dashboard
+/medicines
+
+==================================================
+PART 29 — DO NOT BREAK EXISTING SYSTEMS
+==================================================
+
+Preserve the working:
+
+- homepage
+- customer UI
+- Firebase authentication
+- admin login
+- admin panel
+- Vercel routing
+- WhatsApp
+- Call Now
+- Get Directions
+- medicine request/inquiry UI
+- orders
+- checkout if already implemented
+
+Do not redesign them.
+
+Only modify the parts necessary for Inventory Sync and medicine catalogue integration.
+
+==================================================
+PART 30 — REAL TESTING
+==================================================
+
+After implementation:
+
+Run:
+
+1. TypeScript
+2. Production build
+3. Database migrations
+4. SDF parser tests
+5. Validation tests
+6. Import tests
+7. Duplicate import test
+8. Product/category/company relationship test
+9. Stock mapping test
+10. Price mapping test
+11. Admin catalogue test
+12. Customer medicine search test
+13. Category filter test
+14. General/Veterinary filter test
+15. Cloudinary image test
+16. Vercel production build
+
+If actual SDF files are available, test with REAL files.
+
+Do NOT use fake data.
+
+==================================================
+PART 31 — FINAL PROJECT AUDIT
+==================================================
+
+After implementation, search the entire repository again.
+
+Confirm there are no:
+
+- broken upload-session calls
+- obsolete Inventory Sync APIs
+- duplicate SDF importers
+- conflicting medicine databases
+- duplicate medicine services
+- Firestore medicine catalogue paths accidentally still being used
+- fake medicine datasets
+- hardcoded catalogue counts
+
+If there are multiple implementations:
+
+choose ONE production implementation and clearly remove/deactivate only the obsolete conflicting implementation.
+
+Do not leave two competing Inventory Sync systems.
+
+==================================================
+PART 32 — FINAL REPORT
+==================================================
+
+At the end give me a detailed report:
+
+### CURRENT PROJECT STATE
+- Current architecture
+- Current database
+- Current medicine source
+- Current Inventory Sync implementation
+
+### FILE AUDIT
+- SDF files found
+- SDF files missing
+- Existing parser files
+- Existing mapping files
+- Existing database files
+- Existing API files
+
+### SDF FORMAT
+For every SDF:
+
+- structure
+- important fields
+- identifiers
+- relationships
+- record count if available
+
+### DATABASE
+- existing tables
+- migrations
+- indexes
+- relationships
+
+### INVENTORY SYNC
+- upload
+- parsing
+- validation
+- import
+- upsert
+- duplicate handling
+- history
+- error handling
+
+### ADMIN
+- catalogue
+- categories
+- brands
+- stock
+- images
+- General/Veterinary
+
+### CUSTOMER
+- search
+- filters
+- medicine details
+- images
+- price
+- availability
+
+### CLOUDINARY
+- configuration
+- upload flow
+- image storage
+
+### DEPLOYMENT
+- Vercel build
+- Replit build
+- routing
+- production compatibility
+
+### IMPORTANT
+Clearly list anything I still need to provide.
+
+DO NOT SAY "COMPLETE" unless the actual implementation has been tested.
+
+==================================================
+FINAL INSTRUCTION
+==================================================
+
+FIRST:
+
+AUDIT.
+
+SECOND:
+
+UNDERSTAND THE REAL SDF FILES.
+
+THIRD:
+
+UNDERSTAND THE EXISTING DATABASE + CODE.
+
+FOURTH:
+
+REMOVE ONLY CONFLICTING/OBSOLETE IMPLEMENTATIONS.
+
+FIFTH:
+
+BUILD ONE CLEAN, FAST, PRODUCTION-READY INVENTORY SYNC.
+
+SIXTH:
+
+TEST IT WITH REAL DATA IF THE SDF FILES ARE AVAILABLE.
+
+DO NOT GUESS.
+
+DO NOT FAKE DATA.
+
+DO NOT WIPE EXISTING MEDICINES.
+
+DO NOT RECREATE THE PROJECT.
+
+DO NOT ROLLBACK WORKING VERCEL ROUTING.
+
+DO NOT STOP AT UI.
+
+I want the complete:
+
+SDF
+→ PARSER
+→ VALIDATION
+→ POSTGRESQL
+→ SYNC
+→ ADMIN CATALOGUE
+→ CUSTOMER SEARCH
+
+pipeline working properly.

@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { Router, type IRouter, type Request, type Response } from "express";
+import { raw, Router, type IRouter, type Request, type Response } from "express";
 import { and, asc, count, desc, eq, ilike, or, sql, db, categoriesTable, companiesTable, drugsTable, importErrorsTable, importFilesTable, importJobsTable, productOverridesTable, productsTable, stockBatchesTable } from "@workspace/db";
 import { requireAdminRequest } from "../lib/firebase-admin";
 import { previewImportFile, syncImportJob } from "../lib/catalog-sync";
@@ -96,7 +96,7 @@ router.get("/catalog/imports/:id", async (req, res): Promise<void> => {
   res.json({ job, files, errors });
 });
 
-router.post("/catalog/imports/upload", async (req, res): Promise<void> => {
+router.post("/catalog/imports/upload", raw({ type: ["application/octet-stream", "text/plain"], limit: MAX_UPLOAD_BYTES }), async (req, res): Promise<void> => {
   if (!await adminGuard(req, res)) return;
   const body = req.body as Buffer;
   const fileName = getQueryString(req.header("x-file-name"));
@@ -104,10 +104,20 @@ router.post("/catalog/imports/upload", async (req, res): Promise<void> => {
   let fileType: ReturnType<typeof detectType>;
   try { fileType = detectType(fileName); } catch (error) { res.status(400).json({ error: error instanceof Error ? error.message : "Unsupported SDF filename." }); return; }
   const parsed = await previewImportFile(fileName, body.toString("utf8"));
-  const [job] = await db.insert(importJobsTable).values({ status: "uploaded", recordsDetected: parsed.records.length, errorCount: parsed.errors.length }).returning();
-  await db.insert(importFilesTable).values({ jobId: job.id, fileType, fileName, fileSize: body.length, contentHash: parsed.hash, sourceText: body.toString("utf8"), detectedDelimiter: parsed.delimiter, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, mapping: parsed.mapping, preview: parsed.fields.length ? parsed.records.slice(0, 10).map((row) => Object.fromEntries(parsed.fields.map((field) => [field.name, row.values[field.index] ?? ""]))) : [] });
-  if (parsed.errors.length) await db.insert(importErrorsTable).values(parsed.errors.map((item) => ({ jobId: job.id, fileId: null, recordNumber: item.recordNumber, reason: item.reason, sourceIdentifier: null, sourceExcerpt: item.excerpt })));
-  res.status(201).json({ jobId: job.id, fileName, fileType, fileSize: body.length, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, delimiter: parsed.delimiter, fields: parsed.fields, errors: parsed.errors, mappings: mappingFor(fileType) });
+  const requestedJobId = Number.parseInt(getQueryString(req.header("x-import-job-id")), 10);
+  let jobId = Number.isFinite(requestedJobId) && requestedJobId > 0 ? requestedJobId : undefined;
+  if (jobId) {
+    const [existingJob] = await db.select({ id: importJobsTable.id }).from(importJobsTable).where(eq(importJobsTable.id, jobId)).limit(1);
+    if (!existingJob) { res.status(404).json({ error: "Import job not found." }); return; }
+  } else {
+    const [job] = await db.insert(importJobsTable).values({ status: "uploaded" }).returning({ id: importJobsTable.id });
+    jobId = job.id;
+  }
+  await db.insert(importFilesTable).values({ jobId, fileType, fileName, fileSize: body.length, contentHash: parsed.hash, sourceText: body.toString("utf8"), detectedDelimiter: parsed.delimiter, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, mapping: parsed.mapping, preview: parsed.fields.length ? parsed.records.slice(0, 10).map((row) => Object.fromEntries(parsed.fields.map((field) => [field.name, row.values[field.index] ?? ""]))) : [] }).onConflictDoUpdate({ target: [importFilesTable.jobId, importFilesTable.fileType], set: { fileName, fileSize: body.length, contentHash: parsed.hash, sourceText: body.toString("utf8"), detectedDelimiter: parsed.delimiter, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, mapping: parsed.mapping, preview: parsed.fields.length ? parsed.records.slice(0, 10).map((row) => Object.fromEntries(parsed.fields.map((field) => [field.name, row.values[field.index] ?? ""]))) : [], updatedAt: new Date() } });
+  const [{ recordsDetected }] = await db.select({ recordsDetected: sql<number>`coalesce(sum(${importFilesTable.recordCount}), 0)` }).from(importFilesTable).where(eq(importFilesTable.jobId, jobId));
+  await db.update(importJobsTable).set({ recordsDetected: Number(recordsDetected), errorCount: parsed.errors.length }).where(eq(importJobsTable.id, jobId));
+  if (parsed.errors.length) await db.insert(importErrorsTable).values(parsed.errors.map((item) => ({ jobId: jobId!, fileId: null, recordNumber: item.recordNumber, reason: item.reason, sourceIdentifier: null, sourceExcerpt: item.excerpt })));
+  res.status(201).json({ jobId, fileName, fileType, fileSize: body.length, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, delimiter: parsed.delimiter, fields: parsed.fields, errors: parsed.errors, mappings: mappingFor(fileType) });
 });
 
 router.post("/catalog/imports/:id/sync", async (req, res): Promise<void> => {

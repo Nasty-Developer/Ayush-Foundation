@@ -1,0 +1,805 @@
+AYUSH MEDICO — CUSTOMER REQUESTS + HOMEPAGE VISUAL UPGRADE
+
+IMPORTANT:
+Do not just explain this task.
+Actually implement the required changes.
+
+We now need to improve the customer-facing website AND create the backend flow for customer inquiries and medicine availability requests.
+
+The medicine catalogue architecture is already being designed around PostgreSQL.
+
+IMPORTANT DATABASE RULE:
+
+DO NOT store customer medicine availability requests or customer inquiries in Firebase/Firestore.
+
+Use PostgreSQL for:
+
+- Medicine availability requests
+- Customer inquiries
+- Request status
+- Admin notes
+- Request timestamps
+- Customer contact information
+- Request history
+
+Firebase should NOT be used as the primary database for these customer request records.
+
+==================================================
+1. HOMEPAGE VISUAL PROBLEM
+
+The current homepage hero looks too empty and plain.
+
+The screenshot shows a large amount of light/white space around the hero content.
+
+Improve the visual presentation significantly.
+
+DO NOT redesign the entire website from scratch.
+
+Keep the current Ayush Medico design language, typography, spacing system and premium pharmacy identity.
+
+But make the homepage feel more alive and visually rich.
+
+==================================================
+2. HERO BACKGROUND / VISUAL
+
+Add a tasteful background visual treatment to the hero section.
+
+The background can use:
+
+- Premium pharmacy imagery
+- Healthcare/product imagery
+- Soft green pharmacy-themed gradient
+- Subtle image overlay
+- Soft decorative shapes
+- Healthcare/product visual elements
+
+The visual must remain professional.
+
+Use the Ayush Medico green brand direction.
+
+Do NOT make the background extremely dark.
+
+Do NOT make text difficult to read.
+
+Do NOT use a random unrelated stock image.
+
+The hero should feel like a real premium pharmacy website.
+
+==================================================
+3. HERO VISUAL COMPOSITION
+
+The hero should have stronger visual balance.
+
+Current structure is approximately:
+
+LEFT:
+Headline
+Description
+Search
+
+RIGHT:
+Pharmacy image
+
+Improve this so the entire hero feels intentionally designed.
+
+Possible approach:
+
+LEFT:
+Headline
+Description
+Search
+Primary CTA
+Secondary CTA
+
+RIGHT:
+Large pharmacy/product visual
+
+BACKGROUND:
+Soft green/healthcare visual treatment
+
+Add subtle depth using:
+
+- gradient
+- soft shapes
+- image overlay
+- gentle shadows
+- glass-style supporting elements
+
+Do NOT overdo animations.
+
+==================================================
+4. PROMOTIONAL BANNER
+
+Keep the promotional banner/carousel system already requested.
+
+It should showcase general pharmacy categories/products such as:
+
+- Everyday medicines
+- Baby diapers
+- Baby care
+- Bandages
+- First aid
+- Personal care
+- Healthcare devices
+- General pharmacy products
+- Vitamins
+- Fast local pharmacy service
+
+The slides must automatically rotate.
+
+Do NOT put a large form inside the banner.
+
+The banner is for promotion/discovery.
+
+==================================================
+5. MEDICINE AVAILABILITY FORM
+
+Now implement the actual customer-facing Medicine Availability form.
+
+Create a dedicated section/page for:
+
+"Check Medicine Availability"
+
+The customer should be able to submit a request.
+
+Fields:
+
+- Customer Name
+- Mobile Number
+- Medicine Name
+- Quantity
+- Message
+- Prescription upload — OPTIONAL and only if the existing project architecture supports secure future storage
+
+IMPORTANT:
+
+Do not require a prescription upload for every request.
+
+For this phase, if prescription storage has not yet been securely implemented, leave the upload as a clearly marked future-ready option or omit the actual file upload rather than storing files unsafely.
+
+==================================================
+6. MEDICINE AVAILABILITY FORM UX
+
+Make the form premium and simple.
+
+Use:
+
+- clean card
+- clear labels
+- icons where appropriate
+- proper spacing
+- mobile-friendly fields
+- validation
+- loading state
+- success state
+- error state
+
+Example success message:
+
+"Your medicine request has been received. Our team will review it and get back to you."
+
+Do NOT promise a specific response time unless one is officially configured.
+
+==================================================
+7. DATABASE — MEDICINE REQUESTS
+
+Create a PostgreSQL table for medicine availability requests.
+
+Suggested structure:
+
+medicine_requests
+
+Fields can include:
+
+- id
+- customerName
+- phone
+- medicineName
+- quantity
+- message
+- status
+- adminNotes
+- createdAt
+- updatedAt
+
+Status values:
+
+NEW
+REVIEWING
+AVAILABLE
+PARTIALLY_AVAILABLE
+UNAVAILABLE
+CONTACTED
+RESOLVED
+CANCELLED
+
+Use a proper enum/type where appropriate.
+
+Do NOT store fake requests.
+
+==================================================
+8. CUSTOMER REQUEST FLOW
+
+Customer:
+
+Fill Medicine Availability form
+        ↓
+Submit
+        ↓
+Validate
+        ↓
+POST request to secure backend
+        ↓
+PostgreSQL
+        ↓
+Request created as NEW
+        ↓
+Admin Panel
+        ↓
+Admin reviews request
+
+The customer must NOT directly communicate with PostgreSQL.
+
+All database operations must happen server-side.
+
+==================================================
+9. ADMIN PANEL — MEDICINE REQUESTS
+
+The existing Admin Panel already contains:
+
+Customer
+→ Medicine Requests
+
+Make this module functional.
+
+Admin should see:
+
+- Request ID
+- Customer name
+- Phone
+- Medicine name
+- Quantity
+- Message
+- Status
+- Created date/time
+
+Add filters:
+
+- New
+- Reviewing
+- Available
+- Partially Available
+- Unavailable
+- Contacted
+- Resolved
+- Cancelled
+
+Add search by:
+
+- Customer name
+- Phone
+- Medicine name
+- Request ID
+
+==================================================
+10. MEDICINE REQUEST DETAIL
+
+When Admin opens a request, show a detailed request page/drawer.
+
+Show:
+
+Customer information
+Medicine information
+Request message
+Created date
+Current status
+Admin notes
+
+Allow Admin to:
+
+- Change status
+- Add internal admin note
+- Mark as contacted
+- Mark as resolved
+
+Admin notes must NOT be visible to customers.
+
+==================================================
+11. CUSTOMER INQUIRIES
+
+Create a separate customer inquiry system.
+
+Do NOT mix generic inquiries with medicine availability requests.
+
+Create:
+
+Customer
+→ Inquiries
+
+Admin Panel should have:
+
+Inquiries
+
+as a separate module.
+
+==================================================
+12. CONTACT / INQUIRY FORM
+
+Create a proper Contact/Inquiry form on the customer website.
+
+Fields:
+
+- Name
+- Mobile Number
+- Email (optional)
+- Subject
+- Message
+
+Keep it simple.
+
+Do not add unnecessary fields.
+
+Validation:
+
+- Name required
+- Mobile required
+- Email valid if provided
+- Subject required
+- Message required
+
+==================================================
+13. POSTGRESQL — INQUIRIES
+
+Create:
+
+inquiries
+
+Suggested fields:
+
+- id
+- name
+- phone
+- email
+- subject
+- message
+- status
+- adminNotes
+- createdAt
+- updatedAt
+
+Statuses:
+
+NEW
+READ
+REPLIED
+RESOLVED
+ARCHIVED
+
+Again:
+
+DO NOT use Firestore for this.
+
+Use PostgreSQL.
+
+==================================================
+14. ADMIN INQUIRIES
+
+Admin Panel:
+
+Customer
+→ Inquiries
+
+Show:
+
+- Name
+- Phone
+- Email
+- Subject
+- Message preview
+- Status
+- Created date
+
+Allow:
+
+- Open
+- Mark as read
+- Mark as replied
+- Add internal note
+- Resolve
+- Archive
+
+Add filters by status.
+
+==================================================
+15. DASHBOARD INTEGRATION
+
+Update the Admin Dashboard to show real counts from PostgreSQL.
+
+For example:
+
+Customer Engagement
+
+[ X ] New Inquiries
+[ X ] New Medicine Requests
+
+These numbers must come from the actual database.
+
+Do NOT use hardcoded zeroes once real records exist.
+
+Do NOT create fake demo records.
+
+==================================================
+16. QUICK ACTIONS
+
+The Admin Dashboard should have useful Quick Actions:
+
+Add Medicine
+View Medicine Requests
+View Inquiries
+Manage Categories
+Manage Companies
+Manage FAQs
+Manage Testimonials
+Update Announcement
+Store Settings
+
+Medicine Requests and Inquiries should open their actual Admin modules.
+
+==================================================
+17. ADMIN SECURITY
+
+Only authenticated/authorized Ayush Medico administrators can access:
+
+- Medicine Requests
+- Inquiries
+- Customer contact information
+- Admin notes
+- Database-backed customer records
+
+Do NOT expose these records publicly.
+
+Do NOT make database APIs publicly writable.
+
+Verify admin authorization server-side wherever appropriate.
+
+==================================================
+18. CUSTOMER PRIVACY
+
+Do not display customer inquiries publicly.
+
+Do not display phone numbers publicly from submitted requests.
+
+Do not expose customer request IDs in a way that reveals private information.
+
+Keep customer data restricted to authorized admin users.
+
+==================================================
+19. MOBILE EXPERIENCE
+
+Both forms must work beautifully on mobile.
+
+Test:
+
+320px
+375px
+390px
+414px
+Tablet
+Desktop
+
+Ensure:
+
+- inputs don't overflow
+- buttons are full-width where appropriate
+- labels remain readable
+- keyboard input works correctly
+- success/error states are clear
+- forms don't become excessively long
+
+==================================================
+20. CONTACT SECTION
+
+Improve the existing Contact section so it feels like a real pharmacy contact experience.
+
+Include the existing Ayush Medico address:
+
+Shop No.1, Hut No.67 1/1, Ground Floor,
+Gangaram Makad Wala Chawl,
+Halav Pool, Near Rolex Hotel,
+CTS No.451,
+Kurla West, Mumbai – 400070
+
+Phone:
+
++91 98332 73838
+
+Actions:
+
+Call Now
+WhatsApp Us
+Get Directions
+
+Keep these actions mobile-friendly.
+
+==================================================
+21. WHATSAPP
+
+WhatsApp:
+
++91 98332 73838
+
+Use the correct WhatsApp destination.
+
+Keep:
+
+- Hero WhatsApp action
+- Contact WhatsApp action
+- Floating WhatsApp button
+
+But do not clutter the page with excessive duplicate buttons.
+
+==================================================
+22. GET DIRECTIONS
+
+Get Directions should open Google Maps for the actual Ayush Medico location.
+
+Do not invent a different address.
+
+Use the exact supplied address.
+
+Make the button clearly identifiable.
+
+==================================================
+23. CONTACT FORM LOCATION
+
+The contact/inquiry form should appear in an appropriate customer-facing location.
+
+Good options:
+
+Contact page
+or
+Contact section near the bottom of homepage
+
+Do not place the entire inquiry form inside the hero.
+
+The hero should remain visually clean.
+
+==================================================
+24. MEDICINE AVAILABILITY CTA
+
+The homepage should prominently offer:
+
+"Check Medicine Availability"
+
+This should open the actual availability form/page.
+
+Do not make it a fake frontend-only form.
+
+It must submit to the backend/PostgreSQL system.
+
+==================================================
+25. REQUEST FEEDBACK
+
+After successful submission:
+
+Medicine Availability:
+
+"Request received successfully."
+
+Inquiry:
+
+"Thanks for contacting Ayush Medico. Your message has been received."
+
+Do not expose database details.
+
+Do not show internal request information.
+
+==================================================
+26. LOADING / ERROR STATES
+
+During submission:
+
+Disable submit button.
+
+Show:
+
+"Submitting..."
+
+Prevent duplicate submissions.
+
+If backend fails:
+
+"Something went wrong. Please try again."
+
+Do not show:
+
+SQL errors
+database connection strings
+stack traces
+internal API errors
+
+to customers.
+
+==================================================
+27. API ARCHITECTURE
+
+Create clean backend endpoints/services.
+
+For example:
+
+POST /api/medicine-requests
+GET /api/admin/medicine-requests
+PATCH /api/admin/medicine-requests/:id
+
+POST /api/inquiries
+GET /api/admin/inquiries
+PATCH /api/admin/inquiries/:id
+
+Use the architecture that best matches the current project.
+
+IMPORTANT:
+
+The Vercel deployment root remains:
+
+artifacts/ayush-medico
+
+Do not require an undeployed sibling API project.
+
+If serverless API routes are required, configure them inside the deployed application architecture.
+
+==================================================
+28. PERFORMANCE
+
+The homepage must remain fast.
+
+Do not load all:
+
+medicine requests
+inquiries
+medicines
+stock
+database records
+
+on the homepage.
+
+Only fetch data when needed.
+
+Admin tables must use:
+
+- pagination
+- filtering
+- server-side queries
+
+==================================================
+29. HOMEPAGE EMPTY SPACE
+
+Specifically fix the empty visual space visible in the current screenshot.
+
+The hero should not look like:
+
+white background
++
+text
++
+one isolated image
+
+Make it feel like a premium branded pharmacy homepage.
+
+Use:
+
+- background image/visual
+- subtle green color treatment
+- decorative pharmacy visuals
+- balanced content
+- stronger hero composition
+
+Keep readability and performance as priorities.
+
+==================================================
+30. DO NOT BREAK EXISTING FEATURES
+
+Do not break:
+
+- Vercel routing
+- /admin
+- /admin/login
+- Firebase Authentication
+- Admin authorization
+- Medicine catalogue architecture
+- SDF synchronization architecture
+- Cloudinary architecture
+- WhatsApp
+- Call Now
+- Get Directions
+
+Integrate with what already exists.
+
+Do not replace working systems unnecessarily.
+
+==================================================
+31. DATABASE ARCHITECTURE
+
+The current intended architecture is:
+
+Firebase
+→ Admin Authentication / lightweight Firebase functionality
+
+PostgreSQL
+→ Medicine catalogue
+→ Stock
+→ Medicine Requests
+→ Inquiries
+→ Admin-managed catalogue data
+
+Cloudinary
+→ Medicine images
+→ Product/category promotional images where appropriate
+
+Do NOT move everything into Firebase.
+
+==================================================
+32. FINAL TESTING
+
+Before completing:
+
+1. Submit Medicine Availability request.
+2. Confirm it reaches PostgreSQL.
+3. Confirm Admin Panel displays it.
+4. Change request status.
+5. Add admin note.
+6. Confirm note is saved.
+7. Submit Contact Inquiry.
+8. Confirm it reaches PostgreSQL.
+9. Confirm Admin Panel displays it.
+10. Change inquiry status.
+11. Refresh Admin Panel.
+12. Confirm data persists.
+
+Then test:
+
+- Vercel production build
+- TypeScript
+- Admin authentication
+- Customer homepage
+- Mobile forms
+- Desktop forms
+- WhatsApp
+- Call Now
+- Get Directions
+
+==================================================
+33. FINAL REPORT
+
+Report:
+
+- Homepage visual changes
+- Background/hero changes
+- Medicine Availability implementation
+- Inquiry implementation
+- PostgreSQL tables created
+- API routes created
+- Admin modules created/updated
+- Security implementation
+- Mobile testing
+- TypeScript result
+- Production build result
+- Any remaining issues
+
+IMPORTANT:
+
+DO NOT USE FIREBASE/FIRESTORE FOR CUSTOMER INQUIRIES OR MEDICINE AVAILABILITY DATA.
+
+DO NOT CREATE FAKE DATA.
+
+DO NOT STOP AT UI.
+
+IMPLEMENT THE COMPLETE:
+
+CUSTOMER FORM
+→ API
+→ POSTGRESQL
+→ ADMIN PANEL
+
+FLOW.
+
+STOP ONLY AFTER BUILD VALIDATION.

@@ -1,0 +1,90 @@
+URGENT — FIX THE VERCEL DEPLOYMENT FAILURE ONLY.
+
+Vercel deployment is currently failing during dependency installation with:
+
+ERR_PNPM_OUTDATED_LOCKFILE
+
+The exact error says:
+
+Cannot install with "frozen-lockfile" because pnpm-lock.yaml is not up to date with <ROOT>/artifacts/ayush-medico/package.json
+
+Failure reason:
+
+specifiers in the lockfile don't match specifiers in package.json:
+
+* 1 dependencies were added: wouter@^3.3.5
+
+IMPORTANT:
+
+DO NOT change the Vercel Root Directory.
+
+The Vercel Root Directory must remain:
+
+artifacts/ayush-medico
+
+DO NOT move the application.
+DO NOT change the workspace structure.
+DO NOT remove the existing sync/monorepo architecture.
+DO NOT modify Vercel settings just to bypass this error.
+DO NOT use --no-frozen-lockfile as the Vercel production workaround.
+
+Instead, fix the repository itself.
+
+TASK:
+
+1. Inspect:
+   artifacts/ayush-medico/package.json
+   pnpm-lock.yaml
+   workspace configuration files
+
+2. Determine why wouter@^3.3.5 was added to package.json without the corresponding lockfile update.
+
+3. If wouter is actually required by the current application:
+   - Keep wouter in package.json.
+   - Update/regenerate pnpm-lock.yaml correctly so it contains the exact dependency specification.
+   - Preserve all existing workspace dependencies.
+
+4. If wouter is NOT actually used by the application:
+   - Remove the unnecessary dependency from package.json instead.
+   - Update pnpm-lock.yaml accordingly.
+
+Do NOT blindly install or remove dependencies without checking the source code first.
+
+5. Run the appropriate pnpm install/update command from the repository root to synchronize the lockfile.
+
+6. Verify that:
+   package.json
+   and
+   pnpm-lock.yaml
+   are synchronized.
+
+7. Run the production build using the SAME build command/configuration used by the project.
+
+8. Run TypeScript checks if available.
+
+9. Make sure the fix works with Vercel's default frozen-lockfile installation.
+
+10. Commit/update the corrected pnpm-lock.yaml and any necessary package.json change in the repository.
+
+IMPORTANT:
+Do NOT fix this by changing Vercel's install command to:
+pnpm install --no-frozen-lockfile
+
+The repository lockfile itself must be correct so a normal Vercel deployment succeeds.
+
+Also do NOT change:
+- Vercel Root Directory
+- Output Directory
+- Build architecture
+- workspace structure
+
+At the end report:
+
+- Whether wouter is actually used
+- What changed in package.json
+- What changed in pnpm-lock.yaml
+- Production build result
+- TypeScript result
+- Whether the repository is now ready for Vercel deployment
+
+STOP after fixing this deployment issue.
