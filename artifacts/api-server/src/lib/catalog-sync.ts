@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import {
   db,
   categoriesTable,
@@ -92,14 +92,23 @@ function bump(summary: SyncSummary, state: "imported" | "updated" | "unchanged")
   summary[state] += 1;
 }
 
+function chunks<T>(items: T[], size = 500) {
+  const result: T[][] = [];
+  for (let index = 0; index < items.length; index += size) result.push(items.slice(index, index + size));
+  return result;
+}
+
 async function syncProducts(parsed: ParsedSdf, jobId: number): Promise<SyncSummary> {
   const errors: Array<{ recordNumber: number; reason: string; sourceIdentifier?: string }> = [];
   const summary: SyncSummary = { imported: 0, updated: 0, unchanged: 0, skipped: 0 };
-  const [companies, categories, drugs] = await Promise.all([
+  const [companies, categories, drugs, existingProducts] = await Promise.all([
     db.select({ id: companiesTable.id, sourceId: companiesTable.sourceCompanyId, normalizedName: companiesTable.normalizedName }).from(companiesTable),
     db.select({ id: categoriesTable.id, sourceId: categoriesTable.sourceCategoryId, normalizedName: categoriesTable.normalizedName }).from(categoriesTable),
     db.select({ id: drugsTable.id, sourceId: drugsTable.sourceDrugId, normalizedName: drugsTable.normalizedDrugName }).from(drugsTable),
+    db.select({ sourceId: productsTable.sourceProductId, sourceHash: productsTable.sourceHash }).from(productsTable),
   ]);
+  const existingBySource = new Map(existingProducts.map((product) => [product.sourceId, product.sourceHash]));
+  const rowsToWrite: Array<typeof productsTable.$inferInsert> = [];
   const byRef = (items: Array<{ id: number; sourceId: string; normalizedName: string }>, ref: string) =>
     items.find((item) => item.sourceId === ref || item.normalizedName === normalized(ref))?.id ?? null;
 
@@ -126,9 +135,8 @@ async function syncProducts(parsed: ParsedSdf, jobId: number): Promise<SyncSumma
     const unitCount = value(row, parsed, "unitCount");
     const packDetail = value(row, parsed, "packDetail") || value(row, parsed, "packSize");
     const sourceCategory = value(row, parsed, "sourceCategory") || categoryName;
-    const [existing] = await db.select({ id: productsTable.id, sourceHash: productsTable.sourceHash }).from(productsTable).where(eq(productsTable.sourceProductId, sourceId)).limit(1);
-    const state = compareCounts(existing?.sourceHash, rowHash);
-    await db.insert(productsTable).values({
+    const state = compareCounts(existingBySource.get(sourceId), rowHash);
+    rowsToWrite.push({
       sourceProductId: sourceId,
       productName,
       normalizedProductName: normalized(productName),
@@ -147,30 +155,33 @@ async function syncProducts(parsed: ParsedSdf, jobId: number): Promise<SyncSumma
       sourceData: rowData,
       sourceHash: rowHash,
       active: true,
-    }).onConflictDoUpdate({
+    });
+    bump(summary, state);
+  }
+  for (const batch of chunks(rowsToWrite)) {
+    await db.insert(productsTable).values(batch).onConflictDoUpdate({
       target: productsTable.sourceProductId,
       set: {
-        productName,
-        normalizedProductName: normalized(productName),
-        companyId,
-        categoryId,
-        drugId,
-        sourceCompanyName: companyName || null,
-        sourceCategoryName: categoryName || null,
-        sourceDrugName: drugName || null,
-        dosageForm: dosagePack || null,
-        packSize: packDetail || unitCount || null,
-        dosagePack: dosagePack || null,
-        unitCount: unitCount || null,
-        packDetail: packDetail || null,
-        sourceCategory: sourceCategory || null,
-        sourceData: rowData,
-        sourceHash: rowHash,
-        active: true,
+        productName: sql`excluded.product_name`,
+        normalizedProductName: sql`excluded.normalized_product_name`,
+        companyId: sql`excluded.company_id`,
+        categoryId: sql`excluded.category_id`,
+        drugId: sql`excluded.drug_id`,
+        sourceCompanyName: sql`excluded.source_company_name`,
+        sourceCategoryName: sql`excluded.source_category_name`,
+        sourceDrugName: sql`excluded.source_drug_name`,
+        dosageForm: sql`excluded.dosage_form`,
+        packSize: sql`excluded.pack_size`,
+        dosagePack: sql`excluded.dosage_pack`,
+        unitCount: sql`excluded.unit_count`,
+        packDetail: sql`excluded.pack_detail`,
+        sourceCategory: sql`excluded.source_category`,
+        sourceData: sql`excluded.source_data`,
+        sourceHash: sql`excluded.source_hash`,
+        active: sql`excluded.active`,
         updatedAt: new Date(),
       },
     });
-    bump(summary, state);
   }
   summary.skipped = errors.length;
   await addErrors(jobId, errors);
@@ -180,7 +191,12 @@ async function syncProducts(parsed: ParsedSdf, jobId: number): Promise<SyncSumma
 async function syncStock(parsed: ParsedSdf, jobId: number): Promise<SyncSummary> {
   const errors: Array<{ recordNumber: number; reason: string; sourceIdentifier?: string }> = [];
   const summary: SyncSummary = { imported: 0, updated: 0, unchanged: 0, skipped: 0 };
-  const products = await db.select({ id: productsTable.id, sourceId: productsTable.sourceProductId }).from(productsTable);
+  const [products, existingStocks] = await Promise.all([
+    db.select({ id: productsTable.id, sourceId: productsTable.sourceProductId }).from(productsTable),
+    db.select({ sourceId: stockBatchesTable.sourceStockId, sourceData: stockBatchesTable.sourceData }).from(stockBatchesTable),
+  ]);
+  const existingBySource = new Map(existingStocks.map((stock) => [stock.sourceId, JSON.stringify(stock.sourceData)]));
+  const rowsToWrite: Array<typeof stockBatchesTable.$inferInsert> = [];
   for (const row of parsed.records) {
     const sourceId = value(row, parsed, "sourceId");
     const productRef = value(row, parsed, "productRef");
@@ -195,9 +211,8 @@ async function syncStock(parsed: ParsedSdf, jobId: number): Promise<SyncSummary>
     if (productRef && !productId) {
       errors.push({ recordNumber: row.recordNumber, reason: "Stock record references a product that was not imported; the stock row was retained unlinked.", sourceIdentifier: productRef });
     }
-    const [existing] = await db.select({ id: stockBatchesTable.id, sourceData: stockBatchesTable.sourceData }).from(stockBatchesTable).where(eq(stockBatchesTable.sourceStockId, sourceId)).limit(1);
-    const state = compareCounts(existing ? JSON.stringify(existing.sourceData) : undefined, rowHash);
-    await db.insert(stockBatchesTable).values({
+    const state = compareCounts(existingBySource.get(sourceId), rowHash);
+    rowsToWrite.push({
       sourceStockId: sourceId,
       productId,
       batchNumber: value(row, parsed, "batch") || null,
@@ -214,28 +229,31 @@ async function syncStock(parsed: ParsedSdf, jobId: number): Promise<SyncSummary>
       linkStatus,
       sourceData: rowData,
       lastSyncedAt: new Date(),
-    }).onConflictDoUpdate({
+    });
+    bump(summary, state);
+  }
+  for (const batch of chunks(rowsToWrite)) {
+    await db.insert(stockBatchesTable).values(batch).onConflictDoUpdate({
       target: stockBatchesTable.sourceStockId,
       set: {
-        productId,
-        batchNumber: value(row, parsed, "batch") || null,
-        expiryMonth: value(row, parsed, "expiry") || null,
-        expiryDate: null,
-        quantity: validNumeric(value(row, parsed, "quantity")),
-        batchQuantity: validNumeric(value(row, parsed, "batchQuantity")),
-        mrp: validNumeric(value(row, parsed, "mrp")),
-        salePrice: validNumeric(value(row, parsed, "salePrice")),
-        cost: validNumeric(value(row, parsed, "cost")),
-        discount: validNumeric(value(row, parsed, "discount")),
-        priceFlag: value(row, parsed, "priceFlag") || null,
-        stockFlag: value(row, parsed, "stockFlag") || null,
-        linkStatus,
-        sourceData: rowData,
-        lastSyncedAt: new Date(),
+        productId: sql`excluded.product_id`,
+        batchNumber: sql`excluded.batch_number`,
+        expiryMonth: sql`excluded.expiry_month`,
+        expiryDate: sql`excluded.expiry_date`,
+        quantity: sql`excluded.quantity`,
+        batchQuantity: sql`excluded.batch_quantity`,
+        mrp: sql`excluded.mrp`,
+        salePrice: sql`excluded.sale_price`,
+        cost: sql`excluded.cost`,
+        discount: sql`excluded.discount`,
+        priceFlag: sql`excluded.price_flag`,
+        stockFlag: sql`excluded.stock_flag`,
+        linkStatus: sql`excluded.link_status`,
+        sourceData: sql`excluded.source_data`,
+        lastSyncedAt: sql`excluded.last_synced_at`,
         updatedAt: new Date(),
       },
     });
-    bump(summary, state);
   }
   summary.skipped = errors.length;
   await addErrors(jobId, errors);
