@@ -47,3 +47,7 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+attached_assets/*firebase-adminsdk*.json
+
+attached_assets/*firebase-adminsdk*.json
