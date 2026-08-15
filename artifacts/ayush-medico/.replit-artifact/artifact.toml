@@ -12,17 +12,17 @@ paths = [ "/" ]
 localPort = 5173
 
 [services.development]
-run = "pnpm --filter @workspace/ayush-foundation run dev"
+run = "pnpm --filter @workspace/ayush-medico run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/ayush-foundation", "run", "build" ]
+build = [ "pnpm", "--filter", "@workspace/ayush-medico", "run", "build" ]
 serve = "static"
-publicDir = "artifacts/ayush-foundation/dist/public"
+publicDir = "artifacts/ayush-medico/dist/public"
 
 [[services.production.rewrites]]
 from = "/*"
 to = "/index.html"
 
 [services.env]
-PORT = "21712"
+PORT = "5173"
 BASE_PATH = "/"
