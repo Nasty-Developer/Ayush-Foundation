@@ -17,7 +17,7 @@ async function main() {
   let recordsDetected = 0;
   const report: Array<{ fileName: string; type: string; bytes: number; records: number; format: string; errors: number }> = [];
   for (const fileName of files) {
-    const body = readFileSync(join(process.cwd(), "attached_assets", fileName));
+    const body = readFileSync(join(process.cwd(), "../../attached_assets", fileName));
     const parsed = await previewImportFile(fileName, body);
     recordsDetected += parsed.records.length;
     report.push({ fileName, type: parsed.type, bytes: body.length, records: parsed.records.length, format: parsed.format, errors: parsed.errors.length });
