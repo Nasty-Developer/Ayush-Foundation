@@ -1,0 +1,102 @@
+Fix the Ayush Medico Admin Panel Inventory Sync upload completely.
+
+Current error:
+
+POST /api/catalog/imports/upload → 500 Internal Server Error
+
+The frontend displays:
+
+"Upload failed
+Inventory API returned 500 Internal Server Error as text/html; charset=utf-8. Check that /api/catalog/imports/upload is deployed as an API route."
+
+The Inventory Sync page uploads these 5 fixed-width SDF files:
+
+* PRODUCTS.SDF
+* STOCK.SDF
+* DRUG.SDF
+* COMPANY.SDF
+* CATEGORY.SDF
+
+IMPORTANT:
+Do not remove or redesign the existing Inventory Sync UI.
+Do not remove existing catalogue data.
+Do not replace the SDF importer with dummy/mock data.
+
+First inspect the COMPLETE backend implementation of:
+
+* /api/catalog/imports/upload
+* /api/catalog/imports/*
+* SDF parsing code
+* PostgreSQL database connection
+* database schema/migrations
+* upload/multipart handling
+* Vercel/Replit deployment configuration
+* package.json scripts
+* vercel.json
+* server/API entry points
+
+Find the actual reason for the HTTP 500.
+
+Make the upload endpoint production-safe:
+
+1. Ensure /api/catalog/imports/upload is actually registered and reachable in the deployed environment.
+
+2. Correctly accept multipart/form-data containing the five SDF files.
+
+3. Validate that the expected files are present without crashing when one is missing.
+
+4. Parse the fixed-width ASCII SDF files safely.
+
+5. Handle malformed rows gracefully and record them in import history instead of crashing the entire request.
+
+6. Validate PostgreSQL environment variables and database connectivity.
+
+7. Fix any incorrect server/runtime assumptions that work in Replit Preview but fail in the deployed API.
+
+8. Do NOT return an HTML error page from the API. Every failure must return JSON such as:
+   {
+   "success": false,
+   "error": "clear human-readable error",
+   "details": "safe diagnostic information"
+   }
+
+9. Add proper server-side logging around:
+
+* request received
+* uploaded filenames
+* file sizes
+* parser start/end
+* database connection
+* database insert/upsert
+* exact failure point
+
+Do NOT expose secrets or database passwords in logs.
+
+10. Preserve the intended behavior:
+
+* Existing catalogue data must NOT be deleted.
+* Records should be upserted using their source identifier.
+* Import history should remain available.
+* Malformed rows should remain visible in import history.
+* Successful imports should be safely repeatable without creating unwanted duplicates.
+
+11. Check whether the route is compatible with the actual deployment platform/runtime. If the current architecture assumes a long-running Express server but deployment is using serverless API routes, adapt the route properly instead of adding a temporary workaround.
+
+12. Check CORS, request body limits, multipart parsing, filesystem/temp-file handling, and runtime compatibility.
+
+13. After fixing, run the project's existing typecheck/build/test commands.
+
+14. Test the endpoint locally with a small valid multipart upload before declaring it fixed.
+
+15. Do not simply hide the error in the frontend. Fix the backend root cause.
+
+Finally, tell me:
+
+* exact root cause of the 500
+* files changed
+* what was fixed
+* whether the endpoint works
+* whether build/typecheck passes
+* whether the five SDF files can now be uploaded and synced to PostgreSQL safely
+
+Keep the existing Ayush Medico design and functionality intact.

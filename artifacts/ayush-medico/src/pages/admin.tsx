@@ -968,10 +968,12 @@ export function InventoryPage() {
       let currentJobId = jobId;
       for (const file of files) {
         const endpoint = '/api/catalog/imports/upload';
+        const formData = new FormData();
+        formData.append('file', file, file.name);
         const response = await fetch(endpoint, {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/octet-stream', 'X-File-Name': file.name, ...(currentJobId ? { 'X-Import-Job-Id': String(currentJobId) } : {}) },
-          body: file,
+          headers: { Authorization: `Bearer ${token}`, 'X-File-Name': file.name, ...(currentJobId ? { 'X-Import-Job-Id': String(currentJobId) } : {}) },
+          body: formData,
         });
         const payload = await readApiResponse<{
           jobId: number;
