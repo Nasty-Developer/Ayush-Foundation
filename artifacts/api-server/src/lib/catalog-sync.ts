@@ -10,8 +10,10 @@ import {
   importJobsTable,
   productsTable,
   stockBatchesTable,
+  isNull,
 } from "@workspace/db";
 import { getMapped, parseSdf, type ParsedSdf, type SdfType } from "./sdf";
+import { logger } from "./logger";
 
 type ParsedFile = { file: typeof importFilesTable.$inferSelect; parsed: ParsedSdf };
 type SyncSummary = { imported: number; updated: number; unchanged: number; skipped: number };
@@ -33,9 +35,18 @@ function validNumeric(valueToCheck: string) {
   return /^-?\d+(?:\.\d+)?$/.test(valueToCheck) ? valueToCheck : null;
 }
 
-function addErrors(jobId: number, errors: Array<{ recordNumber: number; reason: string; sourceIdentifier?: string; excerpt?: string }>) {
+async function addErrors(jobId: number, errors: Array<{ recordNumber: number; reason: string; sourceIdentifier?: string; excerpt?: string }>) {
   if (!errors.length) return Promise.resolve();
-  return db.insert(importErrorsTable).values(errors.map((error) => ({
+  const existing = await db.select({
+    recordNumber: importErrorsTable.recordNumber,
+    reason: importErrorsTable.reason,
+    sourceIdentifier: importErrorsTable.sourceIdentifier,
+    sourceExcerpt: importErrorsTable.sourceExcerpt,
+  }).from(importErrorsTable).where(and(eq(importErrorsTable.jobId, jobId), isNull(importErrorsTable.fileId)));
+  const existingKeys = new Set(existing.map((error) => JSON.stringify([error.recordNumber, error.reason, error.sourceIdentifier, error.sourceExcerpt])));
+  const newErrors = errors.filter((error) => !existingKeys.has(JSON.stringify([error.recordNumber, error.reason, error.sourceIdentifier ?? null, error.excerpt ?? null])));
+  if (!newErrors.length) return;
+  await db.insert(importErrorsTable).values(newErrors.map((error) => ({
     jobId,
     fileId: null,
     recordNumber: error.recordNumber,
@@ -275,11 +286,13 @@ export async function syncImportJob(jobId: number) {
   const parsedFiles: ParsedFile[] = ordered.map((file) => ({ file, parsed: parseSdf(file.fileName, file.sourceText) }));
   const blocked = parsedFiles.filter(({ parsed }) => parsed.mappingStatus === "review_required");
   if (blocked.length) throw new Error(`Cannot synchronize ${blocked.map(({ file }) => file.fileName).join(", ")} until its field mapping is verified.`);
+  logger.info({ jobId, fileCount: parsedFiles.length }, "Inventory PostgreSQL sync started");
   await db.update(importJobsTable).set({ status: "importing", startedAt: new Date() }).where(eq(importJobsTable.id, jobId));
   const startedAt = Date.now();
   const summary: SyncSummary = { imported: 0, updated: 0, unchanged: 0, skipped: 0 };
   summary.skipped = parsedFiles.reduce((total, { parsed }) => total + parsed.errors.length, 0);
   for (const { parsed } of parsedFiles) {
+    logger.info({ jobId, fileType: parsed.type, recordCount: parsed.records.length }, "Inventory PostgreSQL upsert started");
     const result = parsed.type === "PRODUCT"
       ? await syncProducts(parsed, jobId)
       : parsed.type === "STOCK"
@@ -289,6 +302,7 @@ export async function syncImportJob(jobId: number) {
     summary.updated += result.updated;
     summary.unchanged += result.unchanged;
     summary.skipped += result.skipped;
+    logger.info({ jobId, fileType: parsed.type, ...result }, "Inventory PostgreSQL upsert finished");
   }
   await db.update(importJobsTable).set({
     status: "completed",
@@ -301,5 +315,6 @@ export async function syncImportJob(jobId: number) {
     durationMs: Date.now() - startedAt,
     summary,
   }).where(eq(importJobsTable.id, jobId));
+  logger.info({ jobId, ...summary, durationMs: Date.now() - startedAt }, "Inventory PostgreSQL sync finished");
   return summary;
 }
