@@ -74,10 +74,11 @@ const fixedWidthProfiles: Record<SdfType, FixedWidthProfile> = {
     width: 81,
     fields: [
       { name: "batch", start: 5, end: 20, mappedAs: "batch" },
+      { name: "productRef", start: 5, end: 10, mappedAs: "productRef" },
       { name: "quantity", start: 20, end: 25, mappedAs: "quantity" },
       { name: "expiry", start: 25, end: 32, mappedAs: "expiry" },
-      { name: "batchQuantity", start: 32, end: 35 },
-      { name: "mrp", start: 35, end: 40, mappedAs: "mrp" },
+      { name: "batchQuantity", start: 31, end: 34 },
+      { name: "mrp", start: 34, end: 40, mappedAs: "mrp" },
       { name: "cost", start: 40, end: 48, mappedAs: "cost" },
       { name: "discount", start: 48, end: 53 },
       { name: "priceFlag", start: 53, end: 55 },
@@ -209,7 +210,14 @@ function fixedWidthParse(type: SdfType, lines: string[], hash: string): ParsedSd
   }]);
   const records = nonEmpty.flatMap((raw, index) => raw.length === profile.width ? [{
     recordNumber: index + 1,
-    values: profile.fields.map((field) => raw.slice(field.start, field.end).trim()),
+    values: profile.fields.map((field) => {
+      if (field.mappedAs === "sourceId") {
+        // COMPANY.SDF and DRUG.SDF right-align numeric identifiers inside
+        // padded tails; slicing a fixed window truncates IDs such as 1101.
+        return raw.match(/(\d+)\s*$/)?.[1] ?? "";
+      }
+      return raw.slice(field.start, field.end).trim();
+    }),
     raw,
   }] : []);
   return {
