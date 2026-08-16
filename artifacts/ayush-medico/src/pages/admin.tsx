@@ -101,6 +101,21 @@ type ResourceConfig = {
 };
 
 const iconProps = { size: 16, strokeWidth: 1.8 };
+const MAX_SDF_FILE_BYTES = 60 * 1024 * 1024;
+const ALLOWED_SDF_FILE_NAMES = new Set([
+  'PRODUCT.SDF',
+  'STOCK.SDF',
+  'DRUG.SDF',
+  'COMPANY.SDF',
+  'CATEGORY.SDF',
+]);
+const configuredInventoryApiBase = (
+  import.meta.env.VITE_AYUSH_API_BASE_URL as string | undefined
+)?.trim().replace(/\/+$/, '');
+
+function inventoryApiEndpoint(path: string) {
+  return configuredInventoryApiBase ? `${configuredInventoryApiBase}${path}` : path;
+}
 
 const resourceConfigs: Record<string, ResourceConfig> = {
   medicines: {
@@ -457,6 +472,63 @@ function humanizeError(error: unknown) {
     return error.message;
   }
   return 'Something went wrong. Please try again.';
+}
+
+type ApiResponse = Record<string, unknown>;
+
+async function readApiResponse<T extends ApiResponse>(
+  response: Response,
+  endpoint: string,
+): Promise<T> {
+  const contentType = response.headers.get('content-type') ?? '';
+  const responseText = await response.text();
+  const isJson = contentType.toLowerCase().includes('application/json');
+  const trimmedResponse = responseText.trim();
+
+  if (!isJson) {
+    const platformMessage = trimmedResponse.slice(0, 300);
+    const sizeMessage =
+      response.status === 413 ||
+      /request entity too large|payload too large/i.test(platformMessage)
+        ? 'The selected SDF file is too large for the Vercel upload proxy. Set VITE_AYUSH_API_BASE_URL in Vercel to send uploads directly to the API server.'
+        : `Inventory API returned ${response.status} ${response.statusText || 'an error'} as ${contentType || 'plain text'}.`;
+    console.error('[Inventory Sync] API returned a non-JSON response', {
+      endpoint,
+      status: response.status,
+      contentType: contentType || '(missing)',
+      responseBody: platformMessage,
+    });
+    throw new Error(sizeMessage);
+  }
+
+  let payload: ApiResponse = {};
+  if (trimmedResponse) {
+    try {
+      const parsed: unknown = JSON.parse(responseText);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        throw new Error('The API returned a non-object JSON response.');
+      }
+      payload = parsed as ApiResponse;
+    } catch (error) {
+      console.error('[Inventory Sync] API returned invalid JSON', {
+        endpoint,
+        status: response.status,
+        responseBody: trimmedResponse.slice(0, 500),
+        error,
+      });
+      throw new Error(`Inventory API returned invalid JSON (${response.status}).`);
+    }
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      typeof payload.error === 'string'
+        ? payload.error
+        : `Inventory API request failed with ${response.status} ${response.statusText}.`,
+    );
+  }
+
+  return payload as T;
 }
 
 function LoadingPanel({ label = 'Loading' }: { label?: string }) {
@@ -852,5 +924,246 @@ export function AdminSettingsPage() {
 }
 
 export function InventoryPage() {
-  return <div className="space-y-7"><AdminPageHeading eyebrow="Inventory" title="Inventory sync" description="A prepared place for a future inventory connection, without connecting an external medicine database or importing random data." /><div className="flex min-h-[360px] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-primary/25 bg-card p-8 text-center"><span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-primary"><RefreshCw size={24} /></span><h2 className="mt-5 font-display text-2xl tracking-[-0.04em]">Sync is not configured</h2><p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">When Ayush Medico is ready to connect an approved inventory source, this workspace can hold the setup and sync status.</p></div></div>;
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [files, setFiles] = useState<File[]>([]);
+  const [jobId, setJobId] = useState<number | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState('');
+  const [summary, setSummary] = useState<Record<string, unknown> | null>(null);
+
+  function validateFiles(candidateFiles: File[]) {
+    const seen = new Set<string>();
+    for (const file of candidateFiles) {
+      const normalizedName = file.name.trim().toUpperCase();
+      if (
+        !normalizedName.endsWith('.SDF') ||
+        !ALLOWED_SDF_FILE_NAMES.has(normalizedName)
+      ) {
+        return `${file.name} is not an approved SDF source file. Select PRODUCT.SDF, STOCK.SDF, DRUG.SDF, COMPANY.SDF, or CATEGORY.SDF.`;
+      }
+      if (seen.has(normalizedName)) {
+        return `${file.name} is selected more than once.`;
+      }
+      if (file.size > MAX_SDF_FILE_BYTES) {
+        return `${file.name} is larger than the 60 MB per-file limit.`;
+      }
+      seen.add(normalizedName);
+    }
+    return null;
+  }
+
+  function handleFileSelection(event: ChangeEvent<HTMLInputElement>) {
+    const selectedFiles = Array.from(event.target.files ?? []);
+    const validationError = validateFiles(selectedFiles);
+    if (validationError) {
+      setFiles([]);
+      setMessage(validationError);
+      toast({
+        title: 'Invalid SDF selection',
+        description: validationError,
+        variant: 'destructive',
+      });
+      event.target.value = '';
+      return;
+    }
+    setFiles(selectedFiles);
+    setMessage('');
+  }
+
+  async function uploadFiles() {
+    if (!user || !files.length) return;
+    const validationError = validateFiles(files);
+    if (validationError) {
+      setMessage(validationError);
+      toast({
+        title: 'Upload failed',
+        description: validationError,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setBusy(true);
+    setMessage('');
+    try {
+      const token = await user.getIdToken();
+      let currentJobId = jobId;
+      for (const file of files) {
+        const endpoint = inventoryApiEndpoint('/api/catalog/imports/upload');
+        const formData = new FormData();
+        formData.append('file', file, file.name);
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'X-File-Name': file.name,
+            ...(currentJobId
+              ? { 'X-Import-Job-Id': String(currentJobId) }
+              : {}),
+          },
+          body: formData,
+        });
+        const payload = await readApiResponse<{
+          jobId: number;
+          recordCount: number;
+          errors?: unknown[];
+        }>(response, endpoint);
+        currentJobId = payload.jobId;
+        setJobId(currentJobId);
+        setMessage(
+          `${file.name}: ${payload.recordCount} fixed-width records detected${
+            payload.errors?.length
+              ? `, ${payload.errors.length} validation errors retained`
+              : ''
+          }.`,
+        );
+      }
+      toast({
+        title: 'SDF files uploaded',
+        description:
+          'Review the detected records, then run the safe PostgreSQL sync.',
+      });
+    } catch (error) {
+      toast({
+        title: 'Upload failed',
+        description: humanizeError(error),
+        variant: 'destructive',
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function syncFiles() {
+    if (!user || !jobId) return;
+    setBusy(true);
+    try {
+      const token = await user.getIdToken();
+      const endpoint = inventoryApiEndpoint(`/api/catalog/imports/${jobId}/sync`);
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const payload = await readApiResponse<{
+        imported?: number;
+        updated?: number;
+        unchanged?: number;
+        skipped?: number;
+      }>(response, endpoint);
+      setSummary(payload);
+      toast({
+        title: 'Catalogue sync completed',
+        description: `${payload.imported ?? 0} new, ${
+          payload.updated ?? 0
+        } updated, ${payload.unchanged ?? 0} unchanged.`,
+      });
+    } catch (error) {
+      toast({
+        title: 'Sync failed',
+        description: humanizeError(error),
+        variant: 'destructive',
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-7">
+      <AdminPageHeading
+        eyebrow="Inventory"
+        title="Inventory sync"
+        description="Upload the approved fixed-width SDF exports and synchronize them into PostgreSQL without deleting existing catalogue data."
+      />
+      <section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-sm sm:p-7">
+        <div className="flex items-start gap-4">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-secondary text-primary">
+            <Upload size={22} />
+          </span>
+          <div>
+            <h2 className="font-display text-2xl tracking-[-0.04em]">
+              Upload source files
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              PRODUCT, STOCK, DRUG, COMPANY and CATEGORY files are uploaded one
+              at a time, parsed as fixed-width ASCII, and upserted by source
+              identifier. Malformed rows remain visible in import history.
+            </p>
+          </div>
+        </div>
+        <input
+          type="file"
+          multiple
+          accept=".sdf,.SDF"
+          onChange={handleFileSelection}
+          className="mt-6 block w-full rounded-xl border border-dashed border-primary/30 bg-muted/40 p-4 text-sm"
+          data-testid="input-sdf-files"
+        />
+        <div className="mt-4 flex flex-wrap gap-2">
+          {files.map((file) => (
+            <span
+              key={file.name}
+              className="rounded-full bg-secondary px-3 py-1.5 text-xs font-semibold"
+            >
+              {file.name}
+            </span>
+          ))}
+        </div>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <button
+            type="button"
+            disabled={busy || !files.length}
+            onClick={() => void uploadFiles()}
+            className="inline-flex items-center gap-2 rounded-xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
+          >
+            {busy ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <Upload size={16} />
+            )}
+            Upload and inspect
+          </button>
+          <button
+            type="button"
+            disabled={busy || !jobId}
+            onClick={() => void syncFiles()}
+            className="inline-flex items-center gap-2 rounded-xl border border-primary px-4 py-3 text-sm font-bold text-primary disabled:opacity-50"
+          >
+            {busy ? (
+              <Loader2 size={16} className="animate-spin" />
+            ) : (
+              <RefreshCw size={16} />
+            )}
+            Sync PostgreSQL catalogue
+          </button>
+        </div>
+        {message && (
+          <p className="mt-4 text-sm text-muted-foreground">{message}</p>
+        )}
+        {summary && (
+          <div className="mt-6 grid gap-3 sm:grid-cols-4">
+            {[
+              ['New', summary.imported],
+              ['Updated', summary.updated],
+              ['Unchanged', summary.unchanged],
+              ['Errors', summary.skipped],
+            ].map(([label, value]) => (
+              <div key={String(label)} className="rounded-xl bg-muted/60 p-4">
+                <p className="text-xs font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  {String(label)}
+                </p>
+                <p className="mt-1 text-2xl font-bold">{String(value ?? 0)}</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+      <p className="text-xs leading-5 text-muted-foreground">
+        Uploads use one request per SDF file. When
+        VITE_AYUSH_API_BASE_URL is configured, the browser sends files directly
+        to the API server instead of through Vercel’s serverless proxy.
+      </p>
+    </div>
+  );
 }

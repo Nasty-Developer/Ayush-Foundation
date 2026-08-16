@@ -15,12 +15,12 @@ const files = [
 async function main() {
   const [job] = await db.insert(importJobsTable).values({ status: "uploaded" }).returning({ id: importJobsTable.id });
   let recordsDetected = 0;
-  const report: Array<{ fileName: string; type: string; bytes: number; records: number; format: string; errors: number }> = [];
+  const report: Array<{ fileName: string; type: string; bytes: number; records: number; delimiter: string | null; errors: number }> = [];
   for (const fileName of files) {
     const body = readFileSync(join(process.cwd(), "../../attached_assets", fileName));
-    const parsed = await previewImportFile(fileName, body);
+    const parsed = await previewImportFile(fileName, body.toString("utf8"));
     recordsDetected += parsed.records.length;
-    report.push({ fileName, type: parsed.type, bytes: body.length, records: parsed.records.length, format: parsed.format, errors: parsed.errors.length });
+    report.push({ fileName, type: parsed.type, bytes: body.length, records: parsed.records.length, delimiter: parsed.delimiter, errors: parsed.errors.length });
     const [file] = await db.insert(importFilesTable).values({
       jobId: job.id,
       fileType: parsed.type,
