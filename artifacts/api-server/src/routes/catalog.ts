@@ -1,90 +1,22 @@
 import crypto from "node:crypto";
-import Busboy from "@fastify/busboy";
-import { raw, Router, type IRouter, type NextFunction, type Request, type Response } from "express";
-import { and, asc, count, desc, eq, ilike, or, sql, db, pool, categoriesTable, companiesTable, drugsTable, importErrorsTable, importFilesTable, importJobsTable, productOverridesTable, productsTable, stockBatchesTable } from "@workspace/db";
+import { Router, type IRouter, type Request, type Response } from "express";
+import { and, asc, count, desc, eq, ilike, or, sql, db, categoriesTable, companiesTable, drugsTable, importErrorsTable, importFilesTable, importJobsTable, productOverridesTable, productsTable, stockBatchesTable } from "@workspace/db";
 import { requireAdminRequest } from "../lib/firebase-admin";
 import { previewImportFile, syncImportJob } from "../lib/catalog-sync";
-import { detectUploadType, mappingFor } from "../lib/sdf";
-import { logger } from "../lib/logger";
+import { detectType, mappingFor } from "../lib/sdf";
 
 const router: IRouter = Router();
 const MAX_UPLOAD_BYTES = 60 * 1024 * 1024;
 
-type UploadRequest = Request & {
-  upload?: {
-    body: Buffer;
-    fileName: string;
-    tooLarge: boolean;
-    multipart: boolean;
-  };
-};
-
-function jsonError(res: Response, status: number, error: string, details?: string) {
-  res.status(status).json({
-    success: false,
-    error,
-    ...(details ? { details } : {}),
-  });
-}
-
 function getQueryString(value: unknown, fallback = "") {
   return typeof value === "string" ? value.trim() : fallback;
-}
-
-function parseMultipartOrRaw(req: Request, res: Response, next: NextFunction) {
-  const contentType = req.header("content-type") ?? "";
-  if (!contentType.toLowerCase().startsWith("multipart/form-data")) {
-    return raw({ type: () => true, limit: MAX_UPLOAD_BYTES })(req, res, next);
-  }
-
-  let parser: ReturnType<typeof Busboy>;
-  try {
-    parser = Busboy({
-      headers: { ...req.headers, "content-type": contentType },
-      limits: { files: 1, fields: 10, fileSize: MAX_UPLOAD_BYTES },
-    });
-  } catch (error) {
-    next(error);
-    return;
-  }
-
-  const chunks: Buffer[] = [];
-  let fileName = "";
-  let fileSeen = false;
-  let tooLarge = false;
-
-  parser.on("file", (_fieldName, file, filename) => {
-    if (fileSeen) {
-      file.resume();
-      return;
-    }
-    fileSeen = true;
-    fileName = typeof filename === "string" ? filename.trim() : "";
-    file.on("limit", () => {
-      tooLarge = true;
-    });
-    file.on("data", (chunk: Buffer | string) => {
-      chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-    });
-  });
-  parser.on("error", next);
-  parser.on("finish", () => {
-    (req as UploadRequest).upload = {
-      body: Buffer.concat(chunks),
-      fileName,
-      tooLarge,
-      multipart: true,
-    };
-    next();
-  });
-  req.pipe(parser);
 }
 
 async function adminGuard(req: Request, res: Response) {
   try {
     return await requireAdminRequest(req.header("authorization"));
   } catch (error) {
-    jsonError(res, error instanceof Error && error.message.includes("not configured") ? 503 : 401, error instanceof Error ? error.message : "Unauthorized");
+    res.status(error instanceof Error && error.message.includes("not configured") ? 503 : 401).json({ error: error instanceof Error ? error.message : "Unauthorized" });
     return null;
   }
 }
@@ -158,56 +90,24 @@ router.get("/catalog/imports/:id", async (req, res): Promise<void> => {
   if (!await adminGuard(req, res)) return;
   const id = Number.parseInt(String(req.params.id), 10);
   const [job] = await db.select().from(importJobsTable).where(eq(importJobsTable.id, id)).limit(1);
-  if (!job) { jsonError(res, 404, "Import job not found."); return; }
+  if (!job) { res.status(404).json({ error: "Import job not found." }); return; }
   const files = await db.select({ id: importFilesTable.id, jobId: importFilesTable.jobId, fileType: importFilesTable.fileType, fileName: importFilesTable.fileName, fileSize: importFilesTable.fileSize, recordCount: importFilesTable.recordCount, mappingStatus: importFilesTable.mappingStatus, mapping: importFilesTable.mapping, preview: importFilesTable.preview, createdAt: importFilesTable.createdAt }).from(importFilesTable).where(eq(importFilesTable.jobId, id));
   const errors = await db.select().from(importErrorsTable).where(eq(importErrorsTable.jobId, id)).orderBy(asc(importErrorsTable.recordNumber)).limit(200);
   res.json({ job, files, errors });
 });
 
-router.post("/catalog/imports/upload", parseMultipartOrRaw, async (req: UploadRequest, res): Promise<void> => {
-  const requestStartedAt = Date.now();
+router.post("/catalog/imports/upload", async (req, res): Promise<void> => {
   if (!await adminGuard(req, res)) return;
-  const upload = req.upload;
-  const body = upload?.body ?? (Buffer.isBuffer(req.body) ? req.body : null);
-  const fileName = getQueryString(upload?.fileName || req.header("x-file-name"));
-  logger.info({ fileName: fileName || "(missing)", fileSize: body?.length ?? 0, multipart: upload?.multipart ?? false }, "Inventory SDF upload received");
-  if (upload?.tooLarge || !body || body.length === 0 || body.length > MAX_UPLOAD_BYTES) {
-    jsonError(res, 400, "Upload an SDF file up to 60 MB.", "The request must contain one non-empty SDF file.");
-    return;
-  }
-  let fileType: ReturnType<typeof detectUploadType>;
-  try {
-    fileType = detectUploadType(fileName);
-  } catch (error) {
-    jsonError(res, 400, error instanceof Error ? error.message : "Unsupported SDF filename.");
-    return;
-  }
-  await pool.query("select 1");
-  logger.info({ fileName, fileType }, "Inventory SDF parser started");
-  const sourceText = body.toString("utf8");
-  const parsed = await previewImportFile(fileName, sourceText);
-  logger.info({ fileName, fileType, recordCount: parsed.records.length, errorCount: parsed.errors.length, durationMs: Date.now() - requestStartedAt }, "Inventory SDF parser finished");
-  const requestedJobId = Number.parseInt(getQueryString(req.header("x-import-job-id")), 10);
-  let jobId = Number.isFinite(requestedJobId) && requestedJobId > 0 ? requestedJobId : undefined;
-  if (jobId) {
-    const [existingJob] = await db.select({ id: importJobsTable.id }).from(importJobsTable).where(eq(importJobsTable.id, jobId)).limit(1);
-    if (!existingJob) { jsonError(res, 404, "Import job not found."); return; }
-  } else {
-    logger.info({ fileType }, "Creating inventory import job");
-    const [job] = await db.insert(importJobsTable).values({ status: "uploaded" }).returning({ id: importJobsTable.id });
-    jobId = job.id;
-  }
-  const preview = parsed.fields.length ? parsed.records.slice(0, 10).map((row) => Object.fromEntries(parsed.fields.map((field) => [field.name, row.values[field.index] ?? ""]))) : [];
-  logger.info({ jobId, fileType, fileName, fileSize: body.length }, "Saving inventory import file");
-  const [savedFile] = await db.insert(importFilesTable).values({ jobId, fileType, fileName, fileSize: body.length, contentHash: parsed.hash, sourceText, detectedDelimiter: parsed.delimiter, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, mapping: parsed.mapping, preview }).onConflictDoUpdate({ target: [importFilesTable.jobId, importFilesTable.fileType], set: { fileName, fileSize: body.length, contentHash: parsed.hash, sourceText, detectedDelimiter: parsed.delimiter, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, mapping: parsed.mapping, preview, updatedAt: new Date() } }).returning({ id: importFilesTable.id });
-  const [{ recordsDetected }] = await db.select({ recordsDetected: sql<number>`coalesce(sum(${importFilesTable.recordCount}), 0)` }).from(importFilesTable).where(eq(importFilesTable.jobId, jobId));
-  await db.update(importJobsTable).set({ recordsDetected: Number(recordsDetected), errorCount: parsed.errors.length }).where(eq(importJobsTable.id, jobId));
-  if (parsed.errors.length && savedFile) {
-    await db.delete(importErrorsTable).where(and(eq(importErrorsTable.jobId, jobId), eq(importErrorsTable.fileId, savedFile.id)));
-    await db.insert(importErrorsTable).values(parsed.errors.map((item) => ({ jobId: jobId!, fileId: savedFile.id, recordNumber: item.recordNumber, reason: item.reason, sourceIdentifier: null, sourceExcerpt: item.excerpt })));
-  }
-  logger.info({ jobId, fileType, fileName, recordCount: parsed.records.length, errorCount: parsed.errors.length, durationMs: Date.now() - requestStartedAt }, "Inventory import file saved");
-  res.status(201).json({ jobId, fileName, fileType, fileSize: body.length, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, delimiter: parsed.delimiter, fields: parsed.fields, errors: parsed.errors, mappings: mappingFor(fileType) });
+  const body = req.body as Buffer;
+  const fileName = getQueryString(req.header("x-file-name"));
+  if (!Buffer.isBuffer(body) || body.length === 0 || body.length > MAX_UPLOAD_BYTES) { res.status(400).json({ error: "Upload an SDF file up to 60 MB." }); return; }
+  let fileType: ReturnType<typeof detectType>;
+  try { fileType = detectType(fileName); } catch (error) { res.status(400).json({ error: error instanceof Error ? error.message : "Unsupported SDF filename." }); return; }
+  const parsed = previewImportFile(fileName, body.toString("utf8"));
+  const [job] = await db.insert(importJobsTable).values({ status: "uploaded", recordsDetected: parsed.records.length, errorCount: parsed.errors.length }).returning();
+  await db.insert(importFilesTable).values({ jobId: job.id, fileType, fileName, fileSize: body.length, contentHash: parsed.hash, sourceText: body.toString("utf8"), detectedDelimiter: parsed.delimiter, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, mapping: parsed.mapping, preview: parsed.fields.length ? parsed.records.slice(0, 10).map((row) => Object.fromEntries(parsed.fields.map((field) => [field.name, row.values[field.index] ?? ""]))) : [] });
+  if (parsed.errors.length) await db.insert(importErrorsTable).values(parsed.errors.map((item) => ({ jobId: job.id, fileId: null, recordNumber: item.recordNumber, reason: item.reason, sourceIdentifier: null, sourceExcerpt: item.excerpt })));
+  res.status(201).json({ jobId: job.id, fileName, fileType, fileSize: body.length, recordCount: parsed.records.length, mappingStatus: parsed.mappingStatus, delimiter: parsed.delimiter, fields: parsed.fields, errors: parsed.errors, mappings: mappingFor(fileType) });
 });
 
 router.post("/catalog/imports/:id/sync", async (req, res): Promise<void> => {
@@ -218,7 +118,7 @@ router.post("/catalog/imports/:id/sync", async (req, res): Promise<void> => {
     res.json({ jobId: id, status: "completed", ...summary });
   } catch (error) {
     await db.update(importJobsTable).set({ status: "failed", completedAt: new Date(), summary: { error: error instanceof Error ? error.message : "Import failed" } }).where(eq(importJobsTable.id, id));
-    jsonError(res, 422, error instanceof Error ? error.message : "Import failed.");
+    res.status(422).json({ error: error instanceof Error ? error.message : "Import failed." });
   }
 });
 

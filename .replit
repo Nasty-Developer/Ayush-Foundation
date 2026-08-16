@@ -1,4 +1,4 @@
-modules = ["nodejs-24", "python-base-3.13", "postgresql-16"]
+modules = ["nodejs-24"]
 
 [deployment]
 router = "application"
@@ -11,27 +11,6 @@ env = { "CI" = "true" }
 [workflows]
 runButton = "Project"
 
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Ayush Medico"
-
-[[workflows.workflow]]
-name = "Ayush Medico"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=5173 BASE_PATH=/ pnpm --filter @workspace/ayush-medico run dev"
-waitForPort = 5173
-
-[workflows.workflow.metadata]
-outputType = "webview"
-
 [agent]
 stack = "PNPM_WORKSPACE"
 expertMode = true
@@ -42,14 +21,3 @@ timeoutMs = 20000
 
 [nix]
 channel = "stable-25_05"
-
-[userenv]
-
-[userenv.shared]
-VITE_FIREBASE_API_KEY = "AIzaSyB_mLLYU0FmJNYGtJTj20b8LcuJ7g5p_V4"
-VITE_FIREBASE_APP_ID = "1:190323213013:web:17b0ac8bb44f614343d85c"
-VITE_FIREBASE_AUTH_DOMAIN = "ayush-medico-6cf77.firebaseapp.com"
-VITE_FIREBASE_MEASUREMENT_ID = "G-9WZXPFR0B2"
-VITE_FIREBASE_MESSAGING_SENDER_ID = "190323213013"
-VITE_FIREBASE_PROJECT_ID = "ayush-medico-6cf77"
-VITE_FIREBASE_STORAGE_BUCKET = "ayush-medico-6cf77.firebasestorage.app"
