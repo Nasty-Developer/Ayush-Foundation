@@ -1,0 +1,416 @@
+Fix the Ayush Medico Admin Panel Inventory Sync system completely AND finish the full medicine-commerce flow from inventory upload → website catalogue → product images → cart → prescription handling → checkout → admin orders.
+
+CURRENT ERROR:
+
+POST /api/catalog/imports/upload → 500 Internal Server Error
+
+The frontend displays:
+
+"Upload failed
+Inventory API returned 500 Internal Server Error as text/html; charset=utf-8. Check that /api/catalog/imports/upload is deployed as an API route."
+
+The Inventory Sync page uploads these 5 fixed-width SDF files:
+
+* PRODUCTS.SDF
+* STOCK.SDF
+* DRUG.SDF
+* COMPANY.SDF
+* CATEGORY.SDF
+
+IMPORTANT:
+
+* Do not remove or redesign the existing Inventory Sync UI.
+* Do not remove existing catalogue data.
+* Do not replace the SDF importer with dummy/mock data.
+* Do not break the existing cart, checkout, Firebase/auth, PostgreSQL, or admin functionality.
+* Do not mark every item as a prescription medicine by default.
+* Do not require prescriptions for general/non-medicine products.
+
+==================================================
+PART 1 — FIX THE CURRENT 500 ERROR FIRST
+========================================
+
+Inspect the COMPLETE backend implementation of:
+
+* /api/catalog/imports/upload
+* /api/catalog/imports/*
+* SDF parsing code
+* PostgreSQL connection
+* database schema/migrations
+* upload/multipart handling
+* Replit/Vercel deployment configuration
+* package.json scripts
+* vercel.json
+* server/API entry points
+
+Find the ACTUAL root cause of the HTTP 500 instead of hiding the error in the frontend.
+
+Make /api/catalog/imports/upload production-safe:
+
+1. Ensure the API route is actually registered and reachable in the deployed environment.
+2. Correctly accept multipart/form-data containing the five SDF files.
+3. Validate expected files without crashing when one is missing.
+4. Parse fixed-width ASCII SDF files safely.
+5. Handle malformed rows gracefully and record them in import history.
+6. Validate PostgreSQL environment variables and database connectivity.
+7. Fix runtime/deployment assumptions that work in Replit Preview but fail in deployment.
+8. Return JSON errors instead of HTML error pages. Example:
+   {
+   "success": false,
+   "error": "clear human-readable error",
+   "details": "safe diagnostic information"
+   }
+9. Add safe server logs for request, filenames, sizes, parsing, database operations, and exact failure point. Never log secrets.
+10. Existing catalogue data must NEVER be deleted by an import.
+11. Upsert records using stable source identifiers and prevent unwanted duplicates.
+12. Preserve import history and malformed-row history.
+13. Check multipart limits, CORS, temp-file handling, filesystem/runtime compatibility, and deployment configuration.
+14. Run existing typecheck/build/test commands.
+15. Test with a small valid multipart upload before declaring the endpoint fixed.
+
+==================================================
+PART 2 — AFTER SUCCESSFUL UPLOAD, MAKE THE CATALOGUE LIVE
+=========================================================
+
+The most important requirement:
+
+WHEN THE SDF MEDICINE DATA IS SUCCESSFULLY UPLOADED/SYNCED, the imported products must automatically become visible on the CUSTOMER WEBSITE.
+
+Do NOT require the administrator to manually enter every medicine again.
+
+The flow must be:
+
+Admin uploads SDF files
+→ SDF files are parsed
+→ products/medicines/stock/categories/brands are synced to PostgreSQL
+→ catalogue API reads the synced data
+→ customer website automatically displays the products
+→ categories are automatically populated
+→ medicine names, brands, prices, stock/availability and other available fields appear
+→ customer can open product details
+→ customer can add eligible products to cart
+→ customer can checkout
+→ order appears correctly in Admin Orders.
+
+Do not hardcode the medicine list.
+
+Map the available SDF fields into a clean catalogue model, including where available:
+
+* product/medicine name
+* generic/drug name
+* brand/company
+* category
+* strength
+* dosage/form
+* pack size
+* SKU/source identifier
+* MRP/price
+* stock/availability
+* prescription-required flag
+* image URL/image reference
+* description/metadata where available
+
+If the SDF files use different field names, inspect the real files/parser and create the correct mapping rather than guessing.
+
+==================================================
+PART 3 — CATEGORY SYSTEM
+========================
+
+Every imported product should be assigned to the correct category using the imported category data and existing category mapping logic.
+
+The website must automatically show category sections/cards based on actual catalogue data.
+
+Examples may include medicines, personal care, baby care, health devices, general healthcare products, etc., but DO NOT invent categories when the source data already provides them.
+
+Categories must be dynamic:
+
+* Admin uploads/syncs data
+* Categories are created/updated from the imported data
+* Website automatically reflects the categories
+* Products appear under their correct category
+* Empty categories should not be unnecessarily displayed
+
+The existing Admin category system must remain compatible with this imported catalogue.
+
+==================================================
+PART 4 — PRODUCT IMAGES FOR EVERY ITEM
+======================================
+
+Every medicine/product card shown on the website should have an image.
+
+Important: the SDF source may not contain actual product images. Do NOT fabricate fake medicine packaging or claim an image is the real manufacturer packaging when it is not.
+
+Implement a proper image-enrichment architecture:
+
+1. If the imported source already contains a valid image URL/reference, use it.
+2. If there is an approved/configured product-image data source available in the project, use it to enrich products by stable product identifier/name/brand.
+3. Store the resolved image URL/reference in the catalogue so the website does not repeatedly perform external lookups.
+4. Make image enrichment retryable and safe.
+5. If a real product image cannot be found, show a clean neutral healthcare/product placeholder rather than a broken image.
+6. Do not block the entire SDF import just because one product has no image.
+7. Add an admin-editable image field so an administrator can manually add/replace an image for any product.
+8. Use lazy loading and optimized image rendering so thousands of products do not destroy website performance.
+
+The customer website should show the image prominently on every product card and product-detail page.
+
+==================================================
+PART 5 — PRESCRIPTION LOGIC
+===========================
+
+Prescription requirements must be product-specific.
+
+For medicines that require a prescription:
+
+* Show a clear "Prescription Required" indicator.
+* Customer must upload a prescription during checkout/order submission when the cart contains one or more prescription-required products.
+* Store the uploaded prescription securely with the order.
+* Admin must be able to view the prescription from the order detail screen.
+* Admin must be able to mark prescription as Pending / Verified / Rejected.
+* Do not allow a prescription-required order to be treated as fully verified until the admin reviews it.
+
+For general/non-medicine products:
+
+* Prescription is NOT required.
+* Customer should be able to order normally without uploading a prescription.
+* Do not show unnecessary prescription warnings on general products.
+
+If the imported SDF data does not reliably indicate prescription status, create a safe admin-controlled "Prescription Required" field and make the default conservative/configurable rather than incorrectly marking every item.
+
+==================================================
+PART 6 — CUSTOMER WEBSITE CATALOGUE
+===================================
+
+Build the customer-facing catalogue around the imported PostgreSQL data.
+
+Required:
+
+* Search medicine/product by name
+* Category browsing
+* Brand/company filtering where available
+* Product image
+* Product name
+* Generic/drug name where available
+* Strength/pack information where available
+* Price/MRP
+* Stock/availability
+* Prescription-required indicator when applicable
+* Product detail page
+* Add to Cart
+* Quantity controls
+* Cart total
+* Checkout
+
+Use pagination/infinite loading/server-side filtering as appropriate. Do not load tens of thousands of products into the browser at once.
+
+The catalogue must remain fast on mobile.
+
+==================================================
+PART 7 — CART + CHECKOUT + ORDERS
+=================================
+
+Use the existing cart/order architecture where possible instead of creating a second conflicting system.
+
+Customer flow:
+
+Browse product
+→ Add to Cart
+→ Cart
+→ Customer details
+→ Delivery address
+→ Phone
+→ Delivery notes
+→ Prescription upload ONLY if required
+→ Payment method
+→ Place Order
+→ Order confirmation
+
+The existing UPI/COD UI should continue working according to the current project implementation.
+
+At checkout, calculate prices from trusted server-side catalogue/order data. Do not trust client-supplied prices.
+
+Prevent ordering products that are unavailable/out of stock according to the server-side stock state.
+
+==================================================
+PART 8 — ADMIN ORDERS
+=====================
+
+Every customer order must appear in the Admin Panel Orders section clearly and professionally.
+
+Admin Orders should show:
+
+* Order ID
+* Date/time
+* Customer name
+* Customer phone
+* Delivery address
+* Items
+* Product names
+* Quantities
+* Prices
+* Total amount
+* Payment method
+* Payment status
+* Prescription status when applicable
+* Order status
+* Delivery status
+
+Order status workflow should support the existing project flow, including where applicable:
+
+* Pending
+* Accepted
+* Rejected
+* Prescription Pending
+* Prescription Verified
+* Payment Pending
+* Payment Verified
+* Preparing
+* Out for Delivery
+* Delivered
+* Cancelled
+
+Admin actions should include:
+
+* View order
+* Accept/reject
+* Verify prescription
+* Verify payment
+* Update order status
+* View prescription securely
+* View customer/address details
+
+Do not show prescription UI for orders containing only general/non-prescription products.
+
+==================================================
+PART 9 — DATABASE + DATA INTEGRITY
+==================================
+
+Use PostgreSQL as the authoritative synced catalogue/order backend according to the existing architecture.
+
+Create/update schema only when required.
+
+Ensure proper relationships for:
+
+* products/catalogue
+* categories
+* companies/brands
+* stock
+* images
+* orders
+* order items
+* prescriptions
+* payments
+* deliveries
+* import history
+
+Use indexes for common searches such as product name, category, brand, SKU/source identifier and prescription flag.
+
+Do not duplicate the same product on every import.
+
+Repeatedly uploading the same SDF data must be safe and idempotent.
+
+==================================================
+PART 10 — UI / UX
+=================
+
+Keep the existing Ayush Medico premium design.
+
+Do not redesign the entire website.
+
+Make the catalogue clean, responsive and pharmacy-appropriate.
+
+Product cards should have:
+
+* image
+* name
+* brand/generic information where available
+* price
+* stock/availability
+* prescription badge only when required
+* Add to Cart button
+
+Category pages should have useful category imagery/icons and then show the actual imported products below.
+
+No broken image icons.
+No empty product cards.
+No fake medicine data.
+
+==================================================
+PART 11 — SECURITY + SAFETY
+===========================
+
+Prescription files contain sensitive customer information.
+
+Store them securely and do not expose public unrestricted URLs.
+
+Only authorized admins should be able to view prescription files.
+
+Validate file type and reasonable file size.
+
+Do not log prescription contents.
+
+Do not expose database credentials, API keys, or private storage credentials to the browser.
+
+==================================================
+PART 12 — TEST THE COMPLETE END-TO-END FLOW
+===========================================
+
+After implementation, test ALL of these:
+
+1. Upload PRODUCTS.SDF.
+2. Upload STOCK.SDF.
+3. Upload DRUG.SDF.
+4. Upload COMPANY.SDF.
+5. Upload CATEGORY.SDF.
+6. Confirm upload no longer returns HTTP 500.
+7. Confirm records are synced to PostgreSQL.
+8. Confirm import history is recorded.
+9. Confirm categories appear on the customer website.
+10. Confirm imported products appear on the website WITHOUT manual re-entry.
+11. Confirm product images load or a safe placeholder appears.
+12. Confirm product search works.
+13. Confirm category filtering works.
+14. Confirm a normal/general product can be added to cart without a prescription.
+15. Confirm a prescription-required product triggers prescription upload during checkout.
+16. Confirm prescription is attached to the correct order.
+17. Confirm order appears in Admin Orders.
+18. Confirm admin can verify/reject prescription.
+19. Confirm admin can update order/payment status.
+20. Confirm repeated imports do not create duplicates.
+21. Confirm out-of-stock products cannot be ordered.
+22. Confirm mobile layout works.
+23. Run typecheck/build/test commands and fix all errors.
+
+IMPORTANT FINAL REQUIREMENT:
+
+Do not tell me "the system is complete" merely because the frontend builds.
+
+Actually trace and test the real flow:
+
+SDF upload
+→ PostgreSQL sync
+→ website catalogue
+→ categories
+→ images
+→ product detail
+→ cart
+→ prescription logic
+→ checkout
+→ order creation
+→ Admin Orders
+→ prescription verification
+→ order status.
+
+Finally report:
+
+* exact root cause of the original 500
+* files changed
+* database/schema changes
+* API routes created/changed
+* image-enrichment implementation
+* prescription logic implementation
+* order/admin implementation
+* test results
+* build/typecheck result
+* any remaining limitation or required environment variable/API key
+
+Keep existing Ayush Medico functionality intact and prioritize real data, data integrity, security, and production reliability over shortcuts.
