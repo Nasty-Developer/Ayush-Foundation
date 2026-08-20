@@ -1,0 +1,139 @@
+AYUSH MEDICO — HERO CONTACT BUTTON POLISH
+
+Please improve ONLY the existing "Call Now" and "Get Directions" actions in the homepage hero.
+
+Do NOT redesign or break the rest of the homepage.
+
+CURRENT BUTTONS:
+- Call Now
+- Get Directions
+
+Make these two actions look much more polished and premium.
+
+==================================================
+CALL NOW
+==================================================
+
+Create a professional phone action with:
+
+- Phone/call icon
+- "Call Now" label
+- Clean typography
+- Comfortable padding
+- Proper rounded shape
+- Subtle border/shadow
+- Smooth hover animation
+- Clear focus state
+- Excellent mobile touch target
+
+Use:
+
++91 98332 73838
+
+The button must actually use:
+
+tel:+919833273838
+
+So tapping it on a phone opens the phone dialer.
+
+==================================================
+GET DIRECTIONS
+==================================================
+
+Create a professional directions action with:
+
+- Map pin icon
+- "Get Directions" label
+- Clean typography
+- Comfortable padding
+- Proper rounded shape
+- Subtle border/shadow
+- Smooth hover animation
+- Clear focus state
+- Excellent mobile touch target
+
+The button must actually open Google Maps for:
+
+Shop No.1, Hut No.67 1/1, Ground Floor,
+Gangaram Makad Wala Chawl,
+Halav Pool, Near Rolex Hotel,
+CTS No.451, Kurla West,
+Mumbai – 400070
+
+Use a proper Google Maps directions/search URL for this exact Ayush Medico location.
+
+==================================================
+VISUAL HIERARCHY
+==================================================
+
+Keep the hierarchy:
+
+PRIMARY:
+Check Medicine Availability
+
+SECONDARY:
+WhatsApp Us
+
+QUICK CONTACT ACTIONS:
+Call Now
+Get Directions
+
+The Call Now and Get Directions buttons should complement the main CTA rather than compete with it.
+
+They should be visually connected as a small premium contact-action row.
+
+==================================================
+DESIGN
+==================================================
+
+Match the existing Ayush Medico visual language.
+
+Use:
+
+- Premium pharmacy aesthetic
+- Green/teal accent
+- Clean white/neutral surfaces
+- Professional icons
+- Consistent border radius
+- Subtle shadows
+- Smooth transitions
+- Excellent spacing
+
+Do NOT make them oversized.
+
+Do NOT make them tiny/plain text links.
+
+They should look like intentional premium UI controls.
+
+==================================================
+MOBILE
+==================================================
+
+On mobile:
+
+- Keep both buttons easy to tap.
+- Prevent text clipping.
+- Allow the buttons to wrap naturally if necessary.
+- Maintain comfortable spacing.
+- Make sure neither button is hidden unnecessarily.
+
+==================================================
+VERIFICATION
+==================================================
+
+After making the change:
+
+1. Test Call Now.
+2. Confirm it uses tel:+919833273838.
+3. Test Get Directions.
+4. Confirm Google Maps opens the Ayush Medico location.
+5. Check desktop.
+6. Check mobile.
+7. Check hover/focus states.
+8. Run the production build.
+9. Fix any errors.
+
+IMPORTANT:
+Actually modify the code. Do not just describe the changes.
+
+Do not modify Firebase, Admin Panel, medicines, orders, or other phases.

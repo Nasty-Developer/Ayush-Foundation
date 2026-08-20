@@ -1,0 +1,518 @@
+# AYUSH MEDICO — PHASE 2
+
+## Homepage + Core Customer Website
+
+We are building a completely new Ayush Medico pharmacy website.
+
+PHASE 1 has already established the project foundation, routing, design system, responsive structure, and reusable components.
+
+Now implement **PHASE 2 ONLY**.
+
+Do NOT implement Phase 3 Firebase integration, Phase 4 medicine database, Phase 5 availability system, Phase 6 checkout, Phase 7 orders, or any admin functionality yet.
+
+---
+
+## IMPORTANT PROJECT RULES
+
+This is a NEW Ayush Medico project.
+
+Do NOT copy the old website's source code.
+
+The previously provided Ayush Medico website is only a reference for:
+
+* Business information
+* Existing website sections
+* Content direction
+* Customer experience
+* Features we eventually want
+* Existing navigation ideas
+
+Rebuild everything cleanly using the current project's architecture.
+
+Do not create a second Firebase project.
+
+Do not add fake backend/database functionality.
+
+Do not hardcode future Firebase data structures into the UI.
+
+---
+
+# 1. HOMEPAGE
+
+Build a premium, modern pharmacy homepage.
+
+The homepage should feel like a real local pharmacy website rather than a generic template.
+
+Create these sections in a logical order:
+
+### Hero Section
+
+Include:
+
+* Ayush Medico branding
+* Strong pharmacy-focused headline
+* Short supporting description
+* Primary CTA:
+  "Check Medicine Availability"
+* Secondary CTA:
+  "Call Now"
+* Optional "Get Directions" CTA
+* Pharmacy trust indicators
+
+The hero should communicate:
+
+* Trusted local pharmacy
+* Genuine medicines
+* Professional pharmacy service
+* Local delivery
+* Easy medicine availability checking
+
+Do not make unsupported medical claims.
+
+---
+
+# 2. TRUST / HIGHLIGHTS
+
+Create a clean feature section with cards such as:
+
+* Genuine Medicines
+* Trusted Pharmacy
+* Fast Local Delivery
+* Helpful Pharmacy Team
+
+Use Lucide icons.
+
+Keep the cards visually consistent with the Phase 1 design system.
+
+---
+
+# 3. MEDICINE SEARCH ENTRY
+
+Create a prominent medicine-search UI on the homepage.
+
+For now this is a FRONTEND UI ONLY.
+
+Do not connect it to Firebase yet.
+
+Example placeholder:
+
+"Search medicines, e.g. Paracetamol, Vitamin D3..."
+
+When clicked, it can navigate to `/medicines`.
+
+Important:
+
+The actual search/database functionality belongs to a later phase.
+
+---
+
+# 4. SERVICES SECTION
+
+Create a services section that introduces the main pharmacy services.
+
+Include:
+
+* Medicine Availability
+* Prescription Medicines
+* Home Delivery
+* Healthcare Products
+* OTC Medicines
+* Pharmacy Support
+
+Each service should have:
+
+* Icon
+* Title
+* Short description
+* Optional CTA
+
+---
+
+# 5. MEDICINE CATEGORIES PREVIEW
+
+Create a visually attractive category preview.
+
+Use category examples based on the existing Ayush Medico website/reference, such as:
+
+* Prescription Medicines
+* OTC Medicines
+* Baby Care
+* Personal Care
+* Vitamins & Supplements
+* Diabetic Care
+* Healthcare Devices
+* Surgical Supplies
+* Ayurvedic Products
+
+IMPORTANT:
+
+These are currently presentation-level categories only.
+
+Do NOT create the Firebase category system yet.
+
+Create reusable category-card components so Phase 4 can later connect them to Firestore.
+
+Include:
+
+"Browse All Medicines"
+
+which navigates to `/medicines`.
+
+---
+
+# 6. NEW MEDICINE ARRIVALS
+
+Create a homepage section titled:
+
+"New Medicine Arrivals"
+
+The old Ayush Medico website used this concept for fresh stock and new healthcare products.
+
+Recreate the concept with clean reusable cards/placeholders.
+
+For now:
+
+* Use local mock data only.
+* Clearly structure the component so it can later receive Firestore data.
+* Do not create Firestore collections.
+* Do not pretend the displayed medicines are live inventory.
+
+Include a CTA:
+
+"View All Medicines"
+
+---
+
+# 7. SPECIAL MEDICINES
+
+Create a section:
+
+"Special Medicines — Only Available Here"
+
+This section should communicate that Ayush Medico can help customers find harder-to-find medicines or healthcare products.
+
+Use placeholder/mock content only.
+
+Do NOT claim that specific medicines are actually exclusive unless verified later.
+
+Include:
+
+"Check Availability"
+
+CTA.
+
+---
+
+# 8. HOME DELIVERY SECTION
+
+Create a dedicated home-delivery section.
+
+Highlight:
+
+* Local delivery
+* Genuine medicines
+* Safe packaging
+* Quick response
+
+Do not claim a specific delivery radius or guaranteed delivery time unless it has been explicitly confirmed.
+
+Include CTA:
+
+"Check Delivery Availability"
+
+This can currently navigate to the contact/medicine availability area.
+
+---
+
+# 9. WHY CHOOSE AYUSH MEDICO
+
+Create a premium "Why Choose Us" section.
+
+Possible cards:
+
+* Genuine Products
+* Trusted Local Pharmacy
+* Experienced Pharmacy Team
+* Convenient Medicine Availability
+* Local Delivery
+* Customer Support
+
+Keep copy concise and trustworthy.
+
+Avoid unsupported numerical claims such as:
+
+* "50,000+ families"
+* "5,000+ medicines"
+* "10+ years"
+* "2,000+ reviews"
+
+unless those values have been explicitly confirmed for the new website.
+
+---
+
+# 10. FAQ PREVIEW
+
+Create a homepage FAQ section.
+
+Use questions relevant to the pharmacy, such as:
+
+* Do you provide genuine medicines?
+* Can I check medicine availability before visiting?
+* Do you accept valid prescriptions?
+* Do you provide home delivery?
+* Where is Ayush Medico located?
+* What are your opening hours?
+
+Use an accessible accordion.
+
+For now, keep the FAQ data in a local reusable data file.
+
+Later phases can move/manage this content dynamically if needed.
+
+---
+
+# 11. CONTACT / CTA SECTION
+
+Create a strong final CTA.
+
+Include:
+
+"Need a Medicine?"
+
+Short supporting text.
+
+Buttons:
+
+* Check Medicine Availability
+* Call Ayush Medico
+* Get Directions
+
+Use the business information already supplied for the project where appropriate.
+
+Do not invent missing contact information.
+
+---
+
+# 12. FOOTER
+
+Build a complete professional footer.
+
+Include:
+
+### Ayush Medico
+
+Short pharmacy description.
+
+### Quick Links
+
+* Home
+* Medicines
+* Services
+* About
+* Contact
+
+### Customer Help
+
+* Medicine Availability
+* FAQ
+* Contact
+
+### Legal placeholders
+
+Create navigation placeholders for future:
+
+* Privacy Policy
+* Terms & Conditions
+* Refund & Cancellation Policy
+* Shipping & Delivery Policy
+* Prescription Policy
+* Disclaimer
+
+IMPORTANT:
+
+Do not write final legal content in this phase.
+
+Those pages will be handled in a later phase.
+
+---
+
+# 13. HEADER / NAVIGATION
+
+Review the Phase 1 header and make sure it supports the new customer experience.
+
+Navigation should include:
+
+* Home
+* Medicines
+* Services
+* About
+* Contact
+
+Also include:
+
+* Cart icon placeholder/UI only
+* Call button on suitable screen sizes
+* Mobile navigation
+
+Do not implement cart functionality yet.
+
+---
+
+# 14. MOBILE EXPERIENCE
+
+This is extremely important.
+
+Test the entire homepage at:
+
+* 320px
+* 375px
+* 390px
+* 414px
+* Tablet
+* Desktop
+
+Fix:
+
+* Text overflow
+* Horizontal scrolling
+* Button wrapping
+* Card sizing
+* Hero height
+* Navigation
+* Section spacing
+* Touch targets
+
+The mobile website should feel intentionally designed, not like a compressed desktop version.
+
+---
+
+# 15. ACCESSIBILITY
+
+Implement:
+
+* Semantic HTML
+* Proper heading hierarchy
+* Accessible buttons
+* Accessible links
+* Alt text for meaningful images
+* Keyboard-friendly interactive elements
+* Visible focus states
+* Appropriate aria-labels where required
+
+---
+
+# 16. SEO FOUNDATION
+
+Add appropriate page-level SEO for the homepage:
+
+* Title
+* Meta description
+* Open Graph basics
+* Language metadata
+
+Use the real Ayush Medico business context already available.
+
+Do not add fake reviews, fake ratings, fake claims, or unsupported structured data.
+
+Full SEO/schema work will be handled later.
+
+---
+
+# 17. COMPONENT ARCHITECTURE
+
+Keep everything reusable.
+
+Create reusable components where appropriate:
+
+* Hero
+* FeatureCard
+* ServiceCard
+* CategoryCard
+* MedicineCard
+* SectionHeading
+* FAQAccordion
+* CTASection
+* Footer
+
+Keep mock data separate from components.
+
+Do not create giant components containing the entire homepage.
+
+---
+
+# 18. PREPARE FOR FUTURE PHASES
+
+The UI must be designed so later phases can easily connect:
+
+Phase 3:
+Firebase
+
+Phase 4:
+Medicine database + categories
+
+Phase 5:
+Medicine availability requests
+
+Phase 6:
+Cart + checkout
+
+Phase 7:
+Orders
+
+Phase 8/9:
+Admin
+
+Do not implement those systems now.
+
+---
+
+# 19. DO NOT DO THESE THINGS
+
+Do NOT:
+
+* Create Firebase collections
+* Create Firestore logic
+* Create Firebase authentication
+* Create admin login
+* Create admin dashboard
+* Create checkout
+* Create order creation
+* Create payment processing
+* Create prescription uploads
+* Create real medicine inventory
+* Create fake medicine stock
+* Create fake reviews
+* Create fake customer statistics
+* Add unnecessary dependencies
+* Rewrite Phase 1 architecture unnecessarily
+
+---
+
+# 20. FINAL VERIFICATION
+
+After implementation:
+
+1. Run the existing production build command.
+2. Run TypeScript checks.
+3. Fix all errors.
+4. Check every route.
+5. Check homepage on mobile.
+6. Check homepage on desktop.
+7. Check navigation.
+8. Check all CTA links.
+9. Check accessibility basics.
+10. Check browser console for implementation errors.
+
+Do not move into Phase 3.
+
+At the end, report:
+
+* Files/components created or modified
+* Routes affected
+* Sections implemented
+* Responsive testing result
+* TypeScript result
+* Production build result
+* Any remaining issues
+
+STOP after Phase 2 is complete.

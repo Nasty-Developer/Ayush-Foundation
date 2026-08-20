@@ -1,0 +1,3 @@
+- [Imported repository previews](imported-repo-preview.md) — repository metadata may need explicit artifact registration before the preview pane can resolve the app.
+- [Artifact build environment](artifact-build-environment.md) — direct Vite production builds need the workflow's PORT and BASE_PATH values.
+- [Imported artifact registration](imported-artifact-registration.md) — imported artifact folders may need explicit registration before the shared preview can route them.
