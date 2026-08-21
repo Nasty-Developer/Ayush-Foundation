@@ -1,0 +1,351 @@
+AYUSH MEDICO — CONTINUE FROM CURRENT SDF IMPORT CHECKPOINT
+
+IMPORTANT:
+The REAL SDF files have ALREADY been uploaded to this Replit project.
+
+DO NOT ask me to upload them again.
+
+Use the original SDF files that are already attached/available in the project.
+
+We previously reached an important parser discovery:
+
+PRODUCT.SDF contains a right-aligned 10-character Product ID.
+
+The previous parser incorrectly read only the last 3 characters, which caused different products to collapse into duplicate IDs.
+
+You were already correcting this and were going to:
+
+1. Fix the Product ID field width to the complete 10 characters.
+2. Remove ONLY malformed records created by the incorrect parser.
+3. Re-run the import from the ORIGINAL SDF files.
+4. Rebuild the catalogue with the correct Product IDs.
+
+CONTINUE FROM THAT EXACT POINT.
+
+==================================================
+IMPORTANT — DO NOT RE-UPLOAD THE SDF FILES
+==================================================
+
+The original SDF files are already available.
+
+Find and use them.
+
+Do not create replacement/mock SDF files.
+
+Do not ask me to upload the same files again unless you genuinely confirm that the original files are no longer available.
+
+==================================================
+API / UPLOAD PROBLEM
+==================================================
+
+We previously got stuck because the Inventory Sync upload/API system had an API/upload-session error.
+
+Before continuing, inspect the CURRENT implementation for:
+
+- upload session
+- SDF upload
+- inventory sync API
+- file processing API
+- API routes
+- frontend API calls
+- server/backend routes
+- Vercel deployment architecture
+
+Search the entire project for:
+
+"upload session"
+"create upload session"
+"inventory sync"
+"SDF"
+"Failed to create upload session"
+"405"
+"505"
+"POST"
+"upload"
+
+Determine exactly what caused the previous upload/API failure.
+
+==================================================
+DO NOT BLINDLY RESTORE THE OLD BROKEN API
+==================================================
+
+If the previous upload-session API is obsolete or incompatible with the current Vercel architecture:
+
+DO NOT simply restore it.
+
+Instead, design the Inventory Sync flow around the architecture that ACTUALLY exists now.
+
+The goal is:
+
+Admin Panel
+→ Inventory Sync
+→ select/upload SDF files
+→ validate
+→ parse
+→ import
+→ PostgreSQL
+→ catalogue
+
+The implementation must work reliably in the actual deployment architecture.
+
+==================================================
+VERY IMPORTANT — VERCEL
+==================================================
+
+The customer website is deployed from:
+
+artifacts/ayush-medico
+
+KEEP THIS AS THE VERCEL ROOT DIRECTORY.
+
+Do NOT change it.
+
+The existing:
+
+artifacts/ayush-medico/vercel.json
+
+SPA routing fix is WORKING.
+
+DO NOT REMOVE OR MODIFY THAT FIX unless absolutely necessary.
+
+Direct routes must continue working:
+
+/
+/admin
+/admin/login
+/admin/dashboard
+/medicines
+
+Do not introduce an API architecture that works only in Replit Preview.
+
+If a long-running SDF import cannot safely run inside a normal Vercel request:
+
+DO NOT fake it.
+
+Use an appropriate existing server/import architecture or clearly separate the import processing from the normal Vercel frontend deployment.
+
+The customer website must remain fast and stable.
+
+==================================================
+ACTUAL SDF IMPORT
+==================================================
+
+Use the ORIGINAL files:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+First correct the parser.
+
+Especially:
+
+PRODUCT.SDF Product ID
+= complete 10-character right-aligned field.
+
+Do NOT truncate it to 3 characters.
+
+Then rerun the import from the original files.
+
+==================================================
+DATABASE
+==================================================
+
+The medicine catalogue should be PostgreSQL-backed.
+
+Do NOT put the large medicine catalogue into Firestore.
+
+Use the existing database/schema if it already exists.
+
+Inspect before modifying.
+
+Do NOT wipe the database.
+
+Do NOT recreate existing tables unnecessarily.
+
+Use safe upsert behavior.
+
+==================================================
+WHAT MUST COME FROM THE SDF DATA
+==================================================
+
+After the corrected import, the catalogue should contain the real source data where available:
+
+- Medicine/product
+- Product ID
+- Company/brand
+- Generic/drug
+- Category
+- Stock
+- Price/MRP where available
+- Batch where available
+- Expiry where available
+- Other valid source fields
+
+Do NOT guess price or stock fields.
+
+Inspect the actual STOCK.SDF structure.
+
+==================================================
+DUPLICATE PROTECTION
+==================================================
+
+The complete 10-character Product ID must be the stable product identity.
+
+After import verify:
+
+- total source products
+- unique product IDs
+- duplicate IDs
+- imported products
+- updated products
+- unchanged products
+- malformed records
+
+There must NOT be accidental duplication caused by the old 3-character parser.
+
+==================================================
+ADMIN INVENTORY SYNC
+==================================================
+
+Complete the Admin Panel:
+
+Inventory
+→ Inventory Sync
+
+The final system should provide an upload/import interface so that FUTURE SDF files can be supplied by the administrator without needing Replit to manually import them every time.
+
+However:
+
+For THIS current import, use the original SDF files already provided.
+
+Do not make me re-upload them unnecessarily.
+
+The Admin Sync interface should eventually support:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+and show:
+
+- file
+- size
+- records
+- validation
+- parsing
+- import status
+- new
+- updated
+- unchanged
+- errors
+- last sync
+
+==================================================
+CUSTOMER WEBSITE
+==================================================
+
+After successful import, the real catalogue must be available to the customer website.
+
+Customer should be able to:
+
+- search medicines
+- browse categories
+- view medicine
+- view company/brand
+- view generic/drug
+- see price where available
+- see stock/availability where appropriate
+- filter General Medicines
+- filter Veterinary Medicines where supported
+
+Do NOT load the entire database into the browser.
+
+Use efficient server-side querying/pagination.
+
+==================================================
+IMAGES
+==================================================
+
+Medicine images will use Cloudinary.
+
+Do NOT use Firebase Storage for the large medicine catalogue.
+
+Use:
+
+CLOUDINARY_CLOUD_NAME
+CLOUDINARY_API_KEY
+CLOUDINARY_API_SECRET
+
+through environment variables.
+
+Never expose the API secret to frontend code.
+
+The SDF import itself should NOT invent medicine images.
+
+==================================================
+FINAL VERIFICATION
+==================================================
+
+Before saying the Inventory Sync is complete:
+
+1. Confirm original SDF files are being used.
+2. Confirm 10-character Product IDs are parsed correctly.
+3. Confirm malformed records from the old parser are handled.
+4. Re-run the import.
+5. Verify PostgreSQL records.
+6. Verify categories.
+7. Verify companies/brands.
+8. Verify drug/generic relationships.
+9. Verify stock.
+10. Verify price mapping.
+11. Verify duplicate protection.
+12. Verify Admin Catalogue.
+13. Verify customer medicine search.
+14. Verify General/Veterinary filtering.
+15. Run TypeScript.
+16. Run production build.
+17. Verify Vercel compatibility.
+18. Verify /admin and /medicines still work.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Tell me:
+
+- What caused the previous API/upload-session error.
+- Whether the old API was reused, fixed, or replaced.
+- How the new/current import architecture works.
+- Whether the original SDF files were successfully parsed.
+- Product count.
+- Category count.
+- Company count.
+- Drug/generic count.
+- Stock count.
+- New/updated/unchanged/error counts.
+- Whether price and stock mappings were verified.
+- Whether Admin Catalogue works.
+- Whether customer medicine search works.
+- Whether the production build passes.
+- Whether Vercel routes still work.
+
+IMPORTANT:
+
+DO NOT RE-UPLOAD THE SDF FILES.
+
+DO NOT CREATE FAKE DATA.
+
+DO NOT ROLLBACK THE PROJECT.
+
+DO NOT WIPE VALID DATA.
+
+DO NOT BREAK THE EXISTING VERCEL ROUTING FIX.
+
+DO NOT RESTORE A KNOWN-BROKEN API JUST BECAUSE IT EXISTED BEFORE.
+
+Continue from the current parser/import checkpoint and finish the REAL medicine synchronization properly.

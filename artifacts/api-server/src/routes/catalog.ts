@@ -1,5 +1,5 @@
 import crypto from "node:crypto";
-import { Router, type IRouter, type Request, type Response } from "express";
+import express, { Router, type IRouter, type Request, type Response } from "express";
 import { and, asc, count, desc, eq, ilike, or, sql, db, categoriesTable, companiesTable, drugsTable, importErrorsTable, importFilesTable, importJobsTable, productOverridesTable, productsTable, stockBatchesTable } from "@workspace/db";
 import { requireAdminRequest } from "../lib/firebase-admin";
 import { previewImportFile, syncImportJob } from "../lib/catalog-sync";
@@ -96,7 +96,7 @@ router.get("/catalog/imports/:id", async (req, res): Promise<void> => {
   res.json({ job, files, errors });
 });
 
-router.post("/catalog/imports/upload", async (req, res): Promise<void> => {
+router.post("/catalog/imports/upload", express.raw({ type: ["application/octet-stream", "text/plain"], limit: MAX_UPLOAD_BYTES }), async (req, res): Promise<void> => {
   if (!await adminGuard(req, res)) return;
   const body = req.body as Buffer;
   const fileName = getQueryString(req.header("x-file-name"));

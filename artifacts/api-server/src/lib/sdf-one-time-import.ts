@@ -118,7 +118,7 @@ async function importMaster(
         ? "id, name AS value, code"
         : kind === "category"
           ? "id, name AS value"
-          : "id, drug_name AS value";
+          : "id, drug_name AS value, source_flags AS flags";
     const existing = await client.query(
       `SELECT ${existingColumns} FROM ${table} WHERE ${sourceColumn} = $1 LIMIT 1`,
       [parsed.sourceId],
@@ -147,7 +147,11 @@ async function importMaster(
          ON CONFLICT (source_drug_id) DO UPDATE SET drug_name = EXCLUDED.drug_name, normalized_drug_name = EXCLUDED.normalized_drug_name, source_flags = EXCLUDED.source_flags, updated_at = NOW()`,
         [parsed.sourceId, parsed.name, normalized(parsed.name), { rawFlags: parsed.flags }],
       );
-      previous ? (previous.value === parsed.name ? result.unchanged++ : result.updated++) : result.inserted++;
+      previous
+        ? previous.value === parsed.name && stableJson(previous.flags) === stableJson({ rawFlags: parsed.flags })
+          ? result.unchanged++
+          : result.updated++
+        : result.inserted++;
     }
   }
   return result;
@@ -177,7 +181,7 @@ async function importProducts(
     result.found += 1;
     const sourceProductId = field(line, 476, 486);
     const productName = field(line, 0, 74);
-    const companyName = field(line, 74, 105);
+    const companyName = field(line, 75, 105);
     const categoryName = field(line, 105, 135);
     const drugName = field(line, 135, 195);
     const packSize = field(line, 195, 230);
@@ -188,6 +192,7 @@ async function importProducts(
     }
     const sourceData = {
       fixedWidth: true,
+      parserVersion: 2,
       company: companyName,
       category: categoryName,
       drug: drugName,
@@ -199,7 +204,7 @@ async function importProducts(
     const categoryId = categories.get(categoryName) ?? categories.get(normalized(categoryName)) ?? null;
     const drugId = drugs.get(drugName) ?? drugs.get(normalized(drugName)) ?? null;
     const existing = await client.query(
-      "SELECT source_hash FROM catalog_products WHERE source_product_id = $1 LIMIT 1",
+      "SELECT source_hash, source_data->>'raw' AS raw FROM catalog_products WHERE source_product_id = $1 LIMIT 1",
       [sourceProductId],
     );
     if (existing.rows[0]?.source_hash === hash) {
@@ -258,7 +263,7 @@ async function importStock(
     const sourceData = { fixedWidth: true, batchNumber, expiry, quantity, mrp, cost, salePrice, raw: line };
     const hash = createHash("sha256").update(JSON.stringify(sourceData)).digest("hex");
     const existing = await client.query("SELECT source_data FROM catalog_stock_batches WHERE source_stock_id = $1 LIMIT 1", [sourceStockId]);
-    if (existing.rows[0] && createHash("sha256").update(JSON.stringify(existing.rows[0].source_data ?? {})).digest("hex") === hash) {
+    if (existing.rows[0] && (existing.rows[0].source_data as { raw?: string })?.raw === line) {
       result.unchanged += 1;
       continue;
     }

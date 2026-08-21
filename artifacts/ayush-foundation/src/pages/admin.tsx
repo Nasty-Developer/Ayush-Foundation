@@ -55,6 +55,7 @@ import {
   ADMIN_EMAIL,
   useAuth,
 } from '@/lib/auth';
+import { firebaseAuth } from '@/lib/firebase';
 import {
   createRecord,
   getRecord,
@@ -852,5 +853,57 @@ export function AdminSettingsPage() {
 }
 
 export function InventoryPage() {
-  return <div className="space-y-7"><AdminPageHeading eyebrow="Inventory" title="Inventory sync" description="A prepared place for a future inventory connection, without connecting an external medicine database or importing random data." /><div className="flex min-h-[360px] flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-primary/25 bg-card p-8 text-center"><span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-secondary text-primary"><RefreshCw size={24} /></span><h2 className="mt-5 font-display text-2xl tracking-[-0.04em]">Sync is not configured</h2><p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">When Ayush Medico is ready to connect an approved inventory source, this workspace can hold the setup and sync status.</p></div></div>;
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
+  const [selected, setSelected] = useState<Record<string, File | null>>({});
+  const [jobs, setJobs] = useState<Array<Record<string, unknown>>>([]);
+  const [busy, setBusy] = useState(false);
+  const fileTypes = ['PRODUCT', 'STOCK', 'DRUG', 'COMPANY', 'CATEGORY'];
+
+  async function refresh() {
+    const token = await firebaseAuth?.currentUser?.getIdToken();
+    const response = await fetch('/api/catalog/imports', { headers: token ? { Authorization: `Bearer ${token}` } : {} });
+    if (!response.ok) throw new Error((await response.json()).error ?? 'Could not load import history.');
+    const data = await response.json();
+    setJobs(data.jobs ?? []);
+  }
+
+  useEffect(() => { void refresh().catch(() => undefined); }, []);
+
+  async function uploadFiles() {
+    setBusy(true);
+    try {
+      const token = await firebaseAuth?.currentUser?.getIdToken();
+      const uploads = Object.entries(selected).filter(([, file]) => file);
+      if (!uploads.length) throw new Error('Select at least one SDF file.');
+      for (const [, file] of uploads) {
+        const response = await fetch('/api/catalog/imports/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/octet-stream', 'X-File-Name': file!.name, ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+          body: file,
+        });
+        if (!response.ok) throw new Error((await response.json()).error ?? `Could not upload ${file!.name}.`);
+      }
+      setSelected({});
+      await refresh();
+      toast({ title: 'Files validated', description: 'The upload records are now visible in import history.' });
+    } catch (error) {
+      toast({ title: 'Upload failed', description: error instanceof Error ? error.message : 'Could not upload the SDF files.', variant: 'destructive' });
+    } finally { setBusy(false); }
+  }
+
+  return <div className="space-y-7">
+    <AdminPageHeading eyebrow="Inventory" title="Inventory sync" description="Upload the five source files, review validation and record counts, then keep the import history auditable." />
+    <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+      <section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-sm sm:p-7">
+        <div className="flex items-start justify-between gap-4"><div><h2 className="font-display text-2xl tracking-[-0.04em]">Source files</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">Use the original PRODUCT, STOCK, DRUG, COMPANY, and CATEGORY SDF exports. Files are sent to the protected API as binary data.</p></div><FileText className="text-primary" /></div>
+        <div className="mt-6 space-y-3">{fileTypes.map((type) => <label key={type} className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border bg-background px-4 py-3 transition hover:border-primary/40"><span><span className="block text-sm font-bold">{type}.SDF</span><span className="text-xs text-muted-foreground">{selected[type]?.name ?? 'No file selected'}</span></span><span className="inline-flex items-center gap-2 rounded-lg bg-secondary px-3 py-2 text-xs font-bold text-primary"><Upload size={14} />Choose<input className="sr-only" type="file" accept=".sdf,.txt" onChange={(event) => setSelected((current) => ({ ...current, [type]: event.target.files?.[0] ?? null }))} /></span></label>)}</div>
+        <button type="button" disabled={busy || !isAdmin} onClick={() => void uploadFiles()} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60">{busy ? <Loader2 size={16} className="animate-spin" /> : <RefreshCw size={16} />}Upload and validate</button>
+      </section>
+      <section className="rounded-[1.5rem] border border-border bg-card p-5 shadow-sm sm:p-7">
+        <div className="flex items-start justify-between gap-4"><div><h2 className="font-display text-2xl tracking-[-0.04em]">Import history</h2><p className="mt-1 text-sm leading-6 text-muted-foreground">Recent uploads, record counts, and processing status.</p></div><button type="button" onClick={() => void refresh()} className="rounded-lg p-2 text-muted-foreground hover:bg-secondary" aria-label="Refresh import history"><RefreshCw size={17} /></button></div>
+        <div className="mt-6 space-y-3">{jobs.length ? jobs.slice(0, 8).map((job) => <div key={String(job.id)} className="rounded-xl border border-border bg-background p-4"><div className="flex items-center justify-between gap-3"><span className="text-sm font-bold">Import #{String(job.id)}</span><span className="rounded-full bg-secondary px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wider text-primary">{String(job.status ?? 'unknown')}</span></div><div className="mt-2 grid grid-cols-3 gap-2 text-xs text-muted-foreground"><span>Found<br /><b className="text-foreground">{String(job.recordsDetected ?? 0)}</b></span><span>New<br /><b className="text-foreground">{String(job.recordsImported ?? 0)}</b></span><span>Errors<br /><b className="text-foreground">{String(job.errorCount ?? 0)}</b></span></div></div>) : <div className="rounded-xl border border-dashed border-primary/25 p-6 text-center text-sm text-muted-foreground">No uploads yet.</div>}</div>
+      </section>
+    </div>
+  </div>;
 }
