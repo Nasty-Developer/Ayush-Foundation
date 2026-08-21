@@ -1,6 +1,5 @@
-import { and, eq } from "drizzle-orm";
 import crypto from "node:crypto";
-import { db, categoriesTable, companiesTable, drugsTable, importErrorsTable, importFilesTable, importJobsTable, productsTable, stockBatchesTable } from "@workspace/db";
+import { and, eq, db, categoriesTable, companiesTable, drugsTable, importErrorsTable, importFilesTable, importJobsTable, productsTable, stockBatchesTable } from "@workspace/db";
 import { getMapped, parseSdf, type ParsedSdf, type SdfType } from "./sdf";
 
 type ParsedFile = { file: typeof importFilesTable.$inferSelect; parsed: ParsedSdf };
@@ -179,7 +178,7 @@ async function syncStock(parsed: ParsedSdf, jobId: number) {
   return { imported, updated, unchanged, skipped: errors.length };
 }
 
-export async function previewImportFile(fileName: string, sourceText: string) {
+export function previewImportFile(fileName: string, sourceText: string) {
   return parseSdf(fileName, sourceText);
 }
 
