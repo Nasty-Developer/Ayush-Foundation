@@ -52,6 +52,12 @@ export default function MedicinesPage() {
   }, []);
 
   useEffect(() => {
+    if (audience === 'veterinary') {
+      setCatalog({ items: [], total: 0, totalPages: 0 });
+      setLoading(false);
+      setError('');
+      return;
+    }
     const params = new URLSearchParams({ page: String(page), pageSize: '24' });
     if (submittedQuery) params.set('q', submittedQuery);
     if (category) params.set('category', category);
@@ -180,7 +186,13 @@ export default function MedicinesPage() {
           </div>
           {loading && <p className="mt-8 text-sm text-muted-foreground">Loading imported medicines…</p>}
           {error && <p className="mt-8 rounded-2xl border border-destructive/30 bg-card p-5 text-sm text-destructive">{error}</p>}
-          {!loading && !error && catalog?.items.length === 0 && (
+          {!loading && !error && audience === 'veterinary' && (
+            <div className="mt-8 rounded-2xl border border-dashed border-primary/30 bg-card p-8">
+              <p className="text-lg font-bold text-foreground">Veterinary medicines coming soon.</p>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">We are keeping this category separate until verified veterinary products are available. Human medicines are not shown here.</p>
+            </div>
+          )}
+          {!loading && !error && audience !== 'veterinary' && catalog?.items.length === 0 && (
             <p className="mt-8 rounded-2xl border border-dashed border-primary/30 bg-card p-8 text-sm text-muted-foreground">No imported medicines match that search.</p>
           )}
           {!loading && !error && catalog && catalog.items.length > 0 && (
