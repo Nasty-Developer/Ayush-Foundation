@@ -1,16 +1,24 @@
 {
-  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @workspace/ayush-medico run build",
+  "version": 2,
+  "buildCommand": "pnpm --filter @workspace/ayush-medico run build",
   "outputDirectory": "artifacts/ayush-medico/dist/public",
-  "functions": {
-    "api/[...path].ts": {
-      "maxDuration": 300,
-      "memory": 1024
-    }
-  },
-  "rewrites": [
+  "builds": [
     {
-      "source": "/:path((?!api(?:/|$)).*)",
-      "destination": "/index.html"
+      "src": "api/**/*.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }
