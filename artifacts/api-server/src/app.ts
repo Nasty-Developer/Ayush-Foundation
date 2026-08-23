@@ -3,6 +3,7 @@ import cors from "cors";
 import helmet from "helmet";
 import { rateLimit } from "express-rate-limit";
 import pinoHttp from "pino-http";
+import path from "node:path";
 import router from "./routes";
 import { logger } from "./lib/logger";
 import { initFirebaseAdmin } from "./lib/firebaseAdmin";
@@ -123,5 +124,24 @@ app.use("/api/sync/session", syncLimiter);
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use("/api", router);
+
+// ── Production frontend ───────────────────────────────────────────────────────
+// Render runs one web service for this project. In production, the API process
+// also serves the already-built Vite output from the primary frontend package.
+if (process.env.NODE_ENV === "production") {
+  const frontendDir = path.resolve(process.cwd(), "artifacts/ayush-medico/dist/public");
+
+  app.use(express.static(frontendDir));
+  app.use((req, res, next) => {
+    if (req.method !== "GET" || req.path.startsWith("/api")) {
+      next();
+      return;
+    }
+
+    res.sendFile(path.join(frontendDir, "index.html"), (err) => {
+      if (err) next(err);
+    });
+  });
+}
 
 export default app;
