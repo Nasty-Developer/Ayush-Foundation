@@ -1,0 +1,495 @@
+The previous Phase 2 session has now been interrupted again because the Replit daily quota was reached.
+
+DO NOT restart Phase 2.
+DO NOT rebuild anything.
+DO NOT undo or duplicate the work already completed.
+
+Continue from the CURRENT project exactly as it is.
+
+WHAT THE PREVIOUS AGENT ALREADY COMPLETED
+
+The previous agent:
+
+- Imported the Ayush Foundation GitHub repository
+- Started the project successfully
+- Resumed the existing Phase 2 implementation
+- Applied the database schema
+- Imported the attached SDF catalogue
+- Imported 51,231 unique products
+- Imported 2,322 companies
+- Imported 16 categories
+- Imported 10,871 stock rows
+- Preserved idempotent import behavior
+- Implemented/continued medicine details
+- Implemented/continued persistent cart
+- Implemented/continued customer checkout
+- Implemented server-side cart/product validation
+- Implemented prescription upload/status foundations
+- Added secure prescription metadata/storage handling
+- Passed frontend TypeScript checks
+- Passed API/workspace checks after fixes
+- Passed production frontend build
+
+Do NOT redo these tasks unless inspection proves something is actually broken.
+
+---
+
+CURRENT BLOCKER — STOCK MAPPING
+
+The previous agent discovered:
+
+10,871 stock rows currently have no safe product link.
+
+The attached "STOCK_1787233263461.SDF" contains real:
+
+- batch information
+- expiry
+- quantity
+- MRP
+- sale price
+
+However, the current investigation indicates that the STOCK SDF does not contain an obvious product identifier that can safely link each stock row to "catalog_products".
+
+This is extremely important.
+
+DO NOT GUESS THE MAPPING
+
+Do NOT:
+
+- randomly match stock rows to medicines
+- match by row number
+- match by database ID
+- invent product IDs
+- invent stock
+- invent prices
+- assign stock to products based on similarity unless the source format explicitly proves the relationship
+- mark products as in-stock when the relationship is unknown
+
+Wrong stock mapping would be worse than unmapped stock.
+
+---
+
+TASK 1 — FINISH THE SDF RELATIONSHIP INVESTIGATION
+
+Inspect the actual attached SDF files and the parser specification/implementation.
+
+Check whether PRODUCT.SDF and STOCK.SDF have any legitimate shared field such as:
+
+- source identifier
+- product code
+- SKU
+- item code
+- barcode
+- GTIN
+- another documented catalogue identifier
+
+Inspect the actual fixed-width fields and parser definitions carefully.
+
+If a legitimate relationship exists:
+
+1. Implement the correct mapping.
+2. Re-run the existing idempotent importer safely.
+3. Verify linked records.
+4. Ensure no duplicates are created.
+5. Confirm prices and quantities came directly from the source file.
+
+If there is no legitimate relationship, DO NOT force one.
+
+Instead:
+
+- Keep the 10,871 stock rows as explicitly unmapped.
+- Preserve their real batch/expiry/quantity/price data.
+- Make sure the customer UI does not falsely say products are "out of stock."
+- Treat availability as unknown until a trustworthy product mapping source exists.
+- Clearly document this as an external/source-data limitation.
+
+This is an acceptable result.
+
+Data integrity is more important than artificially showing stock.
+
+---
+
+TASK 2 — VERIFY PHASE 2 FEATURES ALREADY IMPLEMENTED
+
+After resolving/documenting the stock mapping issue, verify the Phase 2 implementation that already exists.
+
+Check the actual running application and code for:
+
+Medicine Details
+
+- Real catalogue product opens correctly
+- Product data comes from API/database
+- No mock medicine data
+- Add to Cart works
+- Missing fields are not fabricated
+
+Cart
+
+- Add product
+- Remove product
+- Increase quantity
+- Decrease quantity
+- Clear cart
+- Cart count
+- Cart subtotal
+- Persistence after refresh
+- Correct empty state
+
+Customer Authentication
+
+- Sign up
+- Sign in
+- Sign out
+- Session persistence
+- Customer-only pages
+
+Do not weaken admin authentication.
+
+Checkout
+
+Verify:
+
+- Customer information
+- Mobile number
+- Address
+- Landmark
+- Delivery notes
+- Cart summary
+- Server-side product validation
+- Server-side price validation
+- Server-side customer validation
+
+The frontend must never be trusted for final prices.
+
+Prescription
+
+Verify:
+
+- Prescription-required products are detected from authoritative catalogue data
+- Non-prescription products do not unnecessarily require prescriptions
+- Prescription upload works
+- Upload validation works
+- Prescription files are not publicly exposed
+- Prescription metadata is stored securely
+- Status foundation works
+
+Do not implement admin approval yet.
+
+---
+
+TASK 3 — DO NOT TURN UNKNOWN STOCK INTO FAKE AVAILABILITY
+
+Until the stock/product relationship is proven:
+
+A product must NOT be displayed as:
+
+- "In Stock"
+- "Available"
+- "Only X left"
+
+based only on an unlinked stock row.
+
+Use an appropriate state such as:
+
+Availability information unavailable
+
+or the equivalent wording already used by the application.
+
+Do not falsely tell customers that a medicine is unavailable either.
+
+---
+
+TASK 4 — TEST THE CURRENT IMPLEMENTATION
+
+Run the appropriate checks:
+
+- Frontend TypeScript check
+- API TypeScript check
+- Production frontend build
+- API build
+- Relevant tests
+- Catalogue API
+- Product details
+- Cart
+- Checkout
+- Customer authentication
+- Prescription upload
+- Existing admin authentication
+- Existing catalogue/search/category functionality
+
+Fix actual errors found.
+
+Do not rewrite working code.
+
+---
+
+FIREBASE
+
+Use the existing Ayush Foundation Firebase configuration already present in the project/Replit environment.
+
+Do NOT use:
+
+"ayush-medico-6cf77"
+
+Do NOT ask me for credentials again if the Foundation configuration is already present in the project or Replit secrets.
+
+Do not expose private Firebase Admin credentials in your final response.
+
+---
+
+PHASE 2 BOUNDARY
+
+This is STILL PHASE 2.
+
+Do NOT implement:
+
+- Full order management
+- My Orders
+- Order tracking
+- Admin order processing
+- Admin prescription approval UI
+- Payment integration
+- Payment verification
+- Delivery system
+- Full stock reservation/decrement workflow
+
+Those belong to Phase 3.
+
+---
+
+FINAL STOP CONDITION
+
+When:
+
+1. The SDF mapping question has been correctly resolved or documented as impossible from the supplied source data,
+2. Existing Phase 2 features have been verified,
+3. Actual Phase 2 bugs have been fixed,
+4. Tests/builds pass,
+
+STOP.
+
+Do not automatically begin Phase 3.
+
+Final report must clearly state:
+
+Already completed
+
+What was already implemented before this session.
+
+Fixed now
+
+What you actually changed during this session.
+
+Stock mapping
+
+Whether stock could be safely linked to products and why.
+
+Phase 2 status
+
+What is working and what remains.
+
+Phase 3
+
+Explicitly state that Phase 3 has NOT been started.
+
+Configuration
+
+Only list genuinely missing configuration.
+
+Verification
+
+List the checks/builds/tests that actually passed.
+
+Continue from the existing Ayush Foundation project. Do not restart or rebuild.
+
+NEXT CUSTOMER-FLOW REQUIREMENTS
+
+After the existing Phase 2 work is stable, improve the customer shopping experience so a real customer can complete the medicine-order journey cleanly.
+
+MEDICINE CATALOGUE
+
+- All real imported medicines should consistently appear in the public catalogue.
+- Search and category filtering must work without blank/error states when valid catalogue data exists.
+- Do not use fake medicine data.
+- Fix loading, pagination, API, and rendering errors rather than hiding them.
+
+MEDICINE IMAGES
+
+Give medicine cards/details a consistent, professional pharmacy-style visual treatment.
+
+If individual real product images are unavailable, create/use one neutral generic medicine/pharmacy product image as the fallback image for medicines and medicine categories.
+
+The fallback must not falsely depict a specific medicine, brand, dosage, or prescription drug. It should simply make the catalogue visually polished and consistent.
+
+Use the same fallback consistently wherever a real product image is unavailable.
+
+CART + ORDERING
+
+Make the complete customer journey reliable:
+
+Medicine → Details → Add to Cart → Cart → Checkout → Place Order
+
+The customer must be able to add real medicines to the cart, change quantities, remove items, and proceed to checkout without broken buttons or dead routes.
+
+CUSTOMER SIGN-IN
+
+Make customer authentication polished and reliable:
+
+- Sign In
+- Sign Up
+- Sign Out
+- Session persistence
+- Google Sign-In if the Ayush Foundation Firebase configuration already supports/enables it
+
+Do not use Ayush Medico Firebase credentials.
+
+Do not claim Google Sign-In works unless it is actually configured and tested in the Foundation Firebase project.
+
+CHECKOUT INFORMATION
+
+The checkout form should collect:
+
+- Full name — required
+- Mobile number — required
+- Delivery address — required
+- Landmark — optional
+- Email — optional
+- Delivery notes — optional
+
+Make validation clear and mobile-friendly.
+
+PRESCRIPTION
+
+If a medicine actually requires a prescription, the checkout must request the prescription before allowing the customer to complete the order.
+
+Non-prescription medicines should not unnecessarily require one.
+
+ORDER CREATION
+
+The ordering flow must actually create a real order using the existing Ayush Foundation PostgreSQL/order architecture.
+
+Do not create fake successful orders.
+
+Do not mark payment as successful without real payment verification.
+
+If payment is not yet configured, the order can use the project's legitimate pending/unpaid state while keeping the payment workflow ready for Phase 3.
+
+The customer must receive a clear order confirmation after a successfully created order.
+
+IMPORTANT STOCK RULE
+
+The current SDF investigation found that stock rows cannot yet be safely linked to products.
+
+Do NOT invent a stock mapping.
+
+Do NOT let the unresolved stock mapping make the entire medicine catalogue disappear or become unusable.
+
+If stock cannot be authoritatively verified, show an honest availability state and prevent only the operation that genuinely requires verified stock.
+
+UI QUALITY
+
+Make the medicine catalogue, category cards, medicine details, cart, sign-in/sign-up, and checkout feel like one polished Ayush Foundation pharmacy website.
+
+Keep the existing design language and make the flow responsive on mobile and desktop.
+
+Do not redesign unrelated admin functionality.
+
+IMMEDIATE FIXES — DO THESE NEXT
+
+The current customer-facing site still has these concrete problems:
+
+1. FIX ADD TO CART AND PRICE
+
+Right now medicines are not reliably being added to the cart, and medicine prices are not consistently visible.
+
+Fix this first.
+
+- Every real medicine card should show its actual price when a valid price exists in the database.
+- The medicine details page should show the actual price too.
+- The Add to Cart button must work for real catalogue products.
+- The cart must receive the correct real product ID, name, price, and quantity.
+- The cart total must calculate correctly.
+- Do not use fake prices.
+- Do not hardcode a price into the frontend.
+- If a real price is genuinely unavailable, clearly show that rather than inventing one.
+
+Actually test:
+
+Medicine → Add to Cart → Cart → quantity → total
+
+Do not consider this fixed until you have tested that complete flow in the running application.
+
+2. MEDICINE IMAGE FOR EVERY PRODUCT
+
+Make the medicine catalogue visually consistent.
+
+For medicines that do not have an actual product image, use one clean generic tablet/medicine pharmacy image as the fallback image.
+
+The fallback should look like a professional pharmacy product image and should be neutral enough to represent generic medicine.
+
+Do NOT make the image look like a specific branded medicine or claim that it is the actual packaging of a particular drug.
+
+Use the same fallback consistently for every medicine without a real image.
+
+Make sure the image loads correctly on:
+
+- Medicine cards
+- Medicine details
+- Search results
+- Any medicine sections on the homepage
+
+Do not let broken image URLs create blank/broken image areas.
+
+3. THREE MEDICINE CATEGORIES ON THE WEBSITE
+
+Create a clear category section that displays exactly these three customer-facing categories:
+
+1. Tablet Medicines 💊
+2. Vet Medicines 🐾
+3. General Medicines
+
+Make the three categories visually consistent and attractive.
+
+The categories should be usable for filtering/navigation where appropriate.
+
+VET MEDICINES
+
+Keep the Vet Medicines category empty for now.
+
+Do NOT create fake veterinary products.
+
+Do NOT populate it from unrelated human medicines.
+
+The admin panel will be used later to add genuine veterinary medicines.
+
+Show a clean empty state such as:
+
+Veterinary medicines coming soon.
+
+TABLET + GENERAL MEDICINES
+
+Use the real imported catalogue data for these sections.
+
+Do not duplicate medicines unnecessarily.
+
+Do not fabricate category assignments when the database does not support them.
+
+If the existing catalogue category structure already provides a trustworthy classification, use it. If not, implement the minimum safe classification needed for these customer-facing sections without changing the underlying SDF data incorrectly.
+
+4. MAKE THE CUSTOMER FLOW ACTUALLY WORK
+
+After these UI/data fixes, test the full customer journey:
+
+Medicines → Category → Medicine → Price → Add to Cart → Cart → Checkout
+
+The customer must be able to complete the flow without blank pages, broken buttons, missing prices, or dead routes.
+
+Do not just make the UI look correct. Verify the actual data and cart state in the running application.
+
+5. DO NOT TOUCH PHASE 3
+
+These fixes are still part of the current customer-flow work.
+
+Do NOT start payment integration, delivery management, admin order processing, or the full Phase 3 workflow yet.
+
+First make the real medicines + prices + images + categories + Add to Cart + Cart flow reliable.
