@@ -51,7 +51,7 @@ export default function ProductDetailsPage() {
         {product && !loading && (
           <div className="grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
             <div className="flex min-h-[320px] items-center justify-center rounded-[2rem] border border-border bg-card p-8">
-              <img src={product.imageUrl || '/medicine-fallback.svg'} alt={product.imageUrl ? product.name : 'Medicine product placeholder'} className="max-h-80 max-w-full object-contain" />
+              <img src={product.imageUrl || '/medicine-fallback.svg'} alt={product.imageUrl ? product.name : 'Medicine product placeholder'} onError={(event) => { event.currentTarget.src = '/medicine-fallback.svg'; }} className="max-h-80 max-w-full object-contain" />
             </div>
             <div className="rounded-[2rem] border border-border bg-card p-7 shadow-sm sm:p-10">
               <p className="eyebrow">{product.categoryDisplayName || product.category || 'Catalogue product'}</p>
@@ -74,7 +74,7 @@ export default function ProductDetailsPage() {
                   <span className="min-w-8 text-center text-sm font-bold">{quantity}</span>
                   <button type="button" onClick={() => setQuantity((value) => Math.min(99, value + 1))} className="p-3" aria-label="Increase quantity"><Plus size={16} /></button>
                 </div>
-                  <button type="button" onClick={addToCart} className="flex-1 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground">{added ? 'Added to cart' : 'Add to cart'}</button>
+                  <button type="button" disabled={!product.salePrice} onClick={addToCart} className="flex-1 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">{added ? 'Added to cart' : product.salePrice ? 'Add to cart' : 'Price pending'}</button>
                 {added && <button type="button" onClick={() => navigate('/cart')} className="rounded-xl border border-primary/25 px-5 py-3.5 text-sm font-bold text-primary">View cart</button>}
               </div>
               {product.productInfo && Object.entries(product.productInfo).filter(([, value]) => value !== null && value !== '').length > 0 && <div className="mt-9 border-t border-border pt-7"><h3 className="text-sm font-bold">Product information</h3><dl className="mt-4 grid gap-3 sm:grid-cols-2">{Object.entries(product.productInfo).filter(([, value]) => value !== null && value !== '').slice(0, 12).map(([key, value]) => <div key={key}><dt className="text-xs capitalize text-muted-foreground">{key.replaceAll('_', ' ')}</dt><dd className="mt-1 text-sm font-semibold">{String(value)}</dd></div>)}</dl></div>}

@@ -1,6 +1,11 @@
 import { ArrowRight, Circle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { medicineCategories } from '@/lib/home-data';
+
+const medicineCategories = [
+  { title: 'Tablet Medicines', note: 'Everyday tablet care', icon: 'TB', href: '/medicines' },
+  { title: 'Vet Medicines', note: 'Veterinary care coming soon', icon: 'VT', href: '/medicines?audience=veterinary' },
+  { title: 'General Medicines', note: 'Browse the imported catalogue', icon: 'GM', href: '/medicines?audience=general' },
+];
 
 export function CategoryPreview() {
   return (
@@ -19,11 +24,11 @@ export function CategoryPreview() {
           Browse All Medicines <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
         </Link>
       </div>
-      <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <div className="mt-10 grid gap-3 sm:grid-cols-3">
         {medicineCategories.map((category, index) => (
           <Link
             key={category.title}
-            to="/medicines"
+            to={category.href}
             className={`group flex min-h-[142px] flex-col justify-between rounded-2xl border border-border bg-card p-4 shadow-sm transition-all hover:-translate-y-1 hover:border-primary/30 hover:shadow-md sm:p-5 ${index === 0 ? 'bg-[hsl(189_35%_94%)]' : ''}`}
             data-testid={`link-category-${index}`}
           >

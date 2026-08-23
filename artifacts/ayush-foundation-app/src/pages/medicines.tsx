@@ -33,6 +33,7 @@ type Category = { id: number; name: string; displayName: string | null };
 
 export default function MedicinesPage() {
   const { add } = useCart();
+  const audience = new URLSearchParams(window.location.search).get('audience') || '';
   const [query, setQuery] = useState('');
   const [submittedQuery, setSubmittedQuery] = useState('');
   const [category, setCategory] = useState('');
@@ -54,6 +55,7 @@ export default function MedicinesPage() {
     const params = new URLSearchParams({ page: String(page), pageSize: '24' });
     if (submittedQuery) params.set('q', submittedQuery);
     if (category) params.set('category', category);
+    if (audience === 'veterinary' || audience === 'general') params.set('audience', audience);
     setLoading(true);
     setError('');
     fetch(`/api/catalog/products?${params.toString()}`)
@@ -61,7 +63,7 @@ export default function MedicinesPage() {
       .then((data: CatalogResponse) => setCatalog(data))
       .catch(() => setError('The medicine catalogue is temporarily unavailable. Please call the team instead.'))
       .finally(() => setLoading(false));
-  }, [submittedQuery, category, page]);
+  }, [submittedQuery, category, page, audience]);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -187,7 +189,7 @@ export default function MedicinesPage() {
                 {catalog.items.map((item) => (
                   <article key={item.id} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
                      <div className="mb-4 flex h-36 items-center justify-center rounded-xl bg-secondary p-4">
-                       <img src={item.imageUrl || '/medicine-fallback.svg'} alt={item.imageUrl ? item.name : 'Medicine product placeholder'} className="max-h-full max-w-full object-contain" />
+                        <img src={item.imageUrl || '/medicine-fallback.svg'} alt={item.imageUrl ? item.name : 'Medicine product placeholder'} onError={(event) => { event.currentTarget.src = '/medicine-fallback.svg'; }} className="max-h-full max-w-full object-contain" />
                      </div>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{item.categoryDisplayName || item.category || 'Uncategorised'}</p>
                     <Link to={`/medicines/${item.id}`} className="mt-3 block text-base font-bold leading-6 hover:text-primary">{item.name}</Link>
@@ -198,7 +200,7 @@ export default function MedicinesPage() {
                       <span className="rounded-full bg-muted px-3 py-1">Source ID: {item.sourceProductId}</span>
                     </div>
                      <p className="mt-3 text-xs font-semibold text-muted-foreground">Availability information unavailable</p>
-                     <div className="mt-3 flex gap-2"><Link to={`/medicines/${item.id}`} className="flex-1 rounded-xl border border-primary/25 px-3 py-2.5 text-center text-xs font-bold text-primary">View details</Link><button type="button" onClick={() => add(item)} className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground"><ShoppingBag size={14} /> Add</button></div>
+                      <div className="mt-3 flex gap-2"><Link to={`/medicines/${item.id}`} className="flex-1 rounded-xl border border-primary/25 px-3 py-2.5 text-center text-xs font-bold text-primary">View details</Link><button type="button" disabled={!item.salePrice} onClick={() => add(item)} className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"><ShoppingBag size={14} /> {item.salePrice ? 'Add' : 'Price pending'}</button></div>
                   </article>
                 ))}
               </div>

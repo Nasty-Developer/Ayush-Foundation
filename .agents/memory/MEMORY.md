@@ -1,0 +1,1 @@
+- [Ayush catalogue data](ayush-catalog-data.md) — stock linkage must be proven; unknown availability must not become fabricated inventory.
