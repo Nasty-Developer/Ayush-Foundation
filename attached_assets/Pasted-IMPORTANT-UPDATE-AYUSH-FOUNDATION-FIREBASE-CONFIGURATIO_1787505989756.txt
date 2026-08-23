@@ -1,0 +1,49 @@
+IMPORTANT UPDATE — AYUSH FOUNDATION FIREBASE CONFIGURATION
+
+I am creating a completely NEW and fresh Firebase project specifically for Ayush Foundation.
+
+Do NOT use the old Ayush Medico Firebase project:
+ayush-medico-6cf77
+
+I will provide you with ALL required Ayush Foundation Firebase configuration values from the new Firebase project.
+
+For now:
+
+1. STOP using or referencing the old Ayush Medico Firebase project.
+2. Do NOT invent any Firebase values.
+3. Do NOT reuse the old Firebase configuration.
+4. Do NOT expose any Firebase Admin private credentials in source code, logs, screenshots, commits, or your final report.
+5. Keep the existing Ayush Foundation application architecture intact.
+6. Do NOT add new features or start Phase 3.
+7. Do NOT re-import the SDF catalogue.
+8. Do NOT modify the existing medicine/catalogue data.
+
+I am going to provide the fresh Ayush Foundation Firebase configuration values next.
+
+Expected client configuration:
+
+- VITE_FIREBASE_API_KEY
+- VITE_FIREBASE_AUTH_DOMAIN
+- VITE_FIREBASE_PROJECT_ID
+- VITE_FIREBASE_STORAGE_BUCKET
+- VITE_FIREBASE_MESSAGING_SENDER_ID
+- VITE_FIREBASE_APP_ID
+- VITE_FIREBASE_MEASUREMENT_ID (if provided)
+
+For Firebase Admin/server configuration, I will provide the required values separately through secure environment variables/secrets. Never print private keys or service-account credentials in the response.
+
+Once I provide the new values:
+
+- Configure them ONLY for Ayush Foundation.
+- Verify the project ID belongs to the new Foundation Firebase project.
+- Remove any remaining runtime dependency on the old Ayush Medico Firebase project.
+- Configure customer Email/Password authentication.
+- Configure Google Sign-In if enabled in the new Foundation Firebase project.
+- Configure Firebase Storage if required by the existing prescription workflow.
+- Keep admin authentication secure and separate.
+- Do not weaken existing security rules.
+- Do not expose secrets to the frontend except the normal VITE Firebase client configuration.
+
+After configuration, verify the Firebase connection and report only whether it is correctly connected. Do not expose the actual secret values.
+
+WAIT FOR MY NEW FIREBASE VALUES BEFORE MAKING ANY FIREBASE-SPECIFIC CHANGES.
