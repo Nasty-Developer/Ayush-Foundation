@@ -10,6 +10,7 @@ type Product = CartProduct & {
   categoryDisplayName: string | null;
   active: boolean;
   productInfo: Record<string, unknown> | null;
+  stockRecords: number;
 };
 
 export default function ProductDetailsPage() {
@@ -65,7 +66,7 @@ export default function ProductDetailsPage() {
                 {product.salePrice ? <p className="text-3xl font-bold text-primary">₹{Number(product.salePrice).toFixed(2)}</p> : <p className="text-sm font-semibold text-muted-foreground">Price not listed</p>}
                 {product.mrp && Number(product.mrp) > Number(product.salePrice) && <p className="text-sm text-muted-foreground line-through">₹{Number(product.mrp).toFixed(2)}</p>}
               </div>
-              <p className={`mt-3 text-sm font-semibold ${Number(product.quantity ?? 0) > 0 ? 'text-primary' : 'text-destructive'}`}>{Number(product.quantity ?? 0) > 0 ? `${product.quantity} available` : 'Currently out of stock'}</p>
+               <p className={`mt-3 text-sm font-semibold ${product.stockRecords === 0 ? 'text-muted-foreground' : Number(product.quantity ?? 0) > 0 ? 'text-primary' : 'text-destructive'}`}>{product.stockRecords === 0 ? 'Availability to be confirmed' : Number(product.quantity ?? 0) > 0 ? `${product.quantity} available` : 'Currently out of stock'}</p>
               {product.prescriptionRequired && <p className="mt-5 flex items-center gap-2 rounded-xl bg-[hsl(42_55%_88%)] px-4 py-3 text-sm font-semibold text-[hsl(35_55%_30%)]"><ShieldCheck size={17} /> Prescription required at checkout</p>}
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <div className="flex items-center justify-between rounded-xl border border-border bg-background px-2">
@@ -73,7 +74,7 @@ export default function ProductDetailsPage() {
                   <span className="min-w-8 text-center text-sm font-bold">{quantity}</span>
                   <button type="button" onClick={() => setQuantity((value) => Math.min(99, value + 1))} className="p-3" aria-label="Increase quantity"><Plus size={16} /></button>
                 </div>
-                <button type="button" disabled={!product.salePrice || Number(product.quantity ?? 0) < quantity} onClick={addToCart} className="flex-1 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">{added ? 'Added to cart' : 'Add to cart'}</button>
+                 <button type="button" disabled={!product.salePrice || product.stockRecords < 1 || Number(product.quantity ?? 0) < quantity} onClick={addToCart} className="flex-1 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">{added ? 'Added to cart' : 'Add to cart'}</button>
                 {added && <button type="button" onClick={() => navigate('/cart')} className="rounded-xl border border-primary/25 px-5 py-3.5 text-sm font-bold text-primary">View cart</button>}
               </div>
               {product.productInfo && Object.entries(product.productInfo).filter(([, value]) => value !== null && value !== '').length > 0 && <div className="mt-9 border-t border-border pt-7"><h3 className="text-sm font-bold">Product information</h3><dl className="mt-4 grid gap-3 sm:grid-cols-2">{Object.entries(product.productInfo).filter(([, value]) => value !== null && value !== '').slice(0, 12).map(([key, value]) => <div key={key}><dt className="text-xs capitalize text-muted-foreground">{key.replaceAll('_', ' ')}</dt><dd className="mt-1 text-sm font-semibold">{String(value)}</dd></div>)}</dl></div>}

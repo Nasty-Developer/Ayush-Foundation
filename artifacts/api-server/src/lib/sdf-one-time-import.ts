@@ -27,7 +27,7 @@ export type OneTimeImportSummary = {
   categories: ImportCounters;
   drugGroups: ImportCounters;
   stock: ImportCounters;
-  unresolvedStockProductReferences: number;
+  stockRecordsWithoutProductReference: number;
   durationMs: number;
 };
 
@@ -232,7 +232,7 @@ async function importStock(
   path: string,
 ) {
   const result = counters();
-  let unresolved = 0;
+  let withoutProductReference = 0;
   for await (const line of lines(path)) {
     result.found += 1;
     let batchNumber = field(line, 5, 24);
@@ -260,14 +260,18 @@ async function importStock(
       result.errors.push(`Record ${result.found}: missing stock identifier`);
       continue;
     }
+    // The supplied STOCK.SDF record layout has no product identifier. Its
+    // trailing 9-digit value is the stock record ID, not a PRODUCT.SDF ID.
+    // Keep the stock row and its source values, but never guess a product link.
+    withoutProductReference += 1;
     const sourceData = { fixedWidth: true, batchNumber, expiry, quantity, mrp, cost, salePrice, raw: line };
     const hash = createHash("sha256").update(JSON.stringify(sourceData)).digest("hex");
     const existing = await client.query("SELECT source_data FROM catalog_stock_batches WHERE source_stock_id = $1 LIMIT 1", [sourceStockId]);
-    if (existing.rows[0] && (existing.rows[0].source_data as { raw?: string })?.raw === line) {
+    const existingSourceData = existing.rows[0]?.source_data as { raw?: string; mappingStatus?: string } | undefined;
+    if (existingSourceData?.raw === line && existingSourceData.mappingStatus === "not_available_in_source") {
       result.unchanged += 1;
       continue;
     }
-    unresolved += 1;
     await client.query(
       `INSERT INTO catalog_stock_batches
        (source_stock_id, product_id, batch_number, expiry_date, quantity, mrp, sale_price, cost, source_data)
@@ -275,11 +279,11 @@ async function importStock(
        ON CONFLICT (source_stock_id) DO UPDATE SET batch_number = EXCLUDED.batch_number, expiry_date = EXCLUDED.expiry_date,
          quantity = EXCLUDED.quantity, mrp = EXCLUDED.mrp, sale_price = EXCLUDED.sale_price, cost = EXCLUDED.cost,
          source_data = EXCLUDED.source_data, last_synced_at = NOW(), updated_at = NOW()`,
-      [sourceStockId, batchNumber || null, parseExpiry(expiry), parseNumber(quantity), parseNumber(mrp), parseNumber(salePrice), parseNumber(cost), sourceData],
+      [sourceStockId, batchNumber || null, parseExpiry(expiry), parseNumber(quantity), parseNumber(mrp), parseNumber(salePrice), parseNumber(cost), { ...sourceData, productReference: null, mappingStatus: "not_available_in_source" }],
     );
     existing.rows[0] ? (result.updated += 1) : (result.inserted += 1);
   }
-  return { result, unresolved };
+  return { result, withoutProductReference };
 }
 
 export async function importFixedWidthSdfFiles(paths: SdfFilePaths): Promise<OneTimeImportSummary> {
@@ -295,7 +299,7 @@ export async function importFixedWidthSdfFiles(paths: SdfFilePaths): Promise<One
     const files: Record<string, ImportCounters> = {};
     for (const [key, path] of Object.entries(paths)) files[key] = { ...counters(), found: 0, inserted: 0, updated: 0, unchanged: 0, skipped: 0, errors: [`sha256:${await fileHash(path)}`] };
     await client.query("COMMIT");
-    return { files, products, companies, categories, drugGroups, stock: stock.result, unresolvedStockProductReferences: stock.unresolved, durationMs: Date.now() - started };
+    return { files, products, companies, categories, drugGroups, stock: stock.result, stockRecordsWithoutProductReference: stock.withoutProductReference, durationMs: Date.now() - started };
   } catch (error) {
     await client.query("ROLLBACK");
     throw error;

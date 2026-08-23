@@ -52,6 +52,7 @@ async function validateCart(items: unknown) {
       company: companiesTable.name,
       salePrice: sql<string | null>`min(${stockBatchesTable.salePrice})`,
       stock: sql<string | null>`coalesce(sum(${stockBatchesTable.quantity}), 0)`,
+       stockRecords: sql<number>`count(${stockBatchesTable.id})`,
       prescriptionRequired: sql<boolean>`coalesce(${productOverridesTable.prescriptionRequired}, false)`,
       active: productsTable.active,
     }).from(productsTable)
@@ -61,6 +62,7 @@ async function validateCart(items: unknown) {
       .where(eq(productsTable.id, productId))
       .groupBy(productsTable.id, companiesTable.name, productOverridesTable.prescriptionRequired);
     if (!row || !row.active) throw new Error("One of the products is no longer available.");
+     if (Number(row.stockRecords) === 0) throw new Error(`${row.name} has no linked stock record, so its availability cannot be confirmed.`);
     const stock = Number(row.stock ?? 0);
     if (stock < quantity) throw new Error(`${row.name} has only ${Math.max(0, stock)} available.`);
     if (!row.salePrice || Number(row.salePrice) < 0) throw new Error(`${row.name} does not have a current price.`);

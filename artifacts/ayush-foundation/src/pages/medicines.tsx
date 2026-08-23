@@ -20,6 +20,7 @@ type CatalogItem = {
   salePrice: string | null;
   mrp: string | null;
   quantity: string | null;
+  stockRecords: number;
 };
 
 type CatalogResponse = {
@@ -193,7 +194,8 @@ export default function MedicinesPage() {
                       {item.packSize && <span className="rounded-full bg-muted px-3 py-1">{item.packSize}</span>}
                       <span className="rounded-full bg-muted px-3 py-1">Source ID: {item.sourceProductId}</span>
                     </div>
-                    <div className="mt-5 flex gap-2"><Link to={`/medicines/${item.id}`} className="flex-1 rounded-xl border border-primary/25 px-3 py-2.5 text-center text-xs font-bold text-primary">View details</Link><button type="button" onClick={() => add(item)} disabled={!item.salePrice || Number(item.quantity ?? 0) < 1} className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-40"><ShoppingBag size={14} /> Add</button></div>
+                     <div className="mt-3 text-xs font-semibold text-muted-foreground">{item.stockRecords > 0 ? (Number(item.quantity ?? 0) > 0 ? `${item.quantity} available` : 'Currently out of stock') : 'Availability to be confirmed'}</div>
+                     <div className="mt-3 flex gap-2"><Link to={`/medicines/${item.id}`} className="flex-1 rounded-xl border border-primary/25 px-3 py-2.5 text-center text-xs font-bold text-primary">View details</Link><button type="button" onClick={() => add(item)} disabled={!item.salePrice || item.stockRecords < 1 || Number(item.quantity ?? 0) < 1} className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-40"><ShoppingBag size={14} /> Add</button></div>
                   </article>
                 ))}
               </div>

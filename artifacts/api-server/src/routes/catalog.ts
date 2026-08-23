@@ -53,7 +53,8 @@ router.get("/catalog/products/:id", async (req, res): Promise<void> => {
     imageUrl: sql<string | null>`coalesce(${productOverridesTable.imageUrl}, ${productsTable.imageUrl})`,
     salePrice: sql<string | null>`min(${stockBatchesTable.salePrice})`,
     mrp: sql<string | null>`min(${stockBatchesTable.mrp})`,
-    quantity: sql<string | null>`coalesce(sum(${stockBatchesTable.quantity}), 0)`,
+     quantity: sql<string | null>`case when count(${stockBatchesTable.id}) = 0 then null else coalesce(sum(${stockBatchesTable.quantity}), 0) end`,
+     stockRecords: sql<number>`count(${stockBatchesTable.id})`,
     prescriptionRequired: sql<boolean>`coalesce(${productOverridesTable.prescriptionRequired}, false)`,
     active: productsTable.active,
     productInfo: productsTable.sourceData,
@@ -99,7 +100,8 @@ router.get("/catalog/products", async (req, res): Promise<void> => {
     imageUrl: sql<string | null>`coalesce(${productOverridesTable.imageUrl}, ${productsTable.imageUrl})`,
     salePrice: sql<string | null>`min(${stockBatchesTable.salePrice})`,
     mrp: sql<string | null>`min(${stockBatchesTable.mrp})`,
-    quantity: sql<string | null>`coalesce(sum(${stockBatchesTable.quantity}), 0)`,
+     quantity: sql<string | null>`case when count(${stockBatchesTable.id}) = 0 then null else coalesce(sum(${stockBatchesTable.quantity}), 0) end`,
+     stockRecords: sql<number>`count(${stockBatchesTable.id})`,
   }).from(productsTable).leftJoin(companiesTable, eq(productsTable.companyId, companiesTable.id)).leftJoin(drugsTable, eq(productsTable.drugId, drugsTable.id)).leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id)).leftJoin(productOverridesTable, eq(productOverridesTable.productId, productsTable.id)).leftJoin(stockBatchesTable, eq(stockBatchesTable.productId, productsTable.id)).where(and(...conditions)).groupBy(productsTable.id, companiesTable.name, drugsTable.drugName, categoriesTable.name, categoriesTable.displayName, productOverridesTable.imageUrl).orderBy(asc(productsTable.productName)).limit(pageSize).offset((page - 1) * pageSize);
   const [{ total }] = await db.select({ total: count() }).from(productsTable).leftJoin(companiesTable, eq(productsTable.companyId, companiesTable.id)).leftJoin(drugsTable, eq(productsTable.drugId, drugsTable.id)).leftJoin(categoriesTable, eq(productsTable.categoryId, categoriesTable.id)).where(and(...conditions));
   res.json({ items: rows, page, pageSize, total: Number(total), totalPages: Math.ceil(Number(total) / pageSize) });

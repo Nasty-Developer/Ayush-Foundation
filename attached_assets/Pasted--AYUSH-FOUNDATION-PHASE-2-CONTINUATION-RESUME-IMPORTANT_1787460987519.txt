@@ -1,0 +1,517 @@
+# AYUSH FOUNDATION — PHASE 2 CONTINUATION / RESUME
+
+IMPORTANT: A previous Phase 2 implementation pass was already started and partially completed before the Replit daily quota was reached. **Do NOT restart Phase 2 and do NOT redo completed work.**
+
+First inspect the CURRENT project state and the changes already made by the previous agent. Continue from exactly where it stopped.
+
+The previous pass reported that it already:
+
+* Created/updated live medicine product details functionality
+* Created a persistent cart
+* Created customer-only checkout
+* Added server-side cart revalidation
+* Added prescription upload/status handling
+* Added secure prescription metadata/storage rules
+* Applied the catalogue schema to the development database
+* Imported the attached catalogue records
+* Populated the database with approximately 51,231 valid products, 2,322 companies, 16 categories, and 10,871 stock records
+* Passed TypeScript checks for API and frontend
+* Restarted the API and frontend workflows
+
+It then discovered a likely **stock-to-product mapping issue during verification** and started investigating the SDF stock parser/mapping. The Replit quota was reached before this investigation was finished.
+
+### FIRST TASK — RESUME, DON'T REBUILD
+
+Inspect the current code and git/worktree state first.
+
+Determine exactly which Phase 2 changes are already present and working.
+
+Do NOT recreate files that already exist.
+
+Do NOT duplicate database tables.
+
+Do NOT re-import the catalogue blindly.
+
+Do NOT overwrite working implementation.
+
+Do NOT start from the original Phase 2 prompt as if nothing was done.
+
+Continue from the current state.
+
+### PRIORITY 1 — FINISH THE STOCK/SDF MAPPING INVESTIGATION
+
+The previous agent found that the catalogue had been imported but was checking whether stock records were correctly linked to the real catalogue products.
+
+Inspect:
+
+* `attached_assets/PRODUCT_1787233263463.SDF`
+* `attached_assets/STOCK_1787233263461.SDF`
+* The existing SDF parser/importer
+* `catalog_products`
+* `catalog_stock_batches`
+* Product source identifiers
+* Stock source identifiers
+* The existing stock mapping logic
+
+Determine the correct relationship between the PRODUCT and STOCK SDF records.
+
+If the stock mapping is wrong or incomplete, fix the existing importer/mapping logic correctly and safely.
+
+Do NOT invent stock quantities or prices.
+
+Use only values actually present in the attached SDF files.
+
+After fixing it, verify that real stock records correctly point to the corresponding real catalogue products.
+
+Do not create duplicate stock rows when re-running the import.
+
+### PRIORITY 2 — VERIFY THE WORK ALREADY IMPLEMENTED
+
+After resolving the stock mapping issue, inspect and test the existing Phase 2 implementation:
+
+1. Medicine details
+2. Real catalogue data
+3. Add to cart
+4. Remove from cart
+5. Quantity changes
+6. Cart persistence
+7. Customer authentication
+8. Checkout
+9. Server-side product/price validation
+10. Prescription-required detection
+11. Secure prescription upload
+12. Prescription metadata/status
+
+Fix only actual problems found.
+
+### FIREBASE — AYUSH FOUNDATION ONLY
+
+Use the actual **Ayush Foundation Firebase configuration already present in the current project/Replit environment**.
+
+Search the current project files and configured environment/secrets before asking me for values.
+
+Do NOT use the old Ayush Medico Firebase project.
+
+Do NOT expose private Firebase Admin service-account credentials in the final response.
+
+If Foundation Firebase configuration is already present, use it.
+
+If a required value is genuinely missing, identify the missing configuration without inventing it.
+
+### IMPORTANT CATALOGUE RULE
+
+The 51,231 imported products are real catalogue data from the attached SDF files.
+
+Preserve them.
+
+Do not replace them with mock data.
+
+Do not create fake medicines, fake prices, fake stock, fake prescriptions, or fake customers.
+
+### COMPLETE ONLY THE REMAINING PHASE 2 WORK
+
+After the stock mapping and verification are complete, finish any genuinely missing Phase 2 functionality from the original Phase 2 scope:
+
+* Medicine details
+* Cart
+* Checkout
+* Prescription workflow
+
+Do NOT implement Phase 3.
+
+Do NOT implement full order management.
+
+Do NOT implement payment processing.
+
+Do NOT implement stock reservation/decrement as the Phase 3 workflow.
+
+Do NOT implement admin prescription approval UI yet.
+
+### TESTING
+
+Run the relevant TypeScript checks, production build, API checks, and frontend verification after fixing the remaining issues.
+
+Verify that the existing Phase 1 functionality remains intact.
+
+### STRICT STOP CONDITION
+
+When all remaining Phase 2 work that can safely be completed is finished and tested, STOP.
+
+Do not automatically begin Phase 3.
+
+Final report must clearly separate:
+
+* Already completed before this resume
+* Fixed during this resume
+* Still remaining in Phase 2
+* Phase 3 work intentionally not started
+* Any missing configuration/secrets
+* Test/build results
+
+**Resume the existing Ayush Foundation Phase 2 implementation from its current state. Do not restart it.**
+
+Phase 1 has been completed and verified.
+
+Before implementing Phase 2, inspect the existing Ayush Foundation Firebase configuration and use the **actual Ayush Foundation Firebase values already present in this project/workspace**. Do not substitute Ayush Medico Firebase values.
+
+Search the project files, environment configuration, and existing Replit secrets/configuration for the Foundation Firebase client configuration and existing Firebase Admin configuration. Reuse the values that are already configured for Ayush Foundation rather than asking me to provide them again if they are already available to you.
+
+If the project contains multiple Firebase configurations, identify which one belongs to Ayush Foundation by checking the current active project configuration and usage. Do not guess.
+
+Before proceeding with Phase 2, verify that the Firebase project ID, auth domain, storage bucket, app ID, sender ID, and relevant Admin SDK configuration all correspond to Ayush Foundation. Do not expose private service-account credentials in the final report.
+
+If any required Foundation Firebase value is genuinely missing, stop only the Firebase-dependent part, report exactly which non-secret configuration is missing, and continue with any Phase 2 work that can safely proceed without it.
+
+Now implement **PHASE 2 ONLY**.
+
+Do NOT start Phase 3.
+
+Do NOT implement the full order-management, stock-reservation, or payment system yet.
+
+The scope of this phase is:
+
+**Medicine Details → Cart → Checkout → Prescription Workflow**
+
+Continue from the existing Ayush Foundation codebase. Do NOT rebuild the project.
+
+---
+
+## 1. MEDICINE DETAILS PAGE
+
+Create/complete a real medicine/product details page using the existing Ayush Foundation catalogue API and PostgreSQL data.
+
+When a customer selects a medicine from the catalogue, show the actual product information available in the database.
+
+Include where available:
+
+* Medicine/product name
+* Brand/company/manufacturer
+* Strength
+* Dosage/form
+* Product information already present in the catalogue
+* Current price if actually available
+* Stock/availability if actually available
+* Prescription-required status
+* Product image if already available
+* Add to Cart
+
+Do NOT invent missing medical information.
+
+If a field does not exist in the catalogue, simply don't fabricate it.
+
+The page must use the real catalogue API/database.
+
+Do NOT use hardcoded medicine objects or mock products.
+
+---
+
+# 2. CUSTOMER CART
+
+Implement the customer shopping cart.
+
+The cart must support:
+
+* Add medicine
+* Remove medicine
+* Increase quantity
+* Decrease quantity
+* Quantity validation
+* Clear cart
+* Empty-cart state
+* Cart item count
+* Cart subtotal
+* Prescription-required item detection
+* Cart persistence across page refreshes
+* Proper mobile and desktop UI
+
+Use the existing Ayush Foundation design system.
+
+Do not unnecessarily redesign unrelated parts of the website.
+
+### IMPORTANT SECURITY RULE
+
+The frontend cart must NOT be treated as the final source of truth.
+
+The server must re-check product information before checkout/order creation.
+
+Never trust a frontend-provided:
+
+* Price
+* Stock quantity
+* Product identity
+* Prescription requirement
+
+The server must retrieve the authoritative product information from the existing database.
+
+---
+
+# 3. CHECKOUT PAGE
+
+Implement the customer checkout interface.
+
+The customer should be able to provide:
+
+* Customer name
+* Mobile number
+* Delivery address
+* Landmark
+* Delivery notes
+
+Use the existing customer authentication/profile system from Phase 1.
+
+If customer address/profile data already exists in the database, reuse it instead of creating duplicate structures.
+
+Provide a clear order/cart summary.
+
+Show:
+
+* Products
+* Quantities
+* Actual current prices
+* Subtotal
+* Any existing applicable delivery information
+
+Do not invent taxes, discounts, delivery fees, or other charges unless they already exist in the project requirements/database.
+
+---
+
+# 4. SERVER-SIDE CHECKOUT VALIDATION
+
+Before allowing checkout to proceed, validate everything server-side.
+
+For every cart item verify:
+
+1. Product exists
+2. Product is active/available
+3. Current database price
+4. Requested quantity
+5. Current stock/availability
+6. Prescription requirement
+7. Customer authentication
+8. Customer identity
+
+The frontend must never determine the final price.
+
+The frontend must never be able to modify the final customer ID.
+
+The frontend must never be able to bypass prescription requirements.
+
+Do not permanently decrement/reserve stock in Phase 2 unless the existing architecture already requires it.
+
+Full stock reservation/order inventory processing belongs to Phase 3.
+
+---
+
+# 5. PRESCRIPTION DETECTION
+
+The checkout system must automatically determine whether the cart contains prescription-required medicines.
+
+Rules:
+
+### If no prescription-required medicine exists:
+
+Normal checkout should continue.
+
+Do NOT force the customer to upload a prescription.
+
+### If one or more prescription-required medicines exist:
+
+The checkout must clearly tell the customer that a prescription is required.
+
+The customer must be able to upload the prescription before proceeding.
+
+Do not allow the customer to bypass this requirement.
+
+The requirement must be determined from the authoritative product/catalogue data, not from a frontend checkbox.
+
+---
+
+# 6. PRESCRIPTION UPLOAD
+
+Implement secure prescription upload for checkout.
+
+Use the existing Ayush Foundation storage architecture/configuration if already available.
+
+Do not create a completely separate storage system unnecessarily.
+
+The upload should support the project's intended prescription file types and reasonable file-size validation.
+
+Validate uploads server-side.
+
+Do not trust the filename or MIME type supplied by the browser alone.
+
+Do not expose prescription files publicly.
+
+Prescription files must not become publicly accessible through an unrestricted URL.
+
+Store only the necessary secure reference/metadata needed for the workflow.
+
+---
+
+# 7. PRESCRIPTION STATUS
+
+Create/use the appropriate prescription state so the system can distinguish:
+
+* Not required
+* Required
+* Uploaded
+* Pending review
+* Approved
+* Rejected
+
+Do not create fake approvals.
+
+The customer should be able to see whether their prescription upload is pending/rejected/approved when the relevant customer-facing UI is available.
+
+The actual admin approval/rejection interface will be completed in Phase 3.
+
+For Phase 2, build the secure upload and status foundation needed for Phase 3.
+
+---
+
+# 8. CHECKOUT FLOW
+
+The intended Phase 2 flow is:
+
+Customer signs in
+→ Browses real catalogue
+→ Opens medicine details
+→ Adds medicine to cart
+→ Opens cart
+→ Proceeds to checkout
+→ Enters delivery/customer information
+→ System checks prescription requirement
+→ Customer uploads prescription if required
+→ Server validates checkout information
+→ Checkout data is prepared for the order workflow
+
+IMPORTANT:
+
+Do NOT implement the complete Phase 3 order-processing workflow yet.
+
+Do NOT add fake "payment successful" behavior.
+
+Do NOT mark anything as paid.
+
+Do NOT create fake delivery statuses.
+
+If the existing project already has order structures, integrate carefully without breaking them, but leave full order processing for Phase 3.
+
+---
+
+# 9. CUSTOMER EXPERIENCE
+
+Make the complete Phase 2 flow work on:
+
+* Desktop
+* Mobile
+* Tablet
+
+Handle:
+
+* Loading states
+* Empty states
+* API errors
+* Invalid product
+* Out-of-stock product
+* Invalid quantity
+* Missing customer information
+* Missing required prescription
+* Upload failure
+* Network failure
+
+Do not leave broken buttons or placeholder screens.
+
+---
+
+# 10. PRESERVE EXISTING FUNCTIONALITY
+
+Do NOT break:
+
+* Homepage
+* Public catalogue
+* Search
+* Categories
+* Autocomplete
+* Admin login
+* Admin dashboard
+* Existing catalogue management
+* Existing SDF/import functionality
+* Firebase admin authentication
+* PostgreSQL catalogue
+* Existing Ayush Foundation branding/configuration
+
+Do NOT mix anything with Ayush Medico.
+
+---
+
+# 11. TESTING
+
+After completing Phase 2, actually test the implementation.
+
+Run:
+
+* TypeScript check
+* Production build
+* Existing tests
+* Relevant API tests
+* Customer authentication flow
+* Medicine details
+* Add to cart
+* Remove from cart
+* Quantity changes
+* Cart persistence
+* Checkout validation
+* Prescription-required detection
+* Prescription upload validation
+* Unauthorized customer access checks
+
+Verify that existing Phase 1 functionality still works.
+
+Fix any errors found during testing.
+
+---
+
+# 12. STRICT PHASE CONTROL
+
+This is **PHASE 2 ONLY**.
+
+Do NOT implement:
+
+* Full order management
+* Customer order history
+* Order status tracking
+* Stock reservation/decrement workflow
+* Admin prescription approval UI
+* Payment integration
+* Payment verification
+* Delivery management
+
+Those belong to **PHASE 3**.
+
+Do not automatically continue into Phase 3.
+
+When Phase 2 is complete, STOP.
+
+---
+
+# FINAL REPORT
+
+At the end, give me a concise report containing:
+
+1. Medicine details implementation
+2. Cart implementation
+3. Checkout implementation
+4. Prescription implementation
+5. API routes created/modified
+6. Database/schema changes
+7. Storage changes
+8. Security/validation implemented
+9. Tests performed
+10. Build result
+11. Any missing environment variables/configuration
+12. Anything remaining for Phase 3
+
+Do not claim functionality is complete unless you actually implemented and tested it.
+
+**Implement Phase 2 now, then stop.**
