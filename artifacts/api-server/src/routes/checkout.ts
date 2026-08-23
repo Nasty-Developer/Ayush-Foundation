@@ -9,6 +9,7 @@ import {
   companiesTable,
   prescriptionUploadsTable,
   sql,
+  pool,
 } from "@workspace/db";
 import { requireUserRequest } from "../lib/firebase-admin";
 
@@ -97,19 +98,69 @@ router.post("/customer/checkout/validate", async (req, res): Promise<void> => {
     const name = typeof req.body?.customerName === "string" ? req.body.customerName.trim() : "";
     const phone = typeof req.body?.phone === "string" ? req.body.phone.trim() : "";
     const address = typeof req.body?.address === "string" ? req.body.address.trim() : "";
+    const landmark = typeof req.body?.landmark === "string" ? req.body.landmark.trim() : "";
+    const email = typeof req.body?.email === "string" ? req.body.email.trim() : identity.email;
+    const notes = typeof req.body?.notes === "string" ? req.body.notes.trim() : "";
     if (!name || !phone || !address) {
       res.status(400).json({ error: "Name, mobile number, and delivery address are required." });
       return;
     }
     const subtotal = items.reduce((total, item) => total + item.lineTotal, 0);
-    res.json({
-      customerUid: identity.uid,
-      items,
-      subtotal: subtotal.toFixed(2),
-      requiresPrescription,
-      prescriptionStatus: requiresPrescription ? "pending_review" : "not_required",
-      message: "Checkout details validated. No payment or stock reservation has been made.",
-    });
+    const client = await pool.connect();
+    try {
+      await client.query("BEGIN");
+      const publicOrderId = `AY-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
+      const addressSnapshot = { address, landmark };
+      const [order] = (await client.query(
+        `INSERT INTO pharmacy_orders
+          (public_order_id, customer_uid, customer_email, customer_name, phone, address, subtotal, delivery_charge, total, payment_status, prescription_status, prescription_path, order_status, notes)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, 0, $7, 'pending', $8, $9, 'pending', $10)
+         RETURNING id, public_order_id, subtotal, total, payment_status, prescription_status, order_status`,
+        [
+          publicOrderId,
+          identity.uid,
+          email || null,
+          name,
+          phone,
+          JSON.stringify(addressSnapshot),
+          subtotal.toFixed(2),
+          requiresPrescription ? "pending_review" : "not_required",
+          prescriptionPath || null,
+          notes || null,
+        ],
+      )).rows;
+      for (const item of items) {
+        await client.query(
+          `INSERT INTO pharmacy_order_items
+            (order_id, product_id, source_product_id, product_name, company_name, quantity, unit_price, line_total, prescription_required, product_snapshot)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+          [
+            order.id,
+            item.id,
+            item.sourceProductId,
+            item.name,
+            item.company || null,
+            item.quantity,
+            item.unitPrice.toFixed(2),
+            item.lineTotal.toFixed(2),
+            item.prescriptionRequired,
+            JSON.stringify({ sourceProductId: item.sourceProductId, name: item.name, company: item.company }),
+          ],
+        );
+      }
+      await client.query("COMMIT");
+      res.status(201).json({
+        customerUid: identity.uid,
+        order,
+        requiresPrescription,
+        message: "Order received. The pharmacy team will confirm availability and payment separately.",
+      });
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
   } catch (error) {
     res.status(422).json({ error: error instanceof Error ? error.message : "Unable to validate checkout." });
   }

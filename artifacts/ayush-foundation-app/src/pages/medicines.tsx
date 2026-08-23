@@ -186,6 +186,9 @@ export default function MedicinesPage() {
               <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {catalog.items.map((item) => (
                   <article key={item.id} className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+                     <div className="mb-4 flex h-36 items-center justify-center rounded-xl bg-secondary p-4">
+                       <img src={item.imageUrl || '/medicine-fallback.svg'} alt={item.imageUrl ? item.name : 'Medicine product placeholder'} className="max-h-full max-w-full object-contain" />
+                     </div>
                     <p className="text-xs font-semibold uppercase tracking-[0.14em] text-primary">{item.categoryDisplayName || item.category || 'Uncategorised'}</p>
                     <Link to={`/medicines/${item.id}`} className="mt-3 block text-base font-bold leading-6 hover:text-primary">{item.name}</Link>
                     <p className="mt-2 text-sm text-muted-foreground">{item.company || 'Company not listed'}</p>
@@ -194,8 +197,8 @@ export default function MedicinesPage() {
                       {item.packSize && <span className="rounded-full bg-muted px-3 py-1">{item.packSize}</span>}
                       <span className="rounded-full bg-muted px-3 py-1">Source ID: {item.sourceProductId}</span>
                     </div>
-                     <div className="mt-3 text-xs font-semibold text-muted-foreground">{item.stockRecords > 0 ? (Number(item.quantity ?? 0) > 0 ? `${item.quantity} available` : 'Currently out of stock') : 'Availability to be confirmed'}</div>
-                     <div className="mt-3 flex gap-2"><Link to={`/medicines/${item.id}`} className="flex-1 rounded-xl border border-primary/25 px-3 py-2.5 text-center text-xs font-bold text-primary">View details</Link><button type="button" onClick={() => add(item)} disabled={!item.salePrice || item.stockRecords < 1 || Number(item.quantity ?? 0) < 1} className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-40"><ShoppingBag size={14} /> Add</button></div>
+                     <p className="mt-3 text-xs font-semibold text-muted-foreground">Availability information unavailable</p>
+                     <div className="mt-3 flex gap-2"><Link to={`/medicines/${item.id}`} className="flex-1 rounded-xl border border-primary/25 px-3 py-2.5 text-center text-xs font-bold text-primary">View details</Link><button type="button" onClick={() => add(item)} className="inline-flex items-center justify-center gap-1 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground"><ShoppingBag size={14} /> Add</button></div>
                   </article>
                 ))}
               </div>

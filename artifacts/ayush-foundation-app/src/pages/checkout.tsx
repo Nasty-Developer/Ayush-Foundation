@@ -48,10 +48,10 @@ export default function CheckoutPage() {
       const path = hasPrescriptionItem ? (prescriptionPath || await uploadPrescription()) : '';
       if (hasPrescriptionItem && !path) throw new Error('Upload your prescription before continuing.');
       const token = await firebaseAuth?.currentUser?.getIdToken();
-      const response = await fetch('/api/customer/checkout/validate', { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity })), customerName: name, phone, address: `${address}${landmark ? `, Landmark: ${landmark}` : ''}`, notes, prescriptionPath: path }) });
+       const response = await fetch('/api/customer/checkout/validate', { method: 'POST', headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' }, body: JSON.stringify({ items: items.map((item) => ({ productId: item.product.id, quantity: item.quantity })), customerName: name, phone, address, landmark, notes, email: user?.email ?? '', prescriptionPath: path }) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || 'Checkout validation failed.');
-      setMessage('Your details are validated and ready for the pharmacy team. No payment or stock reservation has been made.');
+       setMessage(`Order ${data.order?.publicOrderId ?? ''} received. The pharmacy team will confirm availability and payment separately.`);
       clear();
       window.setTimeout(() => navigate('/account'), 900);
     } catch (nextError) { setError(nextError instanceof Error ? nextError.message : 'Unable to continue checkout.'); } finally { setBusy(false); }
@@ -75,7 +75,7 @@ export default function CheckoutPage() {
             {message && <p className="mt-6 flex items-start gap-2 rounded-xl border border-primary/20 bg-secondary p-4 text-sm font-semibold text-primary"><CheckCircle2 size={17} className="mt-0.5 shrink-0" />{message}</p>}
             <button type="submit" disabled={busy} className="mt-7 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-5 py-3.5 text-sm font-bold text-primary-foreground disabled:opacity-60">{busy && <Loader2 size={17} className="animate-spin" />}{busy ? 'Checking securely…' : 'Validate checkout details'}</button>
           </form>
-          <aside className="h-fit rounded-[2rem] border border-border bg-card p-7 shadow-sm"><p className="eyebrow">Cart summary</p><div className="mt-5 space-y-4">{items.map(({ product, quantity }) => <div key={product.id} className="flex justify-between gap-4 text-sm"><span>{product.name} <span className="text-muted-foreground">× {quantity}</span></span><strong>₹{((Number(product.salePrice) || 0) * quantity).toFixed(2)}</strong></div>)}</div><div className="mt-6 flex justify-between border-t border-border pt-5 font-bold"><span>Subtotal</span><span className="text-primary">₹{subtotal.toFixed(2)}</span></div><Link to="/cart" className="mt-6 block text-center text-sm font-bold text-primary underline underline-offset-4">Edit cart</Link></aside>
+          <aside className="h-fit rounded-[2rem] border border-border bg-card p-7 shadow-sm"><p className="eyebrow">Cart summary</p><div className="mt-5 space-y-4">{items.map(({ product, quantity }) => <div key={product.id} className="flex justify-between gap-4 text-sm"><span>{product.name} <span className="text-muted-foreground">× {quantity}</span></span><strong>{product.salePrice ? `₹${(Number(product.salePrice) * quantity).toFixed(2)}` : 'Price to be confirmed'}</strong></div>)}</div><div className="mt-6 flex justify-between border-t border-border pt-5 font-bold"><span>Subtotal</span><span className="text-primary">{items.every(({ product }) => product.salePrice) ? `₹${subtotal.toFixed(2)}` : 'To be confirmed'}</span></div><Link to="/cart" className="mt-6 block text-center text-sm font-bold text-primary underline underline-offset-4">Edit cart</Link></aside>
         </div>
       </section>
     </PageFrame>

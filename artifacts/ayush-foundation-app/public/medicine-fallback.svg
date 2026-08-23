@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="title desc">
+  <title id="title">Medicine product placeholder</title>
+  <desc id="desc">A neutral pharmacy package illustration used when a product image is unavailable.</desc>
+  <rect width="640" height="480" rx="48" fill="#e4f1f0"/>
+  <rect x="176" y="88" width="288" height="304" rx="24" fill="#fffdf8" stroke="#2f817c" stroke-width="10"/>
+  <rect x="176" y="88" width="288" height="84" rx="24" fill="#2f817c"/>
+  <path d="M304 108v44M282 130h44" stroke="#fffdf8" stroke-width="12" stroke-linecap="round"/>
+  <rect x="228" y="218" width="184" height="18" rx="9" fill="#d8e8e6"/>
+  <rect x="228" y="258" width="140" height="14" rx="7" fill="#d8e8e6"/>
+  <rect x="228" y="296" width="168" height="14" rx="7" fill="#d8e8e6"/>
+  <circle cx="402" cy="342" r="28" fill="#efc9a9"/>
+  <path d="M389 342h26M402 329v26" stroke="#fffdf8" stroke-width="7" stroke-linecap="round"/>
+</svg>
