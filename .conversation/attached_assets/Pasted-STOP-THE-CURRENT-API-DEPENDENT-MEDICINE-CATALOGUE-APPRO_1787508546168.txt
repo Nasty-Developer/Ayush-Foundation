@@ -1,0 +1,357 @@
+STOP THE CURRENT API-DEPENDENT MEDICINE CATALOGUE APPROACH.
+
+I want you to use the existing Ayush-Medicozip repository as the REFERENCE for the customer shopping experience:
+
+https://github.com/Nasty-Developer/Ayush-Medicozip
+
+I have reviewed that repository.
+
+IMPORTANT:
+Ayush Foundation is a separate project.
+Do NOT copy Ayush Medico branding, Firebase, credentials, database, or secrets.
+
+I want the CUSTOMER MEDICINE CATALOGUE + CART EXPERIENCE to work like the reference project, BUT with one major architectural difference:
+
+# CRITICAL ARCHITECTURE CHANGE
+
+DO NOT DEPEND ON THE AYUSH FOUNDATION API SERVER FOR THE PUBLIC MEDICINE CATALOGUE.
+
+The Vercel frontend must be able to deploy and display medicines independently.
+
+The medicine catalogue must be packaged/served as frontend-accessible static data.
+
+Use this architecture:
+
+REAL CATALOGUE DATA
+        ↓
+generated catalogue data file
+        ↓
+Ayush Foundation frontend
+        ↓
+Vercel
+        ↓
+Medicines page
+        ↓
+Medicine details
+        ↓
+Add to Cart
+        ↓
+Cart
+
+NO API REQUEST should be required just to display the medicine catalogue.
+
+NO API SERVER should be required for:
+
+- Medicines page
+- Search
+- Category filtering
+- Medicine details
+- Add to Cart
+- Cart
+- Cart quantity changes
+- Cart removal
+- Cart persistence
+
+# IMPORTANT — USE REAL DATA
+
+Use the existing real Ayush Foundation catalogue.
+
+Do NOT create fake medicines.
+
+Do NOT create fake prices.
+
+Do NOT invent stock.
+
+Do NOT replace the catalogue with mock products.
+
+We already have the real imported catalogue.
+
+Generate an optimized frontend-readable catalogue dataset from the existing real catalogue.
+
+Prefer a structure such as:
+
+public/catalogue/
+  medicines.json
+
+or another Vercel-safe static data structure appropriate for the size of the catalogue.
+
+IMPORTANT:
+There are approximately 51,231 products.
+
+Do NOT blindly create one enormous JavaScript bundle that makes the website slow.
+
+Use an efficient static-data strategy such as:
+
+- paginated JSON files
+- searchable pre-generated indexes
+- category-specific JSON files
+- lightweight product metadata
+- separate detail records
+
+Choose the simplest reliable approach that works on Vercel.
+
+The browser must be able to fetch the static catalogue directly without contacting the API server.
+
+# MEDICINES PAGE
+
+Make `/medicines` work even if the API server is completely OFFLINE.
+
+Test this explicitly.
+
+The page must show real catalogue products.
+
+Each product should contain whatever real fields are available, such as:
+
+- product ID
+- medicine name
+- company/manufacturer
+- category
+- strength
+- dosage/form
+- prescription requirement
+- legitimate price IF available
+
+Do not fabricate missing fields.
+
+# MEDICINE DETAILS
+
+Clicking a real medicine must open its details page using the static catalogue data.
+
+The details page must NOT call the API.
+
+It should resolve the product from the frontend catalogue/index.
+
+Test:
+
+Medicines
+→ click product
+→ Details opens
+→ correct product information appears
+
+# ADD TO CART
+
+Implement the Add to Cart behavior in the frontend exactly like the working customer experience in the reference project.
+
+The cart must work WITHOUT the API.
+
+For each cart item store:
+
+- real product ID
+- product name
+- legitimate price when available
+- quantity
+- prescription-required state
+- image/fallback reference
+
+Use localStorage or the existing Foundation client-side cart architecture.
+
+Test:
+
+Product
+→ Add to Cart
+→ Cart count updates
+→ Cart opens
+→ Product appears
+→ Increase quantity
+→ Decrease quantity
+→ Remove
+→ Clear cart
+→ Refresh page
+→ Cart persists
+
+# PRICE
+
+This is extremely important.
+
+Use a price ONLY when there is a legitimate price directly associated with the product.
+
+Do NOT randomly join the 10,871 stock records to products.
+
+Do NOT invent a price.
+
+If a product does not have a safely associated price:
+
+Show:
+
+"Price unavailable"
+
+and do not allow an unsafe purchase for that product.
+
+But DO NOT hide the medicine itself.
+
+The catalogue should still display the real medicine.
+
+# STOCK
+
+Do NOT fabricate stock.
+
+The existing investigation found that the stock source does not provide a trustworthy product mapping.
+
+Therefore:
+
+DO NOT map stock by:
+
+- row number
+- similar names
+- database order
+- random matching
+- guessed IDs
+
+Keep availability honest.
+
+The unresolved stock mapping must NOT prevent the catalogue from displaying.
+
+# CATEGORIES
+
+Keep exactly these customer-facing categories:
+
+1. Tablet Medicines 💊
+2. Vet Medicines 🐾
+3. General Medicines
+
+Vet Medicines MUST remain empty.
+
+Do not populate Vet with random catalogue records.
+
+Tablet and General should use real catalogue classification wherever safely supported.
+
+# SEARCH
+
+Search must work entirely from the frontend catalogue/static index.
+
+Do NOT call the API.
+
+Support medicine-name search and other legitimate catalogue fields where practical.
+
+Do not make a search request to the backend.
+
+# PAGINATION
+
+Because the catalogue contains approximately 51,231 products, do NOT render all products simultaneously.
+
+Implement efficient pagination or incremental loading.
+
+The browser should only render the required page of products.
+
+# IMAGE
+
+Use the existing neutral medicine fallback image for products without a real image.
+
+Do not fabricate branded medicine packaging.
+
+No broken image icons.
+
+# VERCEL REQUIREMENT
+
+This is the whole reason for this architecture.
+
+The public Ayush Foundation website must work on Vercel even when:
+
+API server = OFFLINE
+
+The following customer pages must still work:
+
+/
+ /medicines
+ /medicines/:id
+ /cart
+
+The medicine catalogue must be available from the frontend/static deployment itself.
+
+# FIREBASE
+
+Keep the existing Ayush Foundation Firebase configuration.
+
+Do NOT use Ayush Medico Firebase.
+
+Do NOT expose secrets.
+
+Firebase authentication can remain separate from the static catalogue.
+
+# CHECKOUT
+
+For now, make the frontend shopping journey reliable:
+
+Medicine
+→ Details
+→ Add to Cart
+→ Cart
+→ Checkout
+
+Do NOT invent payment success.
+
+Do NOT invent stock.
+
+Do NOT claim an order was successfully placed if the required secure backend validation is unavailable.
+
+If checkout currently requires the API, clearly separate:
+
+PUBLIC CATALOGUE/CART = frontend/static
+
+SECURE ORDER PROCESSING = backend/server
+
+Do not make the public medicine browsing depend on the backend.
+
+# REFERENCE PROJECT
+
+Use the customer-facing behavior and cart interaction patterns from:
+
+https://github.com/Nasty-Developer/Ayush-Medicozip
+
+as inspiration/reference only.
+
+Do NOT copy:
+
+- Ayush Medico branding
+- Ayush Medico Firebase
+- Ayush Medico secrets
+- Ayush Medico database
+- Ayush Medico credentials
+- old project configuration
+
+Only reproduce the useful CUSTOMER CATALOGUE + DETAILS + CART behavior.
+
+# VERY IMPORTANT
+
+Before changing the architecture, inspect the existing Foundation implementation.
+
+Do NOT delete working Foundation features unnecessarily.
+
+Do NOT re-import the SDF catalogue.
+
+Do NOT create duplicate catalogue data.
+
+Use the existing imported real catalogue as the source for generating the frontend dataset.
+
+# SUCCESS TEST
+
+After implementation, TURN OFF/IGNORE the API server and verify:
+
+1. Open `/medicines`
+2. Real medicines appear
+3. Search works
+4. Category works
+5. Open medicine
+6. Details appear
+7. Add to Cart works
+8. Cart count updates
+9. Cart opens
+10. Quantity works
+11. Remove works
+12. Refresh preserves cart
+
+The above must work without the API server.
+
+Then verify the Vercel production build.
+
+DO NOT START PHASE 3.
+
+DO NOT redesign the whole site.
+
+DO NOT add unrelated features.
+
+This task is specifically:
+
+# MAKE THE AYUSH FOUNDATION MEDICINE CATALOGUE + CART FRONTEND-INDEPENDENT FROM THE API
+
+Use the Ayush-Medicozip repository as the customer-flow reference, while keeping Ayush Foundation completely separate.
