@@ -1,0 +1,268 @@
+Now do NOT add another large feature set.
+
+The latest Phase 2 changes have supposedly been implemented:
+
+* Medicine prices
+* Add to Cart
+* Medicine fallback images
+* Tablet Medicines category
+* Vet Medicines category
+* General Medicines category
+
+Now I need you to **actually verify that everything works in the real running application and on the live Vercel deployment.**
+
+## 1. TEST THE REAL CUSTOMER FLOW
+
+Do not rely only on TypeScript/build results.
+
+Actually test:
+
+**Homepage → Medicines → Category → Medicine → Price → Add to Cart → Cart → Sign In → Checkout**
+
+Verify each step.
+
+### Medicines
+
+I must be able to see real medicines from the PostgreSQL catalogue.
+
+Verify:
+
+* Medicine cards appear
+* Medicine names appear
+* Prices appear
+* Images appear
+* Search works
+* Categories work
+* Medicine details open
+
+If something is blank, find the actual API/frontend/data problem and fix it.
+
+### Add to Cart
+
+This is critical.
+
+Take a real medicine from the catalogue and actually click:
+
+**Add to Cart**
+
+Verify:
+
+* Item enters cart
+* Correct medicine appears
+* Correct price appears
+* Quantity works
+* Cart count updates
+* Cart total is correct
+* Refresh does not unexpectedly destroy the cart
+
+Do not just inspect the code. Test the actual button in the running app.
+
+If Add to Cart still fails, diagnose and fix it before doing anything else.
+
+## 2. THREE CATEGORIES
+
+The customer-facing website must show exactly:
+
+### 💊 Tablet Medicines
+
+Use real catalogue medicines that can safely be classified as tablets.
+
+### 🐾 Vet Medicines
+
+Keep this category EMPTY.
+
+Do not add fake veterinary medicines.
+
+Show a polished empty state explaining that veterinary medicines will be added through the Admin Panel later.
+
+### General Medicines
+
+Use real catalogue data where classification is trustworthy.
+
+Do not invent medicine classifications.
+
+Make all three categories visually consistent.
+
+## 3. MEDICINE IMAGES
+
+Every medicine card should have a clean visual.
+
+If an actual product image exists, use it.
+
+If it does not, use the same professional neutral **generic tablet/medicine fallback image**.
+
+The fallback must NOT pretend to be a specific branded medicine.
+
+Make sure there are no broken image icons or empty image containers.
+
+Verify images on:
+
+* Homepage medicine sections
+* Category pages
+* Search results
+* Medicine details
+* Cart where applicable
+
+## 4. PRICE DISPLAY
+
+Every medicine with a real price in the database must show that price.
+
+Use the authoritative database/API value.
+
+Do not hardcode prices.
+
+Do not invent prices.
+
+If a product genuinely has no usable price, show an honest unavailable-price state and prevent an unsafe purchase rather than inventing a number.
+
+## 5. SIGN IN / SIGN UP
+
+Verify the normal customer authentication flow:
+
+* Sign Up
+* Sign In
+* Sign Out
+* Session persistence
+
+Also verify Google Sign-In **if it is enabled in the Ayush Foundation Firebase project**.
+
+Do not use Ayush Medico Firebase.
+
+Do not claim Google Sign-In works unless you actually test it.
+
+If Google authentication is not enabled/configured in Foundation Firebase, report exactly what needs to be configured rather than creating fake behavior.
+
+## 6. CHECKOUT
+
+Once a real medicine is in the cart, checkout must open correctly.
+
+The customer checkout form should support:
+
+* Full Name — required
+* Phone — required
+* Delivery Address — required
+* Landmark — optional
+* Email — optional
+* Delivery Notes — optional
+
+If prescription-required medicine is in the cart:
+
+* Prescription must be requested
+* Upload must work
+* Customer cannot bypass the requirement
+
+Do not fabricate prescription approval.
+
+## 7. ORDER CREATION
+
+If the existing Phase 2 architecture already supports creating the order record, verify the real order creation path.
+
+The customer should be able to reach the final order submission without a broken button or dead API route.
+
+Do NOT fake payment success.
+
+Do NOT fake delivery success.
+
+If payment is not configured, keep the order in the legitimate pending/unpaid state.
+
+Do not start the full Phase 3 payment/delivery system yet.
+
+## 8. VERCEL — THIS IS CRITICAL
+
+The Replit preview is NOT enough.
+
+The exact same latest changes must work on the **live Vercel production website**.
+
+Inspect:
+
+* GitHub repository connected to Vercel
+* Production branch
+* Latest commit
+* Vercel deployment
+* Root directory
+* Build settings
+* Production environment variables
+* API/database configuration
+* Firebase configuration
+
+Make sure Vercel is deploying the **Ayush Foundation** project and not an old Ayush Medico deployment.
+
+If the latest code is not pushed to GitHub, push the correct Ayush Foundation changes.
+
+If Vercel is using an old commit, trigger the correct deployment.
+
+If production environment variables are missing, identify/configure the correct Ayush Foundation values.
+
+Do NOT expose private credentials.
+
+## 9. TEST THE ACTUAL VERCEL URL
+
+Open the real Vercel production URL and test:
+
+**Homepage**
+↓
+**Medicines**
+↓
+**Tablet Medicines**
+↓
+**Real Medicine**
+↓
+**Price**
+↓
+**Add to Cart**
+↓
+**Cart**
+↓
+**Sign In**
+↓
+**Checkout**
+
+Also test:
+
+**Vet Medicines → Empty state**
+
+and
+
+**General Medicines → Real medicines**
+
+Do not tell me "Vercel is ready" based only on a successful deployment/build.
+
+Actually test the live production website.
+
+## 10. IF REPLIT QUOTA IS REACHED
+
+If the Replit daily quota is reached again:
+
+Do NOT start over.
+
+Do NOT re-import the repository.
+
+Do NOT redo Phase 2.
+
+Leave all completed work intact.
+
+At the end, clearly state exactly what was verified and where the quota stopped further work.
+
+## STRICT BOUNDARY
+
+This task is still Phase 2 customer-flow verification/fixing.
+
+Do NOT start:
+
+* Full admin order processing
+* Payment integration
+* Delivery system
+* Advanced stock reservation
+* Full order tracking
+
+First make sure the basic customer experience is genuinely working.
+
+### SUCCESS CONDITION
+
+Do not say "completed" until this works in the actual running application:
+
+**SEE MEDICINE → SEE PRICE → SEE IMAGE → ADD TO CART → CART → SIGN IN → CHECKOUT**
+
+And verify the same flow on **Vercel production**.
+
+Fix actual problems you encounter and then give me a concise report of what was truly tested and what remains.
