@@ -1,0 +1,975 @@
+AYUSH MEDICO — ADMIN PANEL IMPLEMENTATION
+PHASE 8 + PHASE 9 — ADMIN DASHBOARD & CONTENT MANAGEMENT
+
+IMPORTANT:
+
+Do NOT just analyze this request.
+
+Actually implement the Admin Panel in the existing Ayush Medico project.
+
+The Admin Panel must be a real protected management system, not a static demo UI.
+
+Before implementing, inspect the current project and verify that the Firebase foundation from Phase 3 is already configured.
+
+Use the EXISTING Firebase project:
+
+Project ID:
+ayush-medico-6cf77
+
+Do NOT create another Firebase project.
+
+==================================================
+ADMIN ACCOUNT
+==================================================
+
+The primary admin email is:
+
+adminayushmedical@gmail.com
+
+Do NOT hardcode a password into the application.
+
+Use Firebase Authentication for admin authentication.
+
+The admin panel must be protected.
+
+Unauthenticated users must NOT be able to access the dashboard or any admin route.
+
+Do not rely only on hiding navigation links for security.
+
+Use proper authentication + authorization.
+
+==================================================
+ADMIN ROUTE
+==================================================
+
+Create a protected admin area:
+
+/admin
+
+Suggested structure:
+
+/admin
+/admin/dashboard
+/admin/medicines
+/admin/vet-medicines
+/admin/general-products
+/admin/categories
+/admin/brands
+/admin/homepage
+/admin/new-arrivals
+/admin/special-medicines
+/admin/orders
+/admin/medicine-requests
+/admin/inquiries
+/admin/legal
+/admin/announcements
+/admin/faq
+/admin/testimonials
+/admin/settings
+/admin/inventory
+
+Use a professional AdminLayout with:
+
+- Sidebar
+- Header
+- Breadcrumbs/page title
+- Responsive mobile navigation
+- Admin profile/email
+- Notifications area if appropriate
+- Sign Out
+
+==================================================
+ADMIN SIDEBAR
+==================================================
+
+Use this exact high-level navigation structure:
+
+AYUSH MEDICO
+
+Dashboard
+
+CATALOG
+- Medicines
+- Vet Medicines
+- General Products
+- Categories
+- Brands
+
+HOMEPAGE
+- Homepage
+- New Arrivals
+- Special Medicines
+
+CUSTOMER
+- Orders
+- Medicine Requests
+- Inquiries
+
+CONTENT
+- Legal & Compliance
+- Announcements
+- FAQ
+- Testimonials
+- Settings
+
+INVENTORY
+- Inventory Sync
+
+Utility:
+- View Website
+- Sign Out
+
+Keep the sidebar clean and professional.
+
+Use appropriate Lucide icons.
+
+On mobile, make the sidebar collapse into a drawer.
+
+==================================================
+1. DASHBOARD
+==================================================
+
+Create a real Admin Dashboard.
+
+Header:
+
+AYUSH MEDICO
+
+Admin Panel
+
+"Welcome back! Here's what's happening at Ayush Medico."
+
+Include:
+
+- Refresh button
+
+Dashboard statistics:
+
+INVENTORY CATALOGUE
+- Medicines
+- Categories
+- Companies / Brands
+- Drug Groups
+
+CUSTOMER ENGAGEMENT
+- Inquiries
+- FAQs
+- Reviews/Testimonials
+
+Do NOT display fake statistics.
+
+If the database is empty, show:
+
+0
+
+and an appropriate empty state.
+
+Statistics must eventually come from Firebase/Firestore.
+
+Do not hardcode fake numbers.
+
+==================================================
+2. QUICK ACTIONS
+==================================================
+
+Create a Quick Actions section:
+
+- Add Medicine
+- View Inquiries
+- Update Announcement
+- Manage Categories
+- Manage Companies / Brands
+- Manage FAQs
+- Testimonials
+- Store Settings
+
+Each action should navigate to the correct admin page.
+
+==================================================
+3. STORE INFORMATION
+==================================================
+
+The Admin Settings page must allow the admin to manage:
+
+Business name:
+Ayush Medico
+
+Location identity:
+Kurla West
+
+Full address:
+
+Shop No.1, Hut No.67 1/1, Ground Floor,
+Gangaram Makad Wala Chawl,
+Halav Pool, Near Rolex Hotel,
+CTS No.451, Kurla West,
+Mumbai – 400070
+
+Phone:
++91 98332 73838
+
+WhatsApp:
++91 98332 73838
+
+Store Hours:
+
+Mon – Sun:
+8:00 AM – 10:00 PM
+
+The admin should be able to edit appropriate store information later through Settings.
+
+Do not invent additional business information.
+
+==================================================
+4. MEDICINES
+==================================================
+
+Create a complete medicine catalogue management interface.
+
+Admin should be able to:
+
+- Add medicine
+- Edit medicine
+- Delete medicine
+- View medicine
+- Search medicine
+- Filter medicine
+- Activate/deactivate medicine
+
+Medicine fields should support:
+
+- Medicine name
+- Brand/manufacturer
+- Generic name
+- Category
+- Drug group
+- Medicine type
+- Description
+- Image
+- Prescription required
+- Stock status
+- Price
+- Visibility
+- Featured status
+- New Arrival status
+- Special Medicine status
+
+IMPORTANT:
+
+Do not expose sensitive/admin-only information unnecessarily on the customer website.
+
+==================================================
+5. VET MEDICINES
+==================================================
+
+Create a dedicated:
+
+Vet Medicines
+
+section.
+
+It should support the same core catalogue functionality where appropriate:
+
+- Add
+- Edit
+- Delete
+- Search
+- Filter
+- Image
+- Name
+- Brand
+- Category
+- Description
+- Stock
+- Price
+- Visibility
+
+Clearly distinguish veterinary products from general human medicines.
+
+Do not make veterinary products appear in the normal human medicine catalogue unless explicitly configured.
+
+==================================================
+6. GENERAL PRODUCTS
+==================================================
+
+Create:
+
+General Products
+
+for non-medicine pharmacy/healthcare products.
+
+Examples of product types can include:
+
+- Personal care
+- Baby care
+- Healthcare devices
+- Surgical supplies
+- Supplements
+- Other pharmacy products
+
+Do not invent actual products.
+
+Admin controls the content.
+
+==================================================
+7. CATEGORIES
+==================================================
+
+Create Category Management.
+
+Admin can:
+
+- Add category
+- Edit category
+- Delete category
+- Upload category image/icon if appropriate
+- Set display order
+- Activate/deactivate
+- Assign category type
+
+Support categories for:
+
+- General Medicines
+- Vet Medicines
+- General Products
+
+Customer-facing category sections should eventually reflect these admin-managed categories.
+
+==================================================
+8. BRANDS / COMPANIES
+==================================================
+
+Create:
+
+Brands / Companies
+
+Admin can:
+
+- Add
+- Edit
+- Delete
+- Search
+- Activate/deactivate
+
+Fields:
+
+- Brand/company name
+- Logo/image
+- Description
+- Status
+
+Use the term "Brands" in the main navigation but allow the internal data model to represent pharmaceutical manufacturers/companies.
+
+==================================================
+9. HOMEPAGE MANAGEMENT
+==================================================
+
+Create a Homepage management page.
+
+The Admin should eventually be able to control:
+
+- Hero content
+- Hero image
+- Promotional banners
+- CTA text
+- CTA links
+- Visibility
+- Display order
+
+Do not make the admin interface overly complicated.
+
+Use clean forms with image previews.
+
+==================================================
+10. PROMOTIONAL BANNERS / ADS
+==================================================
+
+THIS IS IMPORTANT.
+
+Create a proper banner management system.
+
+The homepage currently has sliding promotional banners.
+
+Admin must be able to:
+
+- Add banner
+- Upload banner image
+- Edit banner
+- Delete banner
+- Enable/disable banner
+- Set display order
+- Add headline
+- Add supporting text
+- Add CTA text
+- Add CTA destination
+- Select campaign/category where appropriate
+
+The banner carousel on the customer website should eventually load these banners dynamically from Firebase.
+
+The banners are Ayush Medico's own promotional content.
+
+Do NOT create third-party advertising.
+
+Do NOT invent fake discounts or offers.
+
+If no banners exist, show a professional empty state in Admin.
+
+==================================================
+11. NEW ARRIVALS
+==================================================
+
+Create:
+
+New Arrivals
+
+Admin management page.
+
+Admin can:
+
+- Add medicine/product to New Arrivals
+- Remove from New Arrivals
+- Change display order
+- Edit product
+- Enable/disable
+
+IMPORTANT:
+
+The customer website should initially show NO products in New Arrivals because the catalogue is currently empty.
+
+Do NOT create fake medicines.
+
+Once Admin adds a real product and marks it as New Arrival, it should appear on the website.
+
+==================================================
+12. SPECIAL MEDICINES
+==================================================
+
+Create:
+
+Special Medicines
+
+Admin management page.
+
+Admin can:
+
+- Add product/medicine
+- Remove
+- Edit
+- Set display order
+- Enable/disable
+
+Initially this section must remain EMPTY.
+
+Do not create fake products.
+
+Only Admin-added products should appear.
+
+==================================================
+13. MEDICINE REQUESTS
+==================================================
+
+Create:
+
+Medicine Requests
+
+This will manage customer medicine availability requests.
+
+Display:
+
+- Customer name
+- Phone
+- Medicine requested
+- Quantity if available
+- Message
+- Prescription reference if available
+- Date/time
+- Status
+
+Statuses can include:
+
+- New
+- Reviewing
+- Available
+- Not Available
+- Contacted
+- Completed
+
+Do not create fake requests.
+
+If there are none, show 0 and a professional empty state.
+
+==================================================
+14. INQUIRIES
+==================================================
+
+Create:
+
+Inquiries
+
+Admin can:
+
+- View
+- Search
+- Filter
+- Open details
+- Mark as read
+- Update status
+
+Use statuses such as:
+
+- New
+- In Progress
+- Resolved
+
+Do not create fake inquiries.
+
+==================================================
+15. ORDERS
+==================================================
+
+Create the Admin Orders interface.
+
+If the customer order system has already been implemented, connect this page to the real orders collection.
+
+Admin should eventually be able to:
+
+- View orders
+- Search orders
+- Filter
+- Open order details
+- Update order status
+- Accept
+- Reject
+- Verify payment
+- Verify prescription
+- View customer/address information
+- Manage delivery status
+
+Do NOT invent orders.
+
+If the order system is not yet implemented, create the admin page architecture without fake order data and clearly keep it ready for the later order phase.
+
+==================================================
+16. FAQ
+==================================================
+
+Create FAQ management.
+
+Admin can:
+
+- Add FAQ
+- Edit FAQ
+- Delete FAQ
+- Publish/unpublish
+- Reorder
+
+Fields:
+
+- Question
+- Answer
+- Published
+- Display order
+
+Customer website FAQ should eventually use this Firebase-managed data.
+
+==================================================
+17. TESTIMONIALS
+==================================================
+
+Create Testimonials management.
+
+Admin can:
+
+- Add testimonial
+- Edit
+- Delete
+- Publish/unpublish
+
+Fields:
+
+- Customer name
+- Testimonial text
+- Optional rating
+- Optional image
+- Published status
+
+IMPORTANT:
+
+Do NOT create fake testimonials.
+
+If there are no testimonials, show an empty state.
+
+==================================================
+18. ANNOUNCEMENTS
+==================================================
+
+Create Announcement management.
+
+Admin can:
+
+- Create announcement
+- Edit
+- Delete
+- Enable/disable
+- Set priority
+- Set display order
+
+Announcements should be capable of appearing in the customer website banner/announcement area later.
+
+Do not invent announcements.
+
+==================================================
+19. LEGAL & COMPLIANCE
+==================================================
+
+Create an Admin section:
+
+Legal & Compliance
+
+Pages/content areas:
+
+- Privacy Policy
+- Terms & Conditions
+- Refund & Cancellation Policy
+- Shipping & Delivery Policy
+- Prescription Policy
+- Disclaimer
+
+Admin should eventually be able to manage/edit the content.
+
+Do NOT invent final legal text.
+
+Create clean content-management fields/placeholders where appropriate.
+
+==================================================
+20. SETTINGS
+==================================================
+
+Create Store Settings.
+
+Manage:
+
+- Business name
+- Address
+- Phone
+- WhatsApp
+- Store hours
+- Email
+- Google Maps destination
+- Website settings
+- Logo
+- Favicon if appropriate
+- Social/contact links if provided
+
+Use the actual Ayush Medico information already provided.
+
+Do not invent missing information.
+
+==================================================
+21. INVENTORY SYNC
+==================================================
+
+Create an:
+
+Inventory Sync
+
+section.
+
+For now, prepare the architecture/UI for future inventory synchronization.
+
+Do NOT connect to external medicine databases or third-party inventory systems unless explicitly requested later.
+
+Do not import random medicine datasets.
+
+Show a professional empty/setup state if synchronization has not been configured.
+
+==================================================
+22. VIEW WEBSITE
+==================================================
+
+Add a "View Website" button in the admin interface.
+
+It should open the customer-facing Ayush Medico website.
+
+==================================================
+23. SIGN OUT
+==================================================
+
+Implement Firebase Authentication sign-out.
+
+After sign-out:
+
+- Clear authenticated admin state.
+- Redirect to admin login.
+- Prevent access to protected admin pages.
+
+==================================================
+24. SECURITY — VERY IMPORTANT
+==================================================
+
+The Admin Panel contains sensitive business/customer information.
+
+Do NOT rely only on frontend route protection.
+
+Implement proper authorization.
+
+The admin email:
+
+adminayushmedical@gmail.com
+
+must be the authorized admin account.
+
+Use a secure authorization strategy that can later support additional admin roles if needed.
+
+Do NOT hardcode passwords.
+
+Do NOT expose Firestore data publicly.
+
+Do NOT use:
+
+allow read, write: if true;
+
+Customer inquiries, orders, and other private information must not be publicly readable.
+
+Storage files must also have appropriate access controls.
+
+==================================================
+25. FIRESTORE ARCHITECTURE
+==================================================
+
+Use clean collections.
+
+Suggested structure:
+
+users
+medicines
+vetMedicines
+generalProducts
+categories
+brands
+banners
+newArrivals
+specialMedicines
+medicineRequests
+inquiries
+orders
+faqs
+testimonials
+announcements
+settings
+
+Use reusable TypeScript types/interfaces.
+
+Do not duplicate data unnecessarily.
+
+Use references/IDs where appropriate.
+
+==================================================
+26. IMAGE STORAGE
+==================================================
+
+Use Firebase Storage for admin-uploaded images.
+
+This includes:
+
+- Medicine images
+- Vet medicine images
+- Product images
+- Brand logos
+- Category images
+- Banner images
+- Testimonial images if enabled
+- Website/hero images
+
+Implement:
+
+- Upload
+- Preview
+- Replace
+- Delete/cleanup where appropriate
+
+Do not store large image binaries directly inside Firestore.
+
+==================================================
+27. ADMIN UI QUALITY
+==================================================
+
+The Admin Panel itself must look premium.
+
+Use:
+
+- Clean dashboard cards
+- Professional sidebar
+- Good spacing
+- Tables
+- Search
+- Filters
+- Dialogs/modals
+- Forms
+- Image previews
+- Toast notifications
+- Loading states
+- Empty states
+- Error states
+- Confirmation dialogs for destructive actions
+
+Make it fully responsive.
+
+Desktop should use a professional dashboard layout.
+
+Mobile should use a collapsible navigation/drawer.
+
+==================================================
+28. EMPTY STATES
+==================================================
+
+Because this is a new project, many collections will initially contain zero records.
+
+Do NOT populate fake data just to make the dashboard look full.
+
+Instead show beautiful empty states such as:
+
+"No medicines added yet."
+
+"No banners published yet."
+
+"No inquiries yet."
+
+"No testimonials yet."
+
+"No FAQs created yet."
+
+This is much better than fake information.
+
+==================================================
+29. CUSTOMER WEBSITE CONNECTION
+==================================================
+
+The architecture must allow the customer website to eventually receive dynamic data from Admin.
+
+For example:
+
+Admin adds medicine
+↓
+Firebase
+↓
+Customer Medicine Catalogue
+
+Admin adds banner
+↓
+Firebase
+↓
+Homepage Banner Carousel
+
+Admin marks medicine as New Arrival
+↓
+Firebase
+↓
+New Medicine Arrivals section
+
+Admin marks product as Special Medicine
+↓
+Firebase
+↓
+Special Medicines section
+
+Admin edits store settings
+↓
+Firebase
+↓
+Website Contact/Footer information
+
+Do not duplicate content manually in multiple places.
+
+==================================================
+30. IMPORTANT — EXISTING PHASES
+
+Do not destroy the Phase 1/2 customer website.
+
+Do not unnecessarily redesign it.
+
+Do not break:
+
+- Homepage
+- Header
+- Footer
+- WhatsApp button
+- Get Directions
+- Call button
+- Promotional carousel
+- Customer routes
+
+Integrate the Admin Panel with the existing architecture.
+
+==================================================
+31. BUILD & TEST
+
+After implementation:
+
+1. Run TypeScript checks.
+2. Run the production build.
+3. Fix all build errors.
+4. Test admin login.
+5. Test protected routes.
+6. Test sign out.
+7. Test dashboard.
+8. Test adding/editing/deleting a medicine.
+9. Test image upload.
+10. Test categories.
+11. Test brands.
+12. Test banners.
+13. Test New Arrivals.
+14. Test Special Medicines.
+15. Test FAQ.
+16. Test announcements.
+17. Test settings.
+18. Test responsive Admin UI.
+19. Check Firestore security rules.
+20. Check Firebase Storage security.
+21. Check browser console.
+
+Do not use fake production data for testing.
+
+==================================================
+32. IMPORTANT DEPLOYMENT RULE
+
+Do NOT change the Vercel Root Directory.
+
+The existing application root is:
+
+artifacts/ayush-medico
+
+Keep it exactly as it is.
+
+Do not change the monorepo/workspace structure.
+
+Do not bypass dependency problems with:
+
+pnpm install --no-frozen-lockfile
+
+If a dependency/lockfile issue appears, fix the repository lockfile correctly.
+
+==================================================
+33. FINAL REPORT
+
+At the end report:
+
+- Admin routes created
+- Firebase collections created/used
+- Storage paths created/used
+- Authentication/authorization implementation
+- Security-rule changes
+- Features completed
+- TypeScript result
+- Production build result
+- Any remaining issues
+
+IMPORTANT:
+
+Actually implement the Admin Panel.
+
+Do NOT simply create mock screenshots or a static dashboard.
+
+Do NOT populate fake medicines/orders/reviews.
+
+STOP after the Admin Panel implementation is complete.

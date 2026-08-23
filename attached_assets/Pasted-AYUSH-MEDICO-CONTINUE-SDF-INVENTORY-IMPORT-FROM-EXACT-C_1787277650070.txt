@@ -1,0 +1,269 @@
+AYUSH MEDICO — CONTINUE SDF INVENTORY IMPORT FROM EXACT CHECKPOINT
+
+You previously stopped because Replit credits ran out.
+
+DO NOT START OVER.
+
+Continue exactly from the point where you stopped.
+
+IMPORTANT DISCOVERY FROM THE PREVIOUS RUN:
+
+The PRODUCT.SDF format was found to contain a product ID that is:
+
+- fixed-width
+- 10 characters
+- right-aligned
+
+The previous parser incorrectly read only the LAST 3 characters of this field.
+
+This caused multiple distinct products to collapse into repeated IDs.
+
+You had already identified the correct fix:
+
+1. Correct the product-ID field width to the full 10-character field.
+2. Correctly trim/normalize the right-aligned value without losing significant digits.
+3. Remove ONLY the malformed product records created by the previous incorrect parser.
+4. DO NOT delete valid records unrelated to this parser mistake.
+5. RERUN the import directly from the ORIGINAL SDF source files.
+6. Rebuild the catalogue using the corrected product IDs.
+
+==================================================
+CRITICAL — USE ORIGINAL SOURCE FILES
+==================================================
+
+Use the REAL uploaded SDF files.
+
+Do not use the malformed database output as the source for rebuilding.
+
+Source of truth:
+
+PRODUCT.SDF
+STOCK.SDF
+DRUG.SDF
+COMPANY.SDF
+CATEGORY.SDF
+
+Re-parse the original files using the corrected parser.
+
+==================================================
+PRODUCT ID VALIDATION
+==================================================
+
+For PRODUCT.SDF:
+
+Read the complete 10-character product-ID field.
+
+Because it is right-aligned:
+
+- preserve the complete field
+- remove only formatting/padding that is actually padding
+- do NOT truncate it to 3 characters
+- do NOT accidentally remove meaningful leading/trailing characters
+- preserve the correct source identifier
+
+Before importing, validate:
+
+- Product ID length
+- Duplicate Product IDs
+- Blank Product IDs
+- Malformed Product IDs
+
+Report the results.
+
+==================================================
+CLEANUP
+==================================================
+
+Identify records that were created incorrectly because the parser previously used only the last 3 characters.
+
+Remove/correct ONLY those malformed records.
+
+Do NOT wipe the entire medicines database.
+
+Do NOT delete valid existing records.
+
+If possible, identify affected records through their previous incorrect source IDs and import metadata.
+
+==================================================
+REIMPORT
+==================================================
+
+Re-run the complete import from the original SDF files.
+
+Respect the actual dependencies discovered from the files.
+
+Do not guess relationships.
+
+Use the corrected product IDs throughout:
+
+PRODUCT
+↓
+DRUG
+↓
+COMPANY
+↓
+CATEGORY
+↓
+STOCK
+
+Use the actual identifiers from the source files.
+
+==================================================
+DUPLICATE PROTECTION
+==================================================
+
+After the corrected import:
+
+There must be ONE catalogue record per actual source Product ID.
+
+Do NOT allow:
+
+Product A → ID 123
+Product B → ID 123
+
+if their actual 10-character IDs are different.
+
+Use the complete source identifier as the stable identity.
+
+==================================================
+VERIFY BEFORE DECLARING SUCCESS
+==================================================
+
+Run checks for:
+
+1. Total PRODUCT.SDF records
+2. Successfully parsed records
+3. Invalid records
+4. Blank IDs
+5. Duplicate full 10-character IDs
+6. Number of unique product IDs
+7. Number of imported medicines
+8. Number of updated medicines
+9. Number of unchanged medicines
+10. Number of errors
+
+Compare the results against the source file.
+
+==================================================
+CATALOGUE VERIFICATION
+==================================================
+
+After import, verify the Admin Catalogue.
+
+Check:
+
+- medicines are not duplicated because of the old 3-character bug
+- product names are correct
+- company/brand relationships are correct
+- category relationships are correct
+- drug/generic relationships are correct
+- stock relationships are correct
+- price mapping is correct according to the actual source fields
+
+Do NOT invent missing values.
+
+==================================================
+CUSTOMER WEBSITE
+==================================================
+
+After the corrected database import, verify that:
+
+- medicine search works
+- categories display correctly
+- medicine results are not duplicated
+- General Medicines work
+- Veterinary Medicines work where supported by the source
+- medicine details use the corrected product identity
+
+Do NOT load the entire catalogue into the browser.
+
+Use the existing PostgreSQL-backed catalogue architecture.
+
+==================================================
+IMAGES
+==================================================
+
+Keep medicine image architecture separate from the SDF import.
+
+Medicine images should use Cloudinary.
+
+Do NOT put large medicine images into Firebase Storage.
+
+Do NOT invent images for products.
+
+If a medicine has no image, use the existing clean placeholder.
+
+==================================================
+IMPORTANT — DO NOT BREAK EXISTING WORK
+==================================================
+
+Do NOT:
+
+- rollback the project
+- recreate the Admin Panel
+- delete valid medicine data
+- recreate Firebase
+- change Firebase project
+- remove the Vercel SPA routing fix
+- change Vercel Root Directory
+- create fake medicine data
+- switch the catalogue to Firestore
+- remove PostgreSQL
+- replace the current working UI
+
+Keep:
+
+artifacts/ayush-medico
+
+as the Vercel Root Directory.
+
+Keep:
+
+artifacts/ayush-medico/vercel.json
+
+==================================================
+FINAL REPORT
+==================================================
+
+When finished, report exactly:
+
+### PARSER FIX
+- Old product ID width
+- Correct product ID width
+- Exact parser file changed
+
+### SOURCE IMPORT
+- PRODUCT.SDF records
+- STOCK.SDF records
+- DRUG.SDF records
+- COMPANY.SDF records
+- CATEGORY.SDF records
+
+### DATABASE
+- Records removed because of the old parser bug
+- New records imported
+- Existing records updated
+- Unchanged records
+- Duplicate IDs found after correction
+
+### CATALOGUE
+- Total medicines
+- Categories
+- Companies/brands
+- Drug groups
+- Stock records
+
+### VERIFICATION
+- Full 10-character Product IDs verified
+- Duplicate check result
+- Search test
+- Category test
+- Admin catalogue test
+- Production build
+- TypeScript
+
+IMPORTANT:
+
+Do NOT say "completed" until the corrected import has actually been rerun from the ORIGINAL SDF files and the duplicate/product-ID checks have passed.
+
+Continue from the previous checkpoint.
