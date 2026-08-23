@@ -1,5 +1,4 @@
 modules = ["nodejs-24", "python-base-3.13", "postgresql-16"]
-run = "pnpm --filter @workspace/ayush-foundation-app run dev"
 
 [deployment]
 router = "application"
@@ -10,28 +9,6 @@ args = ["pnpm", "store", "prune"]
 env = { "CI" = "true" }
 
 [workflows]
-runButton = "Project"
-
-[[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Ayush Foundation"
-
-[[workflows.workflow]]
-name = "Ayush Foundation"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "PORT=5173 BASE_PATH=/ pnpm --filter @workspace/ayush-foundation-app run dev"
-waitForPort = 5173
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [agent]
 stack = "PNPM_WORKSPACE"
@@ -41,12 +18,18 @@ expertMode = true
 path = "scripts/post-merge.sh"
 timeoutMs = 20000
 
-[nix]
-channel = "stable-25_05"
-
 [userenv]
 
 [userenv.shared]
-FIREBASE_PROJECT_ID = "ayush-foundation-f6d89"
-FIREBASE_PRIVATE_KEY = 'f98ab6f8a7b4abf19c313e344a3ddacce960b41c",   "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDixS3uhsw4viG3\nUMsioSrEPnoGv/iEwx0/+rJOd/aCt8n9PSOuGp4RCtBtOkr6emQW/R9J82+Z2I5a\nFVu9IWiw5I5A2BzHGjZw0KA7o0IgVWBgtZyivvubzAuiyPEPJtHWF7tShbAyQBmu\n8f8bzG5PSpNykaP+J5kMn2gldnrXi8OQoU8E7a427/p0JeFbiXAr7te56qWTZnxX\nq9DaMFdROz+jrPAqD2JE8jSRUIqPF9AjuKhwk/97FXsYTw9vKd5ERx8JJ3e13rSr\nBMKOi8iUiSjXJ55TqXXEVkSwh8tECipy/6bPRPd23ZyWJ94Kn3NzsxOj4/gZeMRM\ngCjca9KTAgMBAAECggEAI31JZXGKJ302CJrn15kSeNjwPvsvORPSEY+59QbYOPfr\ncCrv2REIWNFw8g8z6cRawrBFg8zJ0/FswdNi4pQGbtyuGJ7Zzh0flQNJeFvh/u5t\noWT6yQuLlAPYdFbvRvhD0bYwFkee3hZjDpqH2sFhKB6bOcxqNl3bGXsfEPHcYrwM\n3vrWg8CcislRlnITpP1fh7f7nERNGhuLIxee0lG3Pm1BFivHwrL34GfmO4HLwZY8\nk5ZZjAeo48qeQTtV1vLTS+582bv5lXeFHhd2PS86SHEl9uYfvQF3lhQWl5wLAsdN\nni4M6pEg22hyjNNLF3xNaYpyeNYGnwuH9fxwg9M5TQKBgQD5TW7c0nkKr/Yy5Vve\nZsj4ekPWZMJG9IHdNEJHBS/0ZZ4xPn3FxYf/QilPOqwGxC9PFaTXc0/hlEwVT7+z\nMj3hij31tUIkmmReRc4Ks9LLTDqZDEC7Oaz9BBmG5YPojddBdOVQ3TPIaNyX97kT\n/s09cdQOfVucNj00iheM9FUQFwKBgQDo3MgnrWq1vOrRvBl4ANgql0kBQGSzX7dZ\n2LnmCPRRGHQr+XYNlvEggjj2OeAzFoyMV1lDe5t6YPPA0MT/QXXb4rzzwiwnDgWf\nmYCkC46ojV9P4cNKgbOTCE3ln7gUaT1yHAznq5rDluaZYoVOFsTFzfVVdsp3Sqy3\nce2lBdXC5QKBgQCC/ZepuYFWBzziYzcRNYqVXJC2Xrzh0WlG1EWa0XPwA1DKaR5m\nwzKBAb943Mg0yfJdqG6zseggC+6qJ/v+6QAwuJVzvCij2OexzRXE89Vncoc7kX+V\noGlvjC7pfUEA+T5IK2auRXwG6mo2Azig8/ndNikI7/8ppiokqAZVzq+/QwKBgGrx\nSnL+b617T5R3AHNeX+hfhkWu3xCJ+timcem1Xw8HXgL8FD11ftPhOmvKdK7BwlaJ\nnxMg52yyrf91YaOg2pHbdc+08zYUeHytsKimLiQ2mPlEw72qB2CVRcEZMx8cnf2T\n6FFVPERrPwheeL4+MqxtRCi135Idl2jAR9Wr8loJAoGAKAPnWOkcUSXBKS7sUz1M\nJEcl/A3abcW/TbEwxQWYeF3m4dIoqdrKVHtBQJX1661bgQLEqgxJELa3SZfaNnmO\nUsjlEHQc8nhNrmX+g5JlqPNFarMfZtKpN1qd5eSDgLWhHnp9LN0P+wy8hzFM16o1\njCucojaEbrecdDhGRBaWeBI=\n-----END PRIVATE KEY-----\n'
-FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@ayush-foundation-f6d89.iam.gserviceaccount.com"
+VITE_ADMIN_EMAIL = "adminayushmedical@gmail.com"
+VITE_FIREBASE_API_KEY = "AIzaSyBKHUUgd5YYHAfJxGEBKRWSDc7kd3mhMLM"
+VITE_FIREBASE_APP_ID = "1:393423004675:web:45e2d434b8c0633cd89a36"
+VITE_FIREBASE_AUTH_DOMAIN = "ayush-medico.firebaseapp.com"
+VITE_FIREBASE_MEASUREMENT_ID = "G-V81ZNN4YDX"
+VITE_FIREBASE_MESSAGING_SENDER_ID = "393423004675"
+VITE_FIREBASE_PROJECT_ID = "ayush-medico"
+VITE_FIREBASE_STORAGE_BUCKET = "ayush-medico.firebasestorage.app"
+
+[nix]
+channel = "stable-25_05"
+packages = ["git"]

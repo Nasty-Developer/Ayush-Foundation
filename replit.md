@@ -1,51 +1,46 @@
 # Ayush Medico
 
-Ayush Medico is a responsive Phase 1 foundation for a modern, trustworthy local pharmacy website.
-
-## Run & Operate
-
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+A medicine delivery and request management web app for Ayush Medico pharmacy (Kurla West, Mumbai).
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- Frontend: React, Vite, TypeScript, Tailwind CSS
-- Routing: React Router
-- Icons: Lucide React
-- Shared API and database packages remain scaffolded for future phases
-- Build: Vite
+- **Frontend**: React 19 + Vite, Tailwind CSS v4, TanStack Query, wouter, Radix UI
+- **Backend**: Express (Node.js/TypeScript), built with esbuild
+- **Database**: PostgreSQL via Drizzle ORM
+- **Auth**: Firebase Authentication + Firebase Admin SDK
+- **Monorepo**: pnpm workspaces
 
-## Where things live
+## Running the project
 
-- `artifacts/ayush-medico/src/components/` — reusable header, footer, page framing, and section components
-- `artifacts/ayush-medico/src/pages/` — Home, Medicines, Services, About, Contact, and not-found pages
-- `artifacts/ayush-medico/src/lib/site-data.ts` — navigation, contact placeholders, service, trust, and availability content
-- `artifacts/ayush-medico/src/index.css` — Ayush Medico color tokens, typography, responsive utilities, and motion
-- `artifacts/ayush-medico/src/App.tsx` — React Router route map and shared providers
+Both services start automatically via the **Project** run button:
 
-## Architecture decisions
+| Service | Command | Port |
+|---------|---------|------|
+| Frontend (Vite dev) | `pnpm --filter @workspace/ayush-medico run dev` | 18169 |
+| API server | `pnpm --filter @workspace/api-server run dev` | 8080 |
 
-- Phase 1 is intentionally frontend-only; no Firebase, authentication, medicine database, cart, checkout, orders, or admin workflows are included.
-- Content that is likely to change is kept in `src/lib/site-data.ts` instead of being repeated across components.
-- The app uses React Router with a base-path-aware `BrowserRouter` so routes work in the artifact preview and future deployment.
+To push DB schema changes: `pnpm --filter @workspace/db run push`
 
-## Product
+## Environment
 
-The foundation introduces Ayush Medico as a premium neighborhood pharmacy: visitors can learn about its care promise, browse service and availability previews, and reach the pharmacy through responsive navigation and contact CTAs. The Medicines, Services, About, and Contact routes are ready for Phase 2 expansion.
+All Firebase config keys (`VITE_FIREBASE_*`) are stored as shared env vars.  
+`DATABASE_URL` is runtime-managed by Replit PostgreSQL.  
+`SESSION_SECRET` is stored as a Replit Secret.
+
+## Inventory sources
+
+The medicine catalog comes from exactly two sources:
+- Manual entries created in the Admin Panel.
+- MediVision Gold inventory sync.
+
+There is no third-party medicine lookup API (previously OpenFDA was explored and has been fully removed).
+
+## Fresh environment setup
+
+On a newly imported/cloned environment the Postgres database starts empty — no tables, no data. To get a fully working app:
+1. `pnpm install` (installs all workspace deps)
+2. `pnpm --filter @workspace/db run push` (creates tables from the Drizzle schema)
+3. Restart both workflows
+4. Sign in as an admin user and use the Admin Panel's inventory sync (MediVision Gold SDF upload) to populate categories/medicines — sample `.SDF` files are in `attached_assets/`. Without this step the site runs but the catalog is empty (0 products/categories).
 
 ## User preferences
-
-- Keep Phase 1 focused on the polished pharmacy foundation; do not add Phase 2 commerce or administration features without an explicit request.
-
-## Gotchas
-
-- The Vite config requires `PORT` and `BASE_PATH` when running a production build directly; the managed workflow supplies them during preview.
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
